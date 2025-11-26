@@ -1,9 +1,12 @@
 FROM php:8.2-apache
 
-# Enable Apache Rewrite
+# Enable Apache rewrite
 RUN a2enmod rewrite
 
-# Install dependencies
+# Fix ServerName warning
+RUN echo "ServerName localhost" >> /etc/apache2/apache2.conf
+
+# Install PHP extensions
 RUN apt-get update && apt-get install -y \
     zip unzip git curl libpng-dev libonig-dev libxml2-dev libzip-dev \
     && docker-php-ext-install pdo pdo_mysql mbstring zip exif pcntl gd
@@ -14,22 +17,21 @@ WORKDIR /var/www/html
 # Copy app
 COPY . .
 
-# Copy composer
+# Copy Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 # Install dependencies
 RUN composer install --no-dev --optimize-autoloader
 
-# Laravel folder permissions
+# Permissions
 RUN chown -R www-data:www-data storage bootstrap/cache
 
-# Apache uses public folder
+# Point Apache to Laravel's public directory
 RUN sed -i 's#/var/www/html#/var/www/html/public#' /etc/apache2/sites-available/000-default.conf
 
-# Disable artisan serve — we use Apache ONLY
 EXPOSE 8080
 
-# Tell Apache to run on Railway's port
-CMD sed -i "s/80/${PORT}/" /etc/apache2/ports.conf && \
-    sed -i "s/:80/:${PORT}/" /etc/apache2/sites-enabled/000-default.conf && \
-    apachectl -D FOREGROUND
+# Use Railway's PORT
+CMD sed -i "s/80/${PORT}/" /etc/apache2/ports.conf \
+    && sed -i "s/:80/:${PORT}/" /etc/apache2/sites-enabled/000-default.conf \
+    && apachectl -D FOREGROUND
