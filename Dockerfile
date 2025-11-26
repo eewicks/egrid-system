@@ -1,30 +1,25 @@
-FROM php:8.2-fpm
+# Use PHP 8.2 image with Apache
+FROM php:8.2-apache
 
-# Install system dependencies
-RUN apt-get update && apt-get install -y \
-    git curl zip unzip libpng-dev libonig-dev libxml2-dev libzip-dev \
-    mariadb-client \
-    && docker-php-ext-install pdo pdo_mysql mbstring exif pcntl bcmath gd zip
+# Enable Apache mod_rewrite
+RUN a2enmod rewrite
 
-# Install Composer
-COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+# Install PHP extensions needed by Laravel
+RUN docker-php-ext-install pdo pdo_mysql
 
 # Set working directory
-WORKDIR /var/www
+WORKDIR /var/www/html
 
 # Copy project files
-COPY . .
+COPY . /var/www/html
 
-# Install dependencies
-RUN composer install --optimize-autoloader --no-dev
+# Permissions for Laravel
+RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 
-# Cache Laravel
-RUN php artisan config:clear
-RUN php artisan config:cache
-RUN php artisan route:cache
-RUN php artisan view:cache
+# Configure Apache to serve the /public folder
+RUN sed -i 's|/var/www/html|/var/www/html/public|g' /etc/apache2/sites-available/000-default.conf
 
-# Expose port 8000
+# Expose port used by Railway
 EXPOSE 8000
 
-CMD php artisan serve --host=0.0.0.0 --port=8000
+CMD ["apache2-foreground"]
