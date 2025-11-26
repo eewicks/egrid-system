@@ -1,0 +1,48 @@
+/*
+ * Configuration File for E-Grid Arduino Client
+ * 
+ * INSTRUCTIONS:
+ * 1. Copy this file and rename it to config.h
+ * 2. Fill in your actual values below
+ * 3. This file will be automatically included by EGrid_Monitoring.ino
+ */
+
+#ifndef CONFIG_H
+#define CONFIG_H
+
+// =========================
+// WIFI CREDENTIALS
+// =========================
+#define WIFI_SSID "YOUR_WIFI_SSID_HERE"
+#define WIFI_PASSWORD "YOUR_WIFI_PASSWORD_HERE"
+
+// =========================
+// SERVER CONFIG (Laravel)
+// =========================
+#define SERVER_ADDRESS "192.168.1.100"    // Your Laravel server's IP address
+#define SERVER_PORT 8000                   // Your Laravel server port
+#define API_ENDPOINT "/api/arduino-signal"
+#define API_KEY "supersecret123"           // Must match ARDUINO_API_KEY in .env
+
+// =========================
+// DEVICE CONFIG
+// =========================
+// IMPORTANT: This must match the device_id in your devices table
+// Find it by looking at the device with household_name = "Household 1 Device" in your dashboard
+#define DEVICE_ID "DEVICE001"              // CHANGE THIS to match your device_id
+#define HOUSEHOLD_ID 1
+
+// =========================
+// TIMING CONFIG
+// =========================
+#define HEARTBEAT_INTERVAL_MS 300000UL     // 5 minutes (300000 ms)
+#define WIFI_CHECK_INTERVAL_MS 30000UL     // 30 seconds
+#define MAX_RECONNECT_ATTEMPTS 5
+
+// =========================
+// HARDWARE CONFIG
+// =========================
+#define POWER_STATUS_PIN 2                 // Digital pin for power detection
+
+#endif
+
