@@ -6,32 +6,37 @@ RUN a2enmod rewrite
 # Fix ServerName warning
 RUN echo "ServerName localhost" >> /etc/apache2/apache2.conf
 
-# Install PHP extensions
+# Install system packages + Node.js for Vite
 RUN apt-get update && apt-get install -y \
     zip unzip git curl libpng-dev libonig-dev libxml2-dev libzip-dev \
-    && docker-php-ext-install pdo pdo_mysql mbstring zip exif pcntl gd
+    && docker-php-ext-install pdo pdo_mysql mbstring zip exif pcntl gd \
+    && curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
+    && apt-get install -y nodejs
 
-# Set working directory
 WORKDIR /var/www/html
 
-# Copy app
+# Copy project
 COPY . .
 
-# Copy Composer
+# Install composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-# Install dependencies
+# Install backend dependencies
 RUN composer install --no-dev --optimize-autoloader
 
-# Permissions
+# Install frontend dependencies and build Vite prod assets
+RUN npm install
+RUN npm run build
+
+# Fix permissions
 RUN chown -R www-data:www-data storage bootstrap/cache
 
-# Point Apache to Laravel's public directory
+# Point Apache to public folder
 RUN sed -i 's#/var/www/html#/var/www/html/public#' /etc/apache2/sites-available/000-default.conf
 
 EXPOSE 8080
 
-# Use Railway's PORT
+# Railway port mapping
 CMD sed -i "s/80/${PORT}/" /etc/apache2/ports.conf \
     && sed -i "s/:80/:${PORT}/" /etc/apache2/sites-enabled/000-default.conf \
     && apachectl -D FOREGROUND
