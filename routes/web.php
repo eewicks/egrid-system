@@ -77,6 +77,23 @@ Route::get('/admin/api/devices', [AdminDashboardController::class, 'getDevices']
 
 
 
+
+
+    Route::post('/heartbeat', function (Request $request) {
+    $device = \App\Models\Device::where('device_id', $request->device_id)->first();
+
+    if ($device) {
+        $device->last_seen = now();
+        $device->status = "ON";
+        $device->save();
+    }
+
+    return response()->json(['success' => true]);
+});
+
+
+
+
 /*
 |--------------------------------------------------------------------------
 | DEVICES CRUD
