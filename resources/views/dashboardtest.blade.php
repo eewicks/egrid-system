@@ -1068,13 +1068,12 @@ function getStatusBadge(device) {
 
 // MAIN FUNCTION – LOAD DEVICES
 async function loadDevices() {
-
-    const loadingState   = document.getElementById('deviceLoadingState');
-    const errorState     = document.getElementById('deviceErrorState');
-    const cardsContainer = document.getElementById('deviceCardsContainer');
-    const emptyState     = document.getElementById('deviceEmptyState');
-    const deviceCount    = document.getElementById('deviceCount');
-    const lastUpdate     = document.getElementById('lastUpdate');
+    const loadingState     = document.getElementById('deviceLoadingState');
+    const errorState       = document.getElementById('deviceErrorState');
+    const cardsContainer   = document.getElementById('deviceCardsContainer');
+    const emptyState       = document.getElementById('deviceEmptyState');
+    const deviceCount      = document.getElementById('deviceCount');
+    const lastUpdate       = document.getElementById('lastUpdate');
 
     loadingState.style.display = "block";
     errorState.style.display   = "none";
@@ -1082,21 +1081,62 @@ async function loadDevices() {
     emptyState.style.display     = "none";
 
     try {
-
-        // 🔥 FIXED — use the REAL route
         const data = await fetchJSON("{{ route('admin.api.devices') }}");
 
-        if (!data || !data.success) throw new Error("Invalid JSON");
+        if (!data || !data.success) {
+            throw new Error("Invalid JSON response");
+        }
 
         const devices = data.devices || [];
+
         deviceCount.textContent = `${devices.length} device${devices.length !== 1 ? "s" : ""}`;
 
-        // Empty
         if (devices.length === 0) {
             loadingState.style.display = "none";
             emptyState.style.display   = "block";
             return;
         }
+
+        cardsContainer.innerHTML = devices.map(device => `
+            <div class="device-card compact">
+                <div class="device-field device-name">${device.household_name}</div>
+
+                <div class="device-field device-id">
+                    <span>ID: ${device.device_id}</span>
+                </div>
+
+                <div class="device-field device-location">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <span>${device.barangay}</span>
+
+                    <span class="device-meta-inline">
+                        <span class="meta-divider">•</span>
+                        <span class="device-last-seen">
+                            <i class="fas fa-clock"></i>
+                            ${device.last_seen_human}
+                        </span>
+                    </span>
+                </div>
+
+                <div class="device-field status">
+                    ${getStatusBadge(device)}
+                </div>
+            </div>
+        `).join("");
+
+        loadingState.style.display = "none";
+        cardsContainer.style.display = "block";
+
+        lastUpdate.textContent = new Date().toLocaleTimeString();
+
+    } catch (err) {
+        console.error("Device loading error:", err);
+
+        loadingState.style.display = "none";
+        errorState.style.display   = "block";
+    }
+}
+
 
         // Build Cards – NOW INSIDE TRY BLOCK ✔
         cardsContainer.innerHTML = devices.map(device => `
