@@ -2,7 +2,6 @@
 <html lang="en">
 
 <head>
-
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -16,504 +15,238 @@
     <link href="{{ asset('assets/admin/css/sb-admin-2.min.css') }}" rel="stylesheet">
 
     <style>
-        /* Fixed Sidebar Styles */
+        /* FULL FIXED LAYOUT CSS */
         #accordionSidebar.sidebar {
             position: fixed !important;
-            top: 0 !important;
-            left: 0 !important;
+            top: 0; left: 0;
             height: 100vh !important;
-            max-height: 100vh !important;
             overflow-y: auto !important;
-            overflow-x: hidden !important;
             z-index: 1000 !important;
         }
-
-        #wrapper {
-            display: flex !important;
-        }
-
+        #wrapper { display: flex !important; }
         #content-wrapper {
             margin-left: 224px !important;
             width: calc(100% - 224px) !important;
             min-height: 100vh;
-            overflow-x: hidden;
         }
-
-        body, html { overflow-x: hidden; }
-
-        /* Sidebar Scrollbar */
-        #accordionSidebar::-webkit-scrollbar {
-            width: 6px;
-        }
-        #accordionSidebar::-webkit-scrollbar-track {
-            background: rgba(255,255,255,0.05);
-        }
-        #accordionSidebar::-webkit-scrollbar-thumb {
-            background: rgba(255,255,255,0.2);
-            border-radius: 3px;
-        }
-        #accordionSidebar::-webkit-scrollbar-thumb:hover {
-            background: rgba(255,255,255,0.3);
-        }
+        body, html { overflow-x: hidden; background: #0f172a; }
 
         @media (max-width:768px) {
-            #accordionSidebar.sidebar {
-                transform: translateX(-100%);
-            }
-            #accordionSidebar.sidebar.mobile-open {
-                transform: translateX(0) !important;
-            }
-            #content-wrapper {
-                margin-left: 0 !important;
-                width: 100% !important;
-            }
+            #accordionSidebar.sidebar { transform: translateX(-100%); }
+            #accordionSidebar.sidebar.mobile-open { transform: translateX(0) !important; }
+            #content-wrapper { margin-left: 0 !important; width: 100% !important; }
         }
 
-        /* Collapsed Sidebar */
-        #accordionSidebar.collapsed ~ #content-wrapper {
-            margin-left: 64px !important;
-            width: calc(100% - 64px) !important;
-        }
-        @media (max-width:768px) {
-            #accordionSidebar.collapsed ~ #content-wrapper {
-                margin-left: 0 !important;
-                width: 100% !important;
-            }
-        }
-
-        .navbar-logo {
-            width: 45px;
-            height: 45px;
-            object-fit: contain;
-        }
-
-        /* Status Pills */
-        .status-pill {
-            display:inline-block;
-            padding:4px 10px;
-            font-size:0.8rem;
-            font-weight:600;
-            border-radius:20px;
-            color:#fff;
-        }
-        .pill-on { background:#28a745; }
-        .pill-off { background:#dc3545; }
-
-        /* Badges */
-        .badge-success {
-            background:#28a745;
-            color:white;
-            padding:0.375rem 0.75rem;
-            border-radius:0.375rem;
-            font-size:0.75rem;
-        }
-        .badge-danger {
-            background:#dc3545;
-            color:white;
-            padding:0.375rem 0.75rem;
-            border-radius:0.375rem;
-            font-size:0.75rem;
-        }
-
-        /* Spinner */
-        .fa-spinner { animation: spin 1s linear infinite; }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        /* Animations */
-        @keyframes pulse {
-            0%,100% { opacity:1; }
-            50% { opacity:0.5; }
-        }
-
-        @keyframes fadeInUp {
-            from { opacity:0; transform:translateY(20px); }
-            to { opacity:1; transform:translateY(0); }
-        }
-
+        .sidebar .nav-link:hover { background: rgba(251,146,60,0.1) !important; }
+        .sidebar .nav-item.active .nav-link { background: rgba(251,146,60,0.08) !important; }
         .card { animation: fadeInUp 0.6s ease-out; }
-        .card:hover {
-            transform:translateY(-4px);
-            box-shadow:0 8px 30px rgba(0,0,0,0.12) !important;
-        }
-
-        /* Sidebar Hover Fixes */
-        .sidebar .nav-link:hover {
-            background: rgba(251, 146, 60, 0.1) !important;
-            transform: translateX(3px);
-        }
-        .sidebar .nav-link:hover i,
-        .sidebar .nav-link:hover span {
-            color:#f97316 !important;
-        }
-
-        .sidebar .nav-item.active .nav-link {
-            background:rgba(251,146,60,0.08) !important;
-        }
-        .sidebar .nav-item.active .nav-link i {
-            color:#f97316 !important;
-        }
-
-        .sidebar {
-            backdrop-filter:blur(20px);
-            -webkit-backdrop-filter:blur(20px);
-            border-right:1px solid rgba(255,255,255,0.05);
-            box-shadow:
-                0 8px 32px rgba(0,0,0,0.3),
-                0 2px 8px rgba(0,0,0,0.2),
-                inset 0 1px 0 rgba(255,255,255,0.1);
-        }
-
+        @keyframes fadeInUp { from{opacity:0;transform:translateY(20px);} to{opacity:1;transform:translateY(0);} }
     </style>
-
 </head>
 
+<body id="page-top">
 
-            </li>
+<div id="wrapper">
 
-            <li class="nav-item">
-                <a class="nav-link" href="{{ route('backup_recovery.index') }}">
-                    <i class="fas fa-wrench"></i>
-                    <span>Backup & Recovery</span>
-                </a>
-            </li>
+    <!-- SIDEBAR -->
+    <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion"
+        id="accordionSidebar"
+        style="background: linear-gradient(135deg,#1a1a2e,#16213e,#0f172a);">
 
-        </ul>
+        <!-- BRAND -->
+        <a class="sidebar-brand d-flex align-items-center justify-content-between" href="/dashboard"
+           style="padding:24px;">
+            <div class="sidebar-brand-icon d-flex align-items-center">
+                <div style="width:48px;height:48px;background:linear-gradient(135deg,#f97316,#ea580c);
+                    border-radius:14px;display:flex;align-items:center;justify-content:center;margin-right:12px;">
+                    <i class="fas fa-desktop" style="color:white;font-size:22px;"></i>
+                </div>
+                <div style="color:white;font-weight:800;font-size:20px;">EGMS</div>
+            </div>
+        </a>
 
-        <!-- Content Wrapper -->
-        <div id="content-wrapper" class="d-flex flex-column">
+        <hr class="sidebar-divider my-0">
 
-            <!-- Topbar -->
-            <nav class="navbar navbar-expand navbar-light topbar mb-4 static-top shadow">
+        <li class="nav-item active">
+            <a class="nav-link" href="/dashboard">
+                <i class="fas fa-fw fa-tachometer-alt" style="color:#f97316;"></i>
+                <span>Dashboard</span>
+            </a>
+        </li>
 
-                <ul class="navbar-nav ml-auto">
+        <hr class="sidebar-divider">
 
-                    <li class="nav-item dropdown no-arrow">
-                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" data-toggle="dropdown">
-                            <span class="mr-2 d-none d-lg-inline small">Administrator</span>
-                            <img class="img-profile rounded-circle" 
-                                 src="{{ asset('assets/admin/img/admin.png') }}">
+        <li class="nav-item">
+            <a class="nav-link" href="{{ route('devices.index') }}">
+                <i class="fas fa-network-wired"></i>
+                <span>Manage Devices</span>
+            </a>
+        </li>
+
+        <li class="nav-item">
+            <a class="nav-link" href="{{ route('analytics.index') }}">
+                <i class="fas fa-chart-area"></i>
+                <span>Analytics</span>
+            </a>
+        </li>
+
+        <li class="nav-item">
+            <a class="nav-link" href="{{ route('settings.alerts') }}">
+                <i class="fas fa-cog"></i>
+                <span>Alert Settings</span>
+            </a>
+        </li>
+
+        <li class="nav-item">
+            <a class="nav-link" href="{{ route('backup_recovery.index') }}">
+                <i class="fas fa-wrench"></i>
+                <span>Backup & Recovery</span>
+            </a>
+        </li>
+
+    </ul>
+    <!-- END SIDEBAR -->
+
+    <!-- CONTENT WRAPPER -->
+    <div id="content-wrapper" class="d-flex flex-column"
+         style="background:linear-gradient(135deg,#0f172a,#1e293b,#334155);">
+
+        <!-- TOPBAR -->
+        <nav class="navbar navbar-expand navbar-light topbar mb-4 static-top shadow"
+             style="background:linear-gradient(135deg,#1e293b,#334155);">
+
+            <ul class="navbar-nav ml-auto">
+                <div class="topbar-divider d-none d-sm-block"></div>
+                <li class="nav-item dropdown no-arrow">
+                    <a class="nav-link dropdown-toggle" href="#" data-toggle="dropdown" style="color:white;">
+                        <span class="mr-2 d-none d-lg-inline small">Administrator</span>
+                        <img class="img-profile rounded-circle"
+                             src="{{ asset('assets/admin/img/admin.png') }}">
+                    </a>
+
+                    <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in">
+                        <a class="dropdown-item" href="#" data-toggle="modal" data-target="#logoutModal">
+                            <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2"></i> Logout
                         </a>
+                    </div>
+                </li>
+            </ul>
 
-                        <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in">
-                            <a class="dropdown-item" href="#" data-toggle="modal" data-target="#logoutModal">
-                                <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2"></i> Logout
-                            </a>
-                        </div>
-                    </li>
+        </nav>
+        <!-- END TOPBAR -->
 
-                </ul>
-            </nav>
-            <!-- End Topbar -->
+        <!-- MAIN CONTENT -->
+        <div class="container-fluid">
 
-            <!-- MAIN CONTENT -->
-            <div class="container-fluid">
+            <!-- METRIC CARDS -->
+            <div class="row mb-3">
 
-                <!-- Modern Stats Grid -->
-                <div class="row mb-3">
-
-                    <!-- Monthly Outages Card -->
-                    <div class="col-xl-3 col-lg-3 col-md-6 mb-3">
-                        <div class="card h-100"
-                             style="background: linear-gradient(135deg,#1e293b,#334155); 
-                                    border:1px solid rgba(255,255,255,0.1);
-                                    border-radius:14px; 
-                                    box-shadow:0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.1);
-                                    overflow:hidden;">
-                            <div style="position:absolute; top:0; left:0; right:0; height:4px; background:linear-gradient(90deg,#3b82f6,#1d4ed8);"></div>
-
-                            <div class="card-body p-2">
-                                <div class="d-flex align-items-center justify-content-between mb-1">
-                                    <div style="width:32px;height:32px;background:linear-gradient(135deg,#3b82f6,#1d4ed8);
-                                                border-radius:10px; display:flex;align-items:center;justify-content:center;">
-                                        <i class="fas fa-chart-line" style="color:white;font-size:13px;"></i>
-                                    </div>
-
-                                    <div class="text-right">
-                                        <div id="monthlyOutages"
-                                             style="font-size:1.15rem;font-weight:700;color:white;line-height:1;">
-                                            <i class="fas fa-spinner fa-spin" style="display:none;"></i>
-                                            <span class="count-value">--</span>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <h6 style="color:#e2e8f0;font-weight:600;font-size:0.875rem;margin-bottom:8px;">
-                                    Monthly Outages
-                                </h6>
-
-                                <p style="color:rgba(255,255,255,0.7);font-size:0.75rem;margin:0;">
-                                    <i class="fas fa-chart-line me-2"></i>Monthly outage statistics
-                                </p>
+                <!-- Monthly Outages -->
+                <div class="col-xl-3 col-lg-3 col-md-6 mb-3">
+                    <div class="card h-100" style="background:#1e293b;border-radius:14px;padding:10px;">
+                        <div class="card-body">
+                            <h6 style="color:#94a3b8;font-weight:700;">Monthly Outages</h6>
+                            <div id="monthlyOutages" style="color:white;font-size:1.4rem;">
+                                <span class="count-value">--</span>
                             </div>
                         </div>
                     </div>
-
-                    <!-- Online Devices Card -->
-                    <div class="col-xl-3 col-lg-3 col-md-6 mb-3">
-                        <div class="card h-100"
-                             style="background:linear-gradient(135deg,#1e293b,#334155);
-                                    border:1px solid rgba(255,255,255,0.1);
-                                    border-radius:14px; 
-                                    box-shadow:0 8px 32px rgba(0,0,0,0.3);">
-                            <div style="position:absolute; top:0; left:0; right:0; height:4px;
-                                        background:linear-gradient(90deg,#10b981,#059669);">
-                            </div>
-
-                            <div class="card-body p-2">
-                                <div class="d-flex align-items-center justify-content-between mb-1">
-
-                                    <div style="width:32px;height:32px;background:linear-gradient(135deg,#10b981,#059669);
-                                                border-radius:10px; display:flex;align-items:center;justify-content:center;">
-                                        <i class="fas fa-wifi" style="color:white;font-size:13px;"></i>
-                                    </div>
-
-                                    <div class="text-right">
-                                        <div id="onlineDevices"
-                                             style="font-size:1.15rem;font-weight:700;color:white;">
-                                            <i class="fas fa-spinner fa-spin" style="display:none;"></i>
-                                            <span class="count-value">--</span>
-                                        </div>
-                                    </div>
-
-                                </div>
-
-                                <h6 style="color:#64748b;font-weight:600;font-size:0.875rem;margin-bottom:8px;">
-                                    Online Devices
-                                </h6>
-
-                                <p style="color:rgba(255,255,255,0.7);font-size:0.75rem;margin:0;">
-                                    <div style="width:8px;height:8px;background:#10b981;border-radius:50%;
-                                                margin-right:8px; display:inline-block; animation:pulse 2s infinite;">
-                                    </div>
-                                    Currently reporting
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Offline Devices Card -->
-                    <div class="col-xl-3 col-lg-3 col-md-6 mb-3">
-                        <div class="card h-100"
-                             style="background:linear-gradient(135deg,#1e293b,#334155);
-                                    border:1px solid rgba(255,255,255,0.1);
-                                    border-radius:14px;">
-                            <div style="position:absolute;top:0;left:0;right:0;height:4px;
-                                        background:linear-gradient(90deg,#ef4444,#dc2626);"></div>
-
-                            <div class="card-body p-2">
-                                <div class="d-flex align-items-center justify-content-between mb-1">
-                                    <div style="width:32px;height:32px;background:linear-gradient(135deg,#ef4444,#dc2626);
-                                                border-radius:10px; display:flex;align-items:center;justify-content:center;">
-                                        <i class="fas fa-exclamation-triangle" style="color:white;font-size:13px;"></i>
-                                    </div>
-
-                                    <div class="text-right">
-                                        <div id="offlineDevices"
-                                             style="font-size:1.15rem;font-weight:700;color:white;">
-                                            <i class="fas fa-spinner fa-spin" style="display:none;"></i>
-                                            <span class="count-value">--</span>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <h6 style="color:#64748b;font-weight:600;font-size:0.875rem;margin-bottom:8px;">
-                                    Offline Devices
-                                </h6>
-
-                                <p style="color:rgba(255,255,255,0.7);font-size:0.75rem;margin:0;">
-                                    <div style="width:8px;height:8px;background:#ef4444;border-radius:50%;
-                                                margin-right:8px; display:inline-block; animation:pulse 2s infinite;">
-                                    </div>
-                                    Needs attention
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Today's Outages Card -->
-                    <div class="col-xl-3 col-lg-3 col-md-6 mb-3">
-                        <div class="card h-100"
-                             style="background:linear-gradient(135deg,#1e293b,#334155);
-                                    border:1px solid rgba(255,255,255,0.1);
-                                    border-radius:14px;">
-                            <div style="position:absolute;top:0;left:0;right:0;height:4px;
-                                        background:linear-gradient(90deg,#f59e0b,#d97706);"></div>
-
-                            <div class="card-body p-2">
-                                <div class="d-flex align-items-center justify-content-between mb-1">
-
-                                    <div style="width:32px;height:32px;background:linear-gradient(135deg,#f59e0b,#d97706);
-                                                border-radius:10px; display:flex;align-items:center;justify-content:center;">
-                                        <i class="fas fa-clock" style="color:white;font-size:13px;"></i>
-                                    </div>
-
-                                    <div class="text-right">
-                                        <div id="todayOutages"
-                                             style="font-size:1.15rem;font-weight:700;color:white;">
-                                            <i class="fas fa-spinner fa-spin" style="display:none;"></i>
-                                            <span class="count-value">--</span>
-                                        </div>
-                                    </div>
-
-                                </div>
-
-                                <h6 style="color:#64748b;font-weight:600;font-size:0.875rem;margin-bottom:8px;">
-                                    Today's Outages
-                                </h6>
-
-                                <p style="color:rgba(255,255,255,0.7);font-size:0.75rem;margin:0;">
-                                    <i class="fas fa-clock me-2"></i>
-                                    Off events (24h)
-                                </p>
-                            </div>
-
-                        </div>
-                    </div>
-
                 </div>
 
-                <!-- Device Status Section -->
-                <div class="row mb-4">
-                    <div class="col-12 mb-3">
-
-                        <div class="chart-container device-section-card"
-                             style="background:linear-gradient(135deg,#1e293b,#334155);
-                                    border:1px solid rgba(255,255,255,0.1);
-                                    border-radius:16px;
-                                    padding:16px 18px;">
-
-                            <div class="section-header">
-
-                                <div>
-                                    <h3 class="section-title" style="color:#e5e7eb;
-                                                                   font-weight:700;font-size:1.15rem;">
-                                        Device Status
-                                    </h3>
-                                </div>
-
-                                <div class="d-flex align-items-center gap-2">
-                                    <span id="deviceCount"
-                                          style="background:rgba(108,120,138,0.2);
-                                                 color:#60a5fa;padding:4px 12px;
-                                                 border-radius:12px;
-                                                 border:1px solid rgba(59,130,246,0.3);
-                                                 font-size:0.75rem;font-weight:600;">
-                                        0 devices
-                                    </span>
-
-                                    <button class="modern-btn-secondary" onclick="loadDevices()">
-                                        <i class="fas fa-sync-alt"></i>
-                                    </button>
-                                </div>
-
+                <!-- Online Devices -->
+                <div class="col-xl-3 col-lg-3 col-md-6 mb-3">
+                    <div class="card h-100" style="background:#1e293b;border-radius:14px;padding:10px;">
+                        <div class="card-body">
+                            <h6 style="color:#94a3b8;font-weight:700;">Online Devices</h6>
+                            <div id="onlineDevices" style="color:white;font-size:1.4rem;">
+                                <span class="count-value">--</span>
                             </div>
-
-                            <!-- Loading State -->
-                            <div id="deviceLoadingState" class="text-center py-5">
-                                <div style="width:48px;height:48px;background:linear-gradient(135deg,#3b82f6,#1d4ed8);
-                                            border-radius:50%;display:flex;align-items:center;justify-content:center;
-                                            margin:0 auto 1rem;">
-                                    <i class="fas fa-spinner fa-spin" style="color:white;font-size:20px;"></i>
-                                </div>
-                                <p style="color:#64748b;font-weight:600;">Loading device status...</p>
-                            </div>
-
-                            <!-- Error State -->
-                            <div id="deviceErrorState" class="text-center py-5" style="display:none;">
-                                <div style="width:48px;height:48px;background:linear-gradient(135deg,#ef4444,#dc2626);
-                                            border-radius:50%;display:flex;align-items:center;justify-content:center;
-                                            margin:0 auto 1rem;">
-                                    <i class="fas fa-exclamation-triangle" style="color:white;font-size:20px;"></i>
-                                </div>
-                                <p style="color:#ef4444;font-weight:600;">Unable to load device data</p>
-                                <button class="modern-btn" onclick="loadDevices()">
-                                    <i class="fas fa-redo me-1"></i> Retry
-                                </button>
-                            </div>
-
-                            <!-- Device Cards -->
-                            <div id="deviceCardsContainer" class="device-cards-container condensed"
-                                 style="display:none;"></div>
-
-                            <!-- Empty State -->
-                            <div id="deviceEmptyState" class="text-center py-5" style="display:none;">
-                                <div style="width:48px;height:48px;background:linear-gradient(135deg,#94a3b8,#64748b);
-                                            border-radius:50%;display:flex;align-items:center;justify-content:center;
-                                            margin:0 auto 1rem;">
-                                    <i class="fas fa-network-wired" style="color:white;font-size:20px;"></i>
-                                </div>
-                                <p style="color:#64748b;font-weight:600;">No devices found</p>
-                                <a href="{{ route('devices.index') }}" class="modern-btn">
-                                    <i class="fas fa-plus me-1"></i> Add Device
-                                </a>
-                            </div>
-
-                            <!-- Footer -->
-                            <div class="mt-auto pt-3"
-                                 style="border-top:1px solid rgba(255,255,255,0.1);">
-
-                                <div class="d-flex justify-content-between">
-                                    <small style="color:rgba(255,255,255,0.7);">
-                                        <i class="fas fa-clock me-1"></i>
-                                        Last updated:
-                                        <span id="lastUpdate" style="color:white;">Never</span>
-                                    </small>
-
-                                    <small style="color:rgba(255,255,255,0.7);">
-                                        <i class="fas fa-sync-alt me-1"></i>
-                                        Auto-refresh:
-                                        <span style="color:#10b981;">ON</span>
-                                    </small>
-                                </div>
-
-                            </div>
-
                         </div>
+                    </div>
+                </div>
 
+                <!-- Offline Devices -->
+                <div class="col-xl-3 col-lg-3 col-md-6 mb-3">
+                    <div class="card h-100" style="background:#1e293b;border-radius:14px;padding:10px;">
+                        <div class="card-body">
+                            <h6 style="color:#94a3b8;font-weight:700;">Offline Devices</h6>
+                            <div id="offlineDevices" style="color:white;font-size:1.4rem;">
+                                <span class="count-value">--</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Today's Outages -->
+                <div class="col-xl-3 col-lg-3 col-md-6 mb-3">
+                    <div class="card h-100" style="background:#1e293b;border-radius:14px;padding:10px;">
+                        <div class="card-body">
+                            <h6 style="color:#94a3b8;font-weight:700;">Today's Outages</h6>
+                            <div id="todayOutages" style="color:white;font-size:1.4rem;">
+                                <span class="count-value">--</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
             </div>
-            <!-- End of Main Content -->
 
-            <!-- Footer removed -->
+            <!-- DEVICE STATUS SECTION -->
+            <div class="card p-4" style="background:#1e293b;border-radius:16px;color:white;">
+                <h4>Device Status</h4>
 
-          </div>
-        <!-- END CONTENT WRAPPER -->
+                <div id="deviceLoadingState" class="text-center py-5">
+                    <i class="fas fa-spinner fa-spin" style="font-size:30px;"></i>
+                </div>
+
+                <div id="deviceErrorState" class="text-center py-5" style="display:none;">
+                    <p>Error loading devices.</p>
+                </div>
+
+                <div id="deviceEmptyState" class="text-center py-4" style="display:none;">
+                    <p>No devices found.</p>
+                </div>
+
+                <div id="deviceCardsContainer" style="display:none;"></div>
+
+                <div class="mt-3">
+                    <small>Last updated: <span id="lastUpdate">Never</span></small>
+                </div>
+            </div>
+
+        </div>
+        <!-- END MAIN CONTENT -->
 
     </div>
-    <!-- END WRAPPER -->
+    <!-- END CONTENT WRAPPER -->
 
-    <!-- Logout Modal -->
-       <div class="modal fade" id="logoutModal">
-        <div class="modal-dialog">
-            <div class="modal-content" style="background:#1e293b;color:white;">
-                <div class="modal-header">
-                    <h5 class="modal-title">Ready to Leave?</h5>
-                    <button class="close" type="button" data-dismiss="modal" style="color:white;">×</button>
-                </div>
-                <div class="modal-body">
-                    Select "Logout" to end your session.
-                </div>
-                <div class="modal-footer">
-                    <button class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                    <form action="{{ route('admin.logout') }}" method="POST">@csrf
-                        <button class="btn btn-primary">Logout</button>
-                    </form>
-                </div>
+</div>
+<!-- END WRAPPER -->
+
+<!-- LOGOUT MODAL -->
+<div class="modal fade" id="logoutModal">
+    <div class="modal-dialog">
+        <div class="modal-content" style="background:#1e293b;color:white;">
+            <div class="modal-header">
+                <h5 class="modal-title">Ready to Leave?</h5>
+                <button class="close" type="button" data-dismiss="modal" style="color:white;">×</button>
+            </div>
+            <div class="modal-body">Select "Logout" to end your session.</div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <form action="{{ route('admin.logout') }}" method="POST">@csrf
+                    <button class="btn btn-primary">Logout</button>
+                </form>
             </div>
         </div>
     </div>
+</div>
 
-    <!-- FIXED JS PATHS -->
-    <script src="{{ asset('assets/admin/vendor/jquery/jquery.min.js') }}"></script>
-    <script src="{{ asset('assets/admin/vendor/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
-    <script src="{{ asset('assets/admin/vendor/jquery-easing/jquery.easing.min.js') }}"></script>
-    <script src="{{ asset('assets/admin/js/sb-admin-2.min.js') }}"></script>
-
+<!-- CORE JS -->
+<script src="{{ asset('assets/admin/vendor/jquery/jquery.min.js') }}"></script>
+<script src="{{ asset('assets/admin/vendor/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
+<script src="{{ asset('assets/admin/vendor/jquery-easing/jquery.easing.min.js') }}"></script>
+<script src="{{ asset('assets/admin/js/sb-admin-2.min.js') }}"></script>
     <!-- Page level plugins removed: Chart.js not used on this page -->
 
     <script>
