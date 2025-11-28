@@ -24,19 +24,23 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 # Install backend dependencies
 RUN composer install --no-dev --optimize-autoloader
 
-# Install frontend dependencies and build Vite prod assets
+# Build Vite assets
 RUN npm install
 RUN npm run build
 
-# Fix permissions
+# Fix folder permissions
 RUN chown -R www-data:www-data storage bootstrap/cache
 
-# Point Apache to public folder
+# Set Apache to point to public folder
 RUN sed -i 's#/var/www/html#/var/www/html/public#' /etc/apache2/sites-available/000-default.conf
 
 EXPOSE 8080
 
-# Railway port mapping
-CMD sed -i "s/80/${PORT}/" /etc/apache2/ports.conf \
+# STARTUP COMMANDS – RUN AFTER ENV EXISTS
+CMD php artisan storage:link || true \
+    && php artisan config:clear \
+    && php artisan view:clear \
+    && php artisan route:clear \
+    && sed -i "s/80/${PORT}/" /etc/apache2/ports.conf \
     && sed -i "s/:80/:${PORT}/" /etc/apache2/sites-enabled/000-default.conf \
     && apachectl -D FOREGROUND
