@@ -100,51 +100,48 @@ class AdminDashboardController extends Controller
     }
 
     // JSON for devices with derived display status
-   public function getDevices()
+public function getDevices()
 {
     try {
-        $thresholdMin = (int) cache(
-            'settings.heartbeat_timeout_minutes',
-            config('services.arduino.heartbeat_timeout_minutes', 5)
-        );
+        // Timeout in seconds (1 minute)
+        $thresholdSec = 60;
 
         $now = \Carbon\Carbon::now();
 
         $devices = Device::orderBy('household_name')
             ->get()
-            ->map(function ($d) use ($now, $thresholdMin) {
+            ->map(function ($d) use ($now, $thresholdSec) {
 
-                // Calculate offline/online based on last_seen time difference
-                $lastSeen     = $d->last_seen;
-                $ageSecs      = $lastSeen ? $now->diffInSeconds($lastSeen) : null;
-                $fresh        = $lastSeen ? $ageSecs <= ($thresholdMin * 60) : false;
+                $lastSeen = $d->last_seen;
 
-                // Derived status
-                $displayStatus = $fresh ? 'Active' : 'Inactive';
-                $statusBadgeClass = $fresh ? 'bg-success' : 'bg-danger';
-                $statusIconClass  = $fresh ? 'text-success' : 'text-danger';
+                // If null → definitely offline
+                $ageSecs = $lastSeen ? $now->diffInSeconds($lastSeen) : 999999;
+
+                // Online if last_seen is within 60 seconds
+                $isOnline = $ageSecs <= $thresholdSec;
 
                 return [
-                    'id' => $d->id,
-                    'device_id' => $d->device_id,
-                    'household_name' => $d->household_name,
-                    'barangay' => $d->barangay,
-                    'status' => $fresh ? 'ON' : 'OFF',
-                    'last_seen' => $lastSeen,
-                    'display_status' => $displayStatus,
-                    'status_badge_class' => $statusBadgeClass,
-                    'status_icon_class' => $statusIconClass,
-                    'last_seen_human' => $lastSeen ? $lastSeen->diffForHumans() : 'Never',
+                    'id'                 => $d->id,
+                    'device_id'          => $d->device_id,
+                    'household_name'     => $d->household_name,
+                    'barangay'           => $d->barangay,
+                    'status'             => $isOnline ? 'ON' : 'OFF',
+                    'last_seen'          => $lastSeen,
+                    'display_status'     => $isOnline ? 'Active' : 'Inactive',
+                    'status_badge_class' => $isOnline ? 'bg-success' : 'bg-danger',
+                    'status_icon_class'  => $isOnline ? 'text-success' : 'text-danger',
+                    'last_seen_human'    => $lastSeen ? $lastSeen->diffForHumans() : 'Never',
                 ];
             });
 
         return response()->json(['success' => true, 'devices' => $devices]);
 
     } catch (\Throwable $e) {
-        return response()->json(['success' => false, 'message' => 'Server error', 'error' => $e->getMessage()], 500);
+        return response()->json([
+            'success' => false,
+            'message' => 'Server error',
+            'error'   => $e->getMessage()
+        ], 500);
     }
 }
-
-
-
 }
