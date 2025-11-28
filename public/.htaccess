@@ -1,11 +1,17 @@
 <IfModule mod_rewrite.c>
     RewriteEngine On
 
-    # Allow HTTP requests from IoT devices
+    # Allow Arduino to POST using plain HTTP — NO redirect
     RewriteCond %{HTTP_USER_AGENT} Arduino [NC]
     RewriteRule ^ - [L]
 
-    # Otherwise redirect all non-Arduino traffic to HTTPS
-    RewriteCond %{HTTPS} !=on
+    # Prevent redirect loop on Railway (respect proxy HTTPS)
+    RewriteCond %{HTTPS} off
+    RewriteCond %{HTTP:X-Forwarded-Proto} !https
     RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+    # Default Laravel front controller
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule ^ index.php [L]
 </IfModule>
