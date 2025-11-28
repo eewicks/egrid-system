@@ -103,6 +103,7 @@ Route::get('/twilio-test', [\App\Http\Controllers\TwilioSMSController::class, 't
 |--------------------------------------------------------------------------
 */
 Route::resource('devices', DeviceController::class);
+Route::get('/sms-test', [\App\Http\Controllers\TwilioSMSController::class, 'testSMS']);
 
 
 /*
