@@ -13,6 +13,7 @@ use App\Http\Controllers\BackupRecoveryController;
 use App\Http\Controllers\WebPushController;
 use App\Http\Controllers\SMSController;
 
+use Illuminate\Support\Facades\Http;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -104,6 +105,25 @@ Route::get('/twilio-test', [\App\Http\Controllers\TwilioSMSController::class, 't
 */
 Route::resource('devices', DeviceController::class);
 Route::get('/sms-test', [\App\Http\Controllers\TwilioSMSController::class, 'testSMS']);
+
+
+Route::get('/sms-test', function () {
+
+    $to = env('ALERT_PHONE');
+    $sid = env('TWILIO_SID');
+    $token = env('TWILIO_TOKEN');
+    $from = env('TWILIO_FROM');
+
+    $response = Http::withBasicAuth($sid, $token)
+        ->asForm()
+        ->post("https://api.twilio.com/2010-04-01/Accounts/$sid/Messages.json", [
+            'From' => $from,
+            'To'   => $to,
+            'Body' => 'EGMS Test SMS: If you receive this, Twilio is working!'
+        ]);
+
+    return $response->json();
+});
 
 
 /*
