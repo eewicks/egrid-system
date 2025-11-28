@@ -1,20 +1,22 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
 
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
 
     <title>Dashboard-Testing</title>
 
-    <!-- Custom fonts -->
-    <link href="{{ asset('assets/admin/vendor/fontawesome-free/css/all.min.css') }}" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css?family=Nunito:200,400,600,700,900" rel="stylesheet">
+    <!-- Custom fonts for this template-->
+    <link href="{{asset('assets/admin/vendor/fontawesome-free/css/all.min.css')}}" rel="stylesheet" type="text/css">
+    <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
-
-    <!-- SB Admin CSS (FIXED PATH) -->
-    <link href="{{ asset('assets/admin/css/sb-admin-2.min.css') }}" rel="stylesheet">
+    <!-- Custom styles for this template-->
+    <link href="{{asset('assets/admin/css/sb-admin-2.min.css')}}" rel="stylesheet">
 
     <style>
         /* Fixed Sidebar Styles */
@@ -703,76 +705,104 @@
     <!-- Page Wrapper -->
     <div id="wrapper">
 
-        <!-- Sidebar -->
-        <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
+        <!-- Enhanced Modern Dark Sidebar -->
+        <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar" style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f172a 100%); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);">
 
-            <a class="sidebar-brand d-flex align-items-center justify-content-between" href="/dashboardtest">
-                <div class="sidebar-brand-icon">
-                    <div style="width: 48px; height: 48px; background: linear-gradient(135deg, #f97316, #ea580c); 
-                    border-radius: 14px; display: flex; align-items: center; justify-content: center;">
-                        <i class="fas fa-desktop" style="color: white; font-size: 22px;"></i>
+            <!-- Enhanced Orange Dark Sidebar Brand -->
+            <a class="sidebar-brand d-flex align-items-center justify-content-between" href="/dashboardtest" style="padding: 24px 24px; background: rgba(255, 255, 255, 0.05); border-bottom: 1px solid rgba(255, 255, 255, 0.1); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border-radius: 0 0 16px 16px; margin: 0 12px 16px 12px;">
+                <div class="sidebar-brand-icon d-flex align-items-center">
+                    <div style="width: 48px; height: 48px; background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); border-radius: 14px; display: flex; align-items: center; justify-content: center; margin-right: 12px; box-shadow: 0 8px 25px rgba(249, 115, 22, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2); border: 1px solid rgba(255, 255, 255, 0.1);">
+                        <i class="fas fa-desktop" style="color: white; font-size: 22px; text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);"></i>
                     </div>
+                    <div style="color: white; font-weight: 800; font-size: 20px; font-family: 'Inter', sans-serif; letter-spacing: 0.5px; text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);">EGMS</div>
                 </div>
-                <div class="sidebar-brand-text mx-3">EGMS</div>
             </a>
 
             <!-- Enhanced Dark Divider -->
-             <hr class="sidebar-divider my-0">
+            <hr class="sidebar-divider my-0" style="border-color: rgba(255, 255, 255, 0.08); margin: 0 20px; border-width: 1px;">
 
-            <li class="nav-item active">
-                <a class="nav-link" href="#">
-                    <i class="fas fa-fw fa-tachometer-alt" style="color:#f97316;"></i>
-                    <span>Dashboard</span>
+            <!-- Enhanced Orange Nav Item - Dashboard -->
+            <li class="nav-item active" style="margin: 8px 16px;">
+                <a class="nav-link" href="#" style="padding: 16px 20px; border-radius: 8px; background: rgba(255, 255, 255, 0.05); border: none; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: none;">
+                    <i class="fas fa-fw fa-tachometer-alt" style="font-size: 18px; margin-right: 14px; color: #f97316; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);"></i>
+                    <span style="font-weight: 600; font-size: 14px; color: white; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);">Dashboard</span>
                 </a>
             </li>
 
             <!-- Enhanced Dark Divider -->
-          <li class="nav-item">
-                <a class="nav-link" href="{{ route('analytics.index') }}">
-                    <i class="fas fa-chart-area"></i>
-                    <span>Analytics</span>
+            <hr class="sidebar-divider" style="border-color: rgba(255, 255, 255, 0.08); margin: 20px 20px; border-width: 1px;">
+
+            <!-- Enhanced Orange Navigation Items -->
+            <li class="nav-item" style="margin: 6px 16px;">
+                <a class="nav-link" href="{{ route('devices.index') }}" style="padding: 16px 20px; border-radius: 8px; background: transparent; border: none; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); color: rgba(255, 255, 255, 0.9); font-weight: 500;">
+                    <i class="fas fa-network-wired" style="font-size: 18px; margin-right: 14px; color: rgba(255, 255, 255, 0.7); text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);"></i>
+                    <span style="font-size: 14px; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);">Manage Devices</span>
                 </a>
             </li>
 
-            <li class="nav-item">
-                <a class="nav-link" href="{{ route('settings.alerts') }}">
-                    <i class="fas fa-cog"></i>
-                    <span>Alert Settings</span>
+            <li class="nav-item" style="margin: 6px 16px;">
+                <a class="nav-link" href="{{ route('analytics.index') }}" style="padding: 16px 20px; border-radius: 8px; background: transparent; border: none; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); color: rgba(255, 255, 255, 0.9); font-weight: 500;">
+                    <i class="fas fa-fw fa-chart-area" style="font-size: 18px; margin-right: 14px; color: rgba(255, 255, 255, 0.7); text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);"></i>
+                    <span style="font-size: 14px; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);">Analytics</span>
                 </a>
             </li>
 
-            <hr class="sidebar-divider d-none d-md-block">
+            <li class="nav-item" style="margin: 6px 16px;">
+                <a class="nav-link" href="{{ route('settings.alerts') }}" style="padding: 16px 20px; border-radius: 8px; background: transparent; border: none; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); color: rgba(255, 255, 255, 0.9); font-weight: 500;">
+                    <i class="fas fa-fw fa-cog" style="font-size: 18px; margin-right: 14px; color: rgba(255, 255, 255, 0.7); text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);"></i>
+                    <span style="font-size: 14px; color: #ffffff !important; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3); font-weight: 500;">Alert Settings</span>
+                </a>
+            </li>
+
+           
+
+            <!-- Enhanced Dark Divider -->
+            <hr class="sidebar-divider d-none d-md-block" style="border-color: rgba(255, 255, 255, 0.08); margin: 24px 20px; border-width: 1px;">
 
         </ul>
         <!-- End of Sidebar -->
 
         <!-- Content Wrapper -->
-       <div id="content-wrapper" class="d-flex flex-column">
+        <div id="content-wrapper" class="d-flex flex-column" style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%); min-height: 100vh;">
 
             <!-- Main Content -->
-            <div id="content">
+            <div id="content" style="background: transparent;">
 
                 <!-- Topbar -->
-                <nav class="navbar navbar-expand navbar-light topbar mb-4 static-top shadow">
+                <nav class="navbar navbar-expand navbar-light topbar mb-4 static-top shadow" style="background: linear-gradient(135deg, #1e293b 0%, #334155 100%); border-bottom: 1px solid rgba(255, 255, 255, 0.1); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);">
 
+
+                  
                     <ul class="navbar-nav ml-auto">
+
+
+                        <!-- Nav Item - Alerts -->
+                  
+
                         <div class="topbar-divider d-none d-sm-block"></div>
 
+                        <!-- Nav Item - User Information -->
                         <li class="nav-item dropdown no-arrow">
-                            <a class="nav-link dropdown-toggle" href="#" data-toggle="dropdown" style="color:white;">
-                                <span class="mr-2 d-none d-lg-inline text-white small">Administrator</span>
+                            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
+                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="color: white;">
+                                <span class="mr-2 d-none d-lg-inline small" style="color: rgba(255, 255, 255, 0.9);">Administrator</span>
                                 <img class="img-profile rounded-circle"
-                                     src="{{ url('assets/admin/img/admin.png') }}">
+                                    src="{{asset('assets/admin/img/admin.png')}}" style="border: 2px solid rgba(255, 255, 255, 0.2);">
                             </a>
-
-                            <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in">
-                                <a class="dropdown-item" href="#" data-toggle="modal" data-target="#logoutModal">
-                                    <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2"></i>
+                            <!-- Dropdown - User Information -->
+                            <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in"
+                                aria-labelledby="userDropdown" style="background: linear-gradient(135deg, #1e293b 0%, #334155 100%); border: 1px solid rgba(255, 255, 255, 0.1); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);">
+                                
+                               
+                                <a class="dropdown-item" href="#" data-toggle="modal" data-target="#logoutModal" style="color: rgba(255, 255, 255, 0.9); background: transparent; transition: all 0.3s ease;">
+                                    <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2" style="color: rgba(255, 255, 255, 0.7);"></i>
                                     Logout
                                 </a>
                             </div>
                         </li>
+
                     </ul>
+
                 </nav>
                 <!-- End of Topbar -->
 
@@ -971,42 +1001,38 @@
         <i class="fas fa-angle-up"></i>
     </a>
 
-    <!-- Logout Modal -->
-    <div class="modal fade" id="logoutModal" tabindex="-1">
-        <div class="modal-dialog">
+    <!-- Logout Modal-->
+    <div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Ready to Leave?</h5>
-                    <button class="close" type="button" data-dismiss="modal">×</button>
+                    <h5 class="modal-title" id="exampleModalLabel">Ready to Leave?</h5>
+                    <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
                 </div>
-                <div class="modal-body">Select "Logout" below to end your session.</div>
-
+                <div class="modal-body">Select "Logout" below if you are ready to end your current session.</div>
                 <div class="modal-footer">
                     <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
-
-                    <form method="POST" action="{{ route('admin.logout') }}">
+                    <form method="POST" action="{{ route('admin.logout') }}" style="display: inline;">
                         @csrf
                         <button type="submit" class="btn btn-primary">Logout</button>
                     </form>
                 </div>
-
             </div>
         </div>
     </div>
 
-
     <!-- Bootstrap core JavaScript-->
-    <script src="{{ asset('assets/admin/vendor/jquery/jquery.min.js') }}"></script>
+    <script src="{{asset('assets/admin/vendor/jquery/jquery.min.js')}}"></script>
+    <script src="{{asset('assets/admin/vendor/bootstrap/js/bootstrap.bundle.min.js')}}"></script>
 
-    <!-- Bootstrap -->
-    <script src="{{ asset('assets/admin/vendor/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
+    <!-- Core plugin JavaScript-->
+    <script src="{{asset('assets/admin/vendor/jquery-easing/jquery.easing.min.js')}}"></script>
 
-    <!-- jQuery Easing -->
-    <script src="{{ asset('assets/admin/vendor/jquery-easing/jquery.easing.min.js') }}"></script>
-
-    <!-- SB Admin JS -->
-    <script src="{{ asset('assets/admin/js/sb-admin-2.min.js') }}"></script>
-
+    <!-- Custom scripts for all pages-->
+    <script src="{{asset('assets/admin/js/sb-admin-2.min.js')}}"></script>
 
     <!-- Page level plugins removed: Chart.js not used on this page -->
 
@@ -1172,15 +1198,419 @@
                             stopAutoRefresh();
                         });
 
-                        /*
-                         * Power Outages Chart Implementation
-                         * NOTE: The corresponding chart HTML and Chart.js library
-                         * are not included on this page anymore. To avoid runtime
-                         * errors (which can break other dashboard scripts,
-                         * especially in production on Railway), the chart
-                         * functionality has been disabled. Re‑enable it only
-                         * after restoring the markup and Chart.js include.
-                         */
+                        // Power Outages Chart Implementation
+                        let powerOutagesChart = null;
+                        let chartUpdateInterval = null;
+
+                        // Fetch power outages data
+                        async function fetchPowerOutages() {
+                            try {
+                                const response = await fetch('/api/power-outages', {
+                                    headers: {
+                                        'X-Requested-With': 'XMLHttpRequest',
+                                        'Content-Type': 'application/json'
+                                    }
+                                });
+
+                                if (!response.ok) {
+                                    throw new Error(`HTTP ${response.status}`);
+                                }
+
+                                const data = await response.json();
+
+                                if (data.success) {
+                                    return data;
+                                } else {
+                                    throw new Error(data.message || 'Failed to fetch data');
+                                }
+                            } catch (error) {
+                                console.error('Error fetching power outages:', error);
+                                throw error;
+                            }
+                        }
+
+                        // Create power outages chart
+                        function createPowerOutagesChart(labels, data) {
+                            const ctx = document.getElementById('powerOutagesChart').getContext('2d');
+                            
+                            if (powerOutagesChart) {
+                                powerOutagesChart.destroy();
+                            }
+
+                            // Create gradient for the chart
+                            const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+                            gradient.addColorStop(0, 'rgba(0, 123, 255, 0.3)');
+                            gradient.addColorStop(0.5, 'rgba(0, 123, 255, 0.1)');
+                            gradient.addColorStop(1, 'rgba(0, 123, 255, 0.05)');
+
+                            powerOutagesChart = new Chart(ctx, {
+                                type: 'line',
+                                data: {
+                                    labels: labels,
+                                    datasets: [{
+                                        label: 'Power Outages',
+                                        data: data,
+                                        borderColor: '#007bff',
+                                        backgroundColor: gradient,
+                                        borderWidth: 4,
+                                        fill: true,
+                                        tension: 0.4,
+                                        pointBackgroundColor: '#ffffff',
+                                        pointBorderColor: '#007bff',
+                                        pointBorderWidth: 3,
+                                        pointRadius: 8,
+                                        pointHoverRadius: 12,
+                                        pointHoverBackgroundColor: '#0056b3',
+                                        pointHoverBorderColor: '#ffffff',
+                                        pointHoverBorderWidth: 4,
+                                        pointStyle: 'circle',
+                                        pointHitRadius: 20,
+                                        // Add shadow effect
+                                        shadowOffsetX: 0,
+                                        shadowOffsetY: 4,
+                                        shadowBlur: 8,
+                                        shadowColor: 'rgba(0, 123, 255, 0.3)'
+                                    }]
+                                },
+                                options: {
+                                    responsive: true,
+                                    maintainAspectRatio: false,
+                                    animation: {
+                                        duration: 2000,
+                                        easing: 'easeInOutQuart',
+                                        delay: (context) => {
+                                            return context.dataIndex * 100;
+                                        }
+                                    },
+                                    plugins: {
+                                        legend: {
+                                            display: false
+                                        },
+                                        tooltip: {
+                                            backgroundColor: 'rgba(15, 23, 42, 0.95)',
+                                            titleColor: '#ffffff',
+                                            bodyColor: '#ffffff',
+                                            borderColor: '#3b82f6',
+                                            borderWidth: 2,
+                                            cornerRadius: 12,
+                                            displayColors: false,
+                                            titleFont: {
+                                                size: 14,
+                                                weight: '600'
+                                            },
+                                            bodyFont: {
+                                                size: 13,
+                                                weight: '500'
+                                            },
+                                            padding: 12,
+                                            callbacks: {
+                                                title: function(context) {
+                                                    return `📊 ${context[0].label}`;
+                                                },
+                                                label: function(context) {
+                                                    return `Outages: ${context.parsed.y}`;
+                                                }
+                                            }
+                                        }
+                                    },
+                                    scales: {
+                                        x: {
+                                            grid: {
+                                                display: true,
+                                                color: 'rgba(226, 232, 240, 0.5)',
+                                                drawBorder: false,
+                                                drawOnChartArea: true,
+                                                drawTicks: false
+                                            },
+                                            ticks: {
+                                                color: '#64748b',
+                                                font: {
+                                                    size: 12,
+                                                    weight: '600',
+                                                    family: "'Inter', sans-serif"
+                                                },
+                                                padding: 8
+                                            },
+                                            border: {
+                                                display: false
+                                            }
+                                        },
+                                        y: {
+                                            beginAtZero: true,
+                                            grid: {
+                                                color: 'rgba(226, 232, 240, 0.5)',
+                                                drawBorder: false,
+                                                drawOnChartArea: true,
+                                                drawTicks: false
+                                            },
+                                            ticks: {
+                                                color: '#64748b',
+                                                font: {
+                                                    size: 12,
+                                                    weight: '600',
+                                                    family: "'Inter', sans-serif"
+                                                },
+                                                padding: 8,
+                                                stepSize: 1,
+                                                callback: function(value) {
+                                                    return value;
+                                                }
+                                            },
+                                            border: {
+                                                display: false
+                                            }
+                                        }
+                                    },
+                                    interaction: {
+                                        intersect: false,
+                                        mode: 'index'
+                                    },
+                                    elements: {
+                                        point: {
+                                            hoverBackgroundColor: '#1d4ed8',
+                                            hoverBorderColor: '#ffffff',
+                                            hoverBorderWidth: 4
+                                        },
+                                        line: {
+                                            borderCapStyle: 'round',
+                                            borderJoinStyle: 'round'
+                                        }
+                                    },
+                                    layout: {
+                                        padding: {
+                                            top: 20,
+                                            bottom: 20,
+                                            left: 20,
+                                            right: 20
+                                        }
+                                    }
+                                }
+                            });
+                        }
+
+                        // Update chart with new data
+                        function updatePowerOutagesChart(labels, data) {
+                            if (powerOutagesChart) {
+                                powerOutagesChart.data.labels = labels;
+                                powerOutagesChart.data.datasets[0].data = data;
+                                powerOutagesChart.update('active');
+                            }
+                        }
+
+                        // Show loading state
+                        function showChartLoading() {
+                            document.getElementById('chartLoading').style.display = 'block';
+                            document.getElementById('chartError').style.display = 'none';
+                            document.getElementById('chartContainer').style.display = 'none';
+                        }
+
+                        // Show error state
+                        function showChartError() {
+                            document.getElementById('chartLoading').style.display = 'none';
+                            document.getElementById('chartError').style.display = 'block';
+                            document.getElementById('chartContainer').style.display = 'none';
+                        }
+
+                        // Show chart
+                        function showChart() {
+                            document.getElementById('chartLoading').style.display = 'none';
+                            document.getElementById('chartError').style.display = 'none';
+                            document.getElementById('chartNoData').style.display = 'none';
+                            document.getElementById('chartContainer').style.display = 'block';
+                        }
+
+                        // Show no data message
+                        function showNoDataMessage() {
+                            document.getElementById('chartLoading').style.display = 'none';
+                            document.getElementById('chartError').style.display = 'none';
+                            document.getElementById('chartContainer').style.display = 'none';
+                            document.getElementById('chartNoData').style.display = 'block';
+                        }
+
+                        // Load power outages data
+                        async function loadPowerOutagesData() {
+                            showChartLoading();
+                            
+                            try {
+                                const data = await fetchPowerOutages();
+                                
+                                // Check if there's any data
+                                const hasData = data.data && data.data.some(value => value > 0);
+                                
+                                if (!hasData) {
+                                    showNoDataMessage();
+                                    return;
+                                }
+                                
+                                if (powerOutagesChart) {
+                                    updatePowerOutagesChart(data.labels, data.data);
+                                } else {
+                                    createPowerOutagesChart(data.labels, data.data);
+                                }
+                                
+                                showChart();
+                            } catch (error) {
+                                console.error('Error loading power outages data:', error);
+                                showChartError();
+                            }
+                        }
+
+                        // Start auto-refresh for power outages chart
+                        function startPowerOutagesAutoRefresh() {
+                            // Load initial data
+                            loadPowerOutagesData();
+                            
+                            // Set up auto-refresh every 10 seconds
+                            chartUpdateInterval = setInterval(loadPowerOutagesData, 10000);
+                        }
+
+                        // Stop auto-refresh
+                        function stopPowerOutagesAutoRefresh() {
+                            if (chartUpdateInterval) {
+                                clearInterval(chartUpdateInterval);
+                                chartUpdateInterval = null;
+                            }
+                        }
+
+                        // Initialize power outages chart when page loads
+                        document.addEventListener('DOMContentLoaded', function() {
+                            startPowerOutagesAutoRefresh();
+                        });
+
+                        // Clean up on page unload
+                        window.addEventListener('beforeunload', function() {
+                            stopPowerOutagesAutoRefresh();
+                        });
+
+                        // Add keyboard support for fullscreen
+                        document.addEventListener('keydown', function(event) {
+                            if (event.key === 'Escape' && document.fullscreenElement) {
+                                fullscreenChart();
+                            }
+                        });
+
+                        // Modern button functions
+                        function refreshChart() {
+                            // Clear existing chart
+                            if (powerOutagesChart) {
+                                powerOutagesChart.destroy();
+                                powerOutagesChart = null;
+                            }
+                            // Reload data
+                            loadPowerOutagesData();
+                        }
+
+                        function exportChart() {
+                            if (powerOutagesChart) {
+                                try {
+                                    // Get the canvas element
+                                    const canvas = document.getElementById('powerOutagesChart');
+                                    
+                                    // Create a temporary canvas with higher resolution for better quality
+                                    const tempCanvas = document.createElement('canvas');
+                                    const tempCtx = tempCanvas.getContext('2d');
+                                    const scale = 2; // Higher resolution
+                                    
+                                    tempCanvas.width = canvas.width * scale;
+                                    tempCanvas.height = canvas.height * scale;
+                                    
+                                    // Scale the context for higher resolution
+                                    tempCtx.scale(scale, scale);
+                                    
+                                    // Draw the original chart on the temporary canvas
+                                    tempCtx.drawImage(canvas, 0, 0);
+                                    
+                                    // Convert to PNG and download
+                                    const url = tempCanvas.toDataURL('image/png', 1.0);
+                                    const link = document.createElement('a');
+                                    link.download = `power-outages-chart-${new Date().toISOString().split('T')[0]}.png`;
+                                    link.href = url;
+                                    document.body.appendChild(link);
+                                    link.click();
+                                    document.body.removeChild(link);
+                                    
+                                    // Show success message
+                                    showExportSuccess();
+                                } catch (error) {
+                                    console.error('Error exporting chart:', error);
+                                    showExportError();
+                                }
+                            } else {
+                                showExportError();
+                            }
+                        }
+
+                        function fullscreenChart() {
+                            const chartContainer = document.getElementById('chartContainer');
+                            const exitBtn = document.getElementById('fullscreenExitBtn');
+                            
+                            if (!document.fullscreenElement) {
+                                // Enter fullscreen
+                                if (chartContainer.requestFullscreen) {
+                                    chartContainer.requestFullscreen();
+                                } else if (chartContainer.webkitRequestFullscreen) {
+                                    chartContainer.webkitRequestFullscreen();
+                                } else if (chartContainer.msRequestFullscreen) {
+                                    chartContainer.msRequestFullscreen();
+                                } else if (chartContainer.mozRequestFullScreen) {
+                                    chartContainer.mozRequestFullScreen();
+                                }
+                                
+                                // Add fullscreen styles
+                                chartContainer.style.height = '100vh';
+                                chartContainer.style.width = '100vw';
+                                chartContainer.style.position = 'fixed';
+                                chartContainer.style.top = '0';
+                                chartContainer.style.left = '0';
+                                chartContainer.style.zIndex = '9999';
+                                chartContainer.style.background = 'white';
+                                chartContainer.style.padding = '2rem';
+                                chartContainer.style.borderRadius = '0';
+                                
+                                // Show exit button
+                                exitBtn.style.display = 'block';
+                                
+                                // Resize chart for fullscreen
+                                setTimeout(() => {
+                                    if (powerOutagesChart) {
+                                        powerOutagesChart.resize();
+                                    }
+                                }, 100);
+                                
+                            } else {
+                                // Exit fullscreen
+                                if (document.exitFullscreen) {
+                                    document.exitFullscreen();
+                                } else if (document.webkitExitFullscreen) {
+                                    document.webkitExitFullscreen();
+                                } else if (document.msExitFullscreen) {
+                                    document.msExitFullscreen();
+                                } else if (document.mozCancelFullScreen) {
+                                    document.mozCancelFullScreen();
+                                }
+                                
+                                // Reset styles
+                                chartContainer.style.height = '400px';
+                                chartContainer.style.width = 'auto';
+                                chartContainer.style.position = 'relative';
+                                chartContainer.style.top = 'auto';
+                                chartContainer.style.left = 'auto';
+                                chartContainer.style.zIndex = 'auto';
+                                chartContainer.style.background = 'linear-gradient(135deg, #f8fafc 0%, #ffffff 100%)';
+                                chartContainer.style.padding = '20px';
+                                chartContainer.style.borderRadius = '12px';
+                                
+                                // Hide exit button
+                                exitBtn.style.display = 'none';
+                                
+                                // Resize chart back to normal
+                                setTimeout(() => {
+                                    if (powerOutagesChart) {
+                                        powerOutagesChart.resize();
+                                    }
+                                }, 100);
+                            }
+                        }
 
                         // Show export success message
                         function showExportSuccess() {
@@ -1242,7 +1672,7 @@
                         // Fetch dashboard statistics
                         async function fetchDashboardStats() {
                             try {
-                                const response = await fetch('{{ url('/dashboard/stats') }}', {
+                                const response = await fetch('/dashboard/stats', {
                                     headers: {
                                         'X-Requested-With': 'XMLHttpRequest',
                                         'Content-Type': 'application/json'
