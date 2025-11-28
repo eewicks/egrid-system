@@ -15,35 +15,23 @@ RUN apt-get update && apt-get install -y \
 
 WORKDIR /var/www/html
 
-# Copy project files
+# Copy project
 COPY . .
 
-# Install Composer
+# Install composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 # Install backend dependencies
 RUN composer install --no-dev --optimize-autoloader
 
-# Build Vite assets
+# Install frontend dependencies and build Vite prod assets
 RUN npm install
 RUN npm run build
 
-# VERY IMPORTANT: Ensure assets exist
-RUN mkdir -p public/assets
-RUN cp -r resources/assets/* public/assets/ 2>/dev/null || true
+# Fix permissions
+RUN chown -R www-data:www-data storage bootstrap/cache
 
-# LINK STORAGE (fix broken images, CSS, JS, assets)
-RUN php artisan storage:link || true
-
-# Cache configs for production
-RUN php artisan config:cache
-RUN php artisan route:cache
-RUN php artisan view:cache
-
-# Permissions
-RUN chown -R www-data:www-data storage bootstrap/cache public
-
-# Point Apache to Laravel public directory
+# Point Apache to public folder
 RUN sed -i 's#/var/www/html#/var/www/html/public#' /etc/apache2/sites-available/000-default.conf
 
 EXPOSE 8080
