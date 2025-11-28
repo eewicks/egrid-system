@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Models\StatusLog;
 use App\Models\Device;
+use App\Http\Controllers\TwilioSMSController;
+
 
 class AdminDashboardController extends Controller
 {
@@ -103,22 +105,38 @@ class AdminDashboardController extends Controller
 public function getDevices()
 {
     try {
-        // Timeout in seconds (1 minute)
-        $thresholdSec = 60;
+        $thresholdSec = 60; // 1 minute timeout
+        $alertCooldownSec = 300; // 5 minutes cooldown
 
         $now = \Carbon\Carbon::now();
 
         $devices = Device::orderBy('household_name')
             ->get()
-            ->map(function ($d) use ($now, $thresholdSec) {
+            ->map(function ($d) use ($now, $thresholdSec, $alertCooldownSec) {
 
                 $lastSeen = $d->last_seen;
-
-                // If null → definitely offline
-                $ageSecs = $lastSeen ? $now->diffInSeconds($lastSeen) : 999999;
-
-                // Online if last_seen is within 60 seconds
+                $ageSecs  = $lastSeen ? $now->diffInSeconds($lastSeen) : 999999;
                 $isOnline = $ageSecs <= $thresholdSec;
+
+                // -------------------------------
+                // 🔥 SMS TRIGGER WHEN OFFLINE
+                // -------------------------------
+                if (!$isOnline) {
+
+                    // If device was previously ONLINE → send SMS
+                    if (!$d->last_alert_sent || $now->diffInSeconds($d->last_alert_sent) > $alertCooldownSec) {
+
+                        $sms = new \App\Http\Controllers\TwilioSMSController();
+                        $sms->sendAlertSMS(
+                            $d->device_id,
+                            "⚠️ ALERT: Device {$d->device_id} ({$d->household_name}) is OFFLINE. No heartbeat for more than 60 seconds."
+                        );
+
+                        // Update last alert timestamp
+                        $d->last_alert_sent = $now;
+                        $d->save();
+                    }
+                }
 
                 return [
                     'id'                 => $d->id,

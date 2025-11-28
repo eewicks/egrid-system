@@ -91,6 +91,9 @@ Route::get('/admin/api/devices', [AdminDashboardController::class, 'getDevices']
     return response()->json(['success' => true]);
 });
 
+//SMS
+
+Route::get('/twilio-test', [\App\Http\Controllers\TwilioSMSController::class, 'testSMS']);
 
 
 
