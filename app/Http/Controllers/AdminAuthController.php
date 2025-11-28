@@ -2,7 +2,6 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 
 class AdminAuthController extends Controller
 {
@@ -17,20 +16,19 @@ class AdminAuthController extends Controller
             'email' => 'required|email',
             'password' => 'required',
         ]);
-         // Hardcoded admin credentials
+
+        // Hardcoded admin credentials
         $adminEmail = 'admin@soleco.com';
         $adminPassword = 'admin123';
 
-
-         if (
+        if (
             strtolower(trim($credentials['email'])) === strtolower($adminEmail) &&
             trim($credentials['password']) === $adminPassword
         ) {
             $request->session()->put('admin_logged_in', true);
-            return redirect()->route('admin.dashboardtest');
+            return redirect()->route('admin.dashboardtest'); // works now
         }
 
         return back()->with('error', 'Invalid credentials');
     }
 }
-
