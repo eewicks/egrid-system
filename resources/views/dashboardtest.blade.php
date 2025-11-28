@@ -9,12 +9,12 @@
     <title>Dashboard-Testing</title>
 
     <!-- Custom fonts -->
-    <link href="{{ url('assets/admin/vendor/fontawesome-free/css/all.min.css') }}" rel="stylesheet">
+    <link href="{{ asset('assets/admin/vendor/fontawesome-free/css/all.min.css') }}" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css?family=Nunito:200,400,600,700,900" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
 
     <!-- SB Admin CSS (FIXED PATH) -->
-    <link href="{{ url('assets/admin/css/sb-admin-2.min.css') }}" rel="stylesheet">
+    <link href="{{ asset('assets/admin/css/sb-admin-2.min.css') }}" rel="stylesheet">
 
     <style>
         /* Fixed Sidebar Styles */
@@ -996,16 +996,16 @@
 
 
     <!-- Bootstrap core JavaScript-->
-     <script src="{{ url('assets/admin/vendor/jquery/jquery.min.js') }}"></script>
+    <script src="{{ asset('assets/admin/vendor/jquery/jquery.min.js') }}"></script>
 
     <!-- Bootstrap -->
-    <script src="{{ url('assets/admin/vendor/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
+    <script src="{{ asset('assets/admin/vendor/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
 
     <!-- jQuery Easing -->
-    <script src="{{ url('assets/admin/vendor/jquery-easing/jquery.easing.min.js') }}"></script>
+    <script src="{{ asset('assets/admin/vendor/jquery-easing/jquery.easing.min.js') }}"></script>
 
     <!-- SB Admin JS -->
-    <script src="{{ url('assets/admin/js/sb-admin-2.min.js') }}"></script>
+    <script src="{{ asset('assets/admin/js/sb-admin-2.min.js') }}"></script>
 
 
     <!-- Page level plugins removed: Chart.js not used on this page -->
@@ -1172,419 +1172,15 @@
                             stopAutoRefresh();
                         });
 
-                        // Power Outages Chart Implementation
-                        let powerOutagesChart = null;
-                        let chartUpdateInterval = null;
-
-                        // Fetch power outages data
-                        async function fetchPowerOutages() {
-                            try {
-                                const response = await fetch('/api/power-outages', {
-                                    headers: {
-                                        'X-Requested-With': 'XMLHttpRequest',
-                                        'Content-Type': 'application/json'
-                                    }
-                                });
-
-                                if (!response.ok) {
-                                    throw new Error(`HTTP ${response.status}`);
-                                }
-
-                                const data = await response.json();
-
-                                if (data.success) {
-                                    return data;
-                                } else {
-                                    throw new Error(data.message || 'Failed to fetch data');
-                                }
-                            } catch (error) {
-                                console.error('Error fetching power outages:', error);
-                                throw error;
-                            }
-                        }
-
-                        // Create power outages chart
-                        function createPowerOutagesChart(labels, data) {
-                            const ctx = document.getElementById('powerOutagesChart').getContext('2d');
-                            
-                            if (powerOutagesChart) {
-                                powerOutagesChart.destroy();
-                            }
-
-                            // Create gradient for the chart
-                            const gradient = ctx.createLinearGradient(0, 0, 0, 400);
-                            gradient.addColorStop(0, 'rgba(0, 123, 255, 0.3)');
-                            gradient.addColorStop(0.5, 'rgba(0, 123, 255, 0.1)');
-                            gradient.addColorStop(1, 'rgba(0, 123, 255, 0.05)');
-
-                            powerOutagesChart = new Chart(ctx, {
-                                type: 'line',
-                                data: {
-                                    labels: labels,
-                                    datasets: [{
-                                        label: 'Power Outages',
-                                        data: data,
-                                        borderColor: '#007bff',
-                                        backgroundColor: gradient,
-                                        borderWidth: 4,
-                                        fill: true,
-                                        tension: 0.4,
-                                        pointBackgroundColor: '#ffffff',
-                                        pointBorderColor: '#007bff',
-                                        pointBorderWidth: 3,
-                                        pointRadius: 8,
-                                        pointHoverRadius: 12,
-                                        pointHoverBackgroundColor: '#0056b3',
-                                        pointHoverBorderColor: '#ffffff',
-                                        pointHoverBorderWidth: 4,
-                                        pointStyle: 'circle',
-                                        pointHitRadius: 20,
-                                        // Add shadow effect
-                                        shadowOffsetX: 0,
-                                        shadowOffsetY: 4,
-                                        shadowBlur: 8,
-                                        shadowColor: 'rgba(0, 123, 255, 0.3)'
-                                    }]
-                                },
-                                options: {
-                                    responsive: true,
-                                    maintainAspectRatio: false,
-                                    animation: {
-                                        duration: 2000,
-                                        easing: 'easeInOutQuart',
-                                        delay: (context) => {
-                                            return context.dataIndex * 100;
-                                        }
-                                    },
-                                    plugins: {
-                                        legend: {
-                                            display: false
-                                        },
-                                        tooltip: {
-                                            backgroundColor: 'rgba(15, 23, 42, 0.95)',
-                                            titleColor: '#ffffff',
-                                            bodyColor: '#ffffff',
-                                            borderColor: '#3b82f6',
-                                            borderWidth: 2,
-                                            cornerRadius: 12,
-                                            displayColors: false,
-                                            titleFont: {
-                                                size: 14,
-                                                weight: '600'
-                                            },
-                                            bodyFont: {
-                                                size: 13,
-                                                weight: '500'
-                                            },
-                                            padding: 12,
-                                            callbacks: {
-                                                title: function(context) {
-                                                    return `📊 ${context[0].label}`;
-                                                },
-                                                label: function(context) {
-                                                    return `Outages: ${context.parsed.y}`;
-                                                }
-                                            }
-                                        }
-                                    },
-                                    scales: {
-                                        x: {
-                                            grid: {
-                                                display: true,
-                                                color: 'rgba(226, 232, 240, 0.5)',
-                                                drawBorder: false,
-                                                drawOnChartArea: true,
-                                                drawTicks: false
-                                            },
-                                            ticks: {
-                                                color: '#64748b',
-                                                font: {
-                                                    size: 12,
-                                                    weight: '600',
-                                                    family: "'Inter', sans-serif"
-                                                },
-                                                padding: 8
-                                            },
-                                            border: {
-                                                display: false
-                                            }
-                                        },
-                                        y: {
-                                            beginAtZero: true,
-                                            grid: {
-                                                color: 'rgba(226, 232, 240, 0.5)',
-                                                drawBorder: false,
-                                                drawOnChartArea: true,
-                                                drawTicks: false
-                                            },
-                                            ticks: {
-                                                color: '#64748b',
-                                                font: {
-                                                    size: 12,
-                                                    weight: '600',
-                                                    family: "'Inter', sans-serif"
-                                                },
-                                                padding: 8,
-                                                stepSize: 1,
-                                                callback: function(value) {
-                                                    return value;
-                                                }
-                                            },
-                                            border: {
-                                                display: false
-                                            }
-                                        }
-                                    },
-                                    interaction: {
-                                        intersect: false,
-                                        mode: 'index'
-                                    },
-                                    elements: {
-                                        point: {
-                                            hoverBackgroundColor: '#1d4ed8',
-                                            hoverBorderColor: '#ffffff',
-                                            hoverBorderWidth: 4
-                                        },
-                                        line: {
-                                            borderCapStyle: 'round',
-                                            borderJoinStyle: 'round'
-                                        }
-                                    },
-                                    layout: {
-                                        padding: {
-                                            top: 20,
-                                            bottom: 20,
-                                            left: 20,
-                                            right: 20
-                                        }
-                                    }
-                                }
-                            });
-                        }
-
-                        // Update chart with new data
-                        function updatePowerOutagesChart(labels, data) {
-                            if (powerOutagesChart) {
-                                powerOutagesChart.data.labels = labels;
-                                powerOutagesChart.data.datasets[0].data = data;
-                                powerOutagesChart.update('active');
-                            }
-                        }
-
-                        // Show loading state
-                        function showChartLoading() {
-                            document.getElementById('chartLoading').style.display = 'block';
-                            document.getElementById('chartError').style.display = 'none';
-                            document.getElementById('chartContainer').style.display = 'none';
-                        }
-
-                        // Show error state
-                        function showChartError() {
-                            document.getElementById('chartLoading').style.display = 'none';
-                            document.getElementById('chartError').style.display = 'block';
-                            document.getElementById('chartContainer').style.display = 'none';
-                        }
-
-                        // Show chart
-                        function showChart() {
-                            document.getElementById('chartLoading').style.display = 'none';
-                            document.getElementById('chartError').style.display = 'none';
-                            document.getElementById('chartNoData').style.display = 'none';
-                            document.getElementById('chartContainer').style.display = 'block';
-                        }
-
-                        // Show no data message
-                        function showNoDataMessage() {
-                            document.getElementById('chartLoading').style.display = 'none';
-                            document.getElementById('chartError').style.display = 'none';
-                            document.getElementById('chartContainer').style.display = 'none';
-                            document.getElementById('chartNoData').style.display = 'block';
-                        }
-
-                        // Load power outages data
-                        async function loadPowerOutagesData() {
-                            showChartLoading();
-                            
-                            try {
-                                const data = await fetchPowerOutages();
-                                
-                                // Check if there's any data
-                                const hasData = data.data && data.data.some(value => value > 0);
-                                
-                                if (!hasData) {
-                                    showNoDataMessage();
-                                    return;
-                                }
-                                
-                                if (powerOutagesChart) {
-                                    updatePowerOutagesChart(data.labels, data.data);
-                                } else {
-                                    createPowerOutagesChart(data.labels, data.data);
-                                }
-                                
-                                showChart();
-                            } catch (error) {
-                                console.error('Error loading power outages data:', error);
-                                showChartError();
-                            }
-                        }
-
-                        // Start auto-refresh for power outages chart
-                        function startPowerOutagesAutoRefresh() {
-                            // Load initial data
-                            loadPowerOutagesData();
-                            
-                            // Set up auto-refresh every 10 seconds
-                            chartUpdateInterval = setInterval(loadPowerOutagesData, 10000);
-                        }
-
-                        // Stop auto-refresh
-                        function stopPowerOutagesAutoRefresh() {
-                            if (chartUpdateInterval) {
-                                clearInterval(chartUpdateInterval);
-                                chartUpdateInterval = null;
-                            }
-                        }
-
-                        // Initialize power outages chart when page loads
-                        document.addEventListener('DOMContentLoaded', function() {
-                            startPowerOutagesAutoRefresh();
-                        });
-
-                        // Clean up on page unload
-                        window.addEventListener('beforeunload', function() {
-                            stopPowerOutagesAutoRefresh();
-                        });
-
-                        // Add keyboard support for fullscreen
-                        document.addEventListener('keydown', function(event) {
-                            if (event.key === 'Escape' && document.fullscreenElement) {
-                                fullscreenChart();
-                            }
-                        });
-
-                        // Modern button functions
-                        function refreshChart() {
-                            // Clear existing chart
-                            if (powerOutagesChart) {
-                                powerOutagesChart.destroy();
-                                powerOutagesChart = null;
-                            }
-                            // Reload data
-                            loadPowerOutagesData();
-                        }
-
-                        function exportChart() {
-                            if (powerOutagesChart) {
-                                try {
-                                    // Get the canvas element
-                                    const canvas = document.getElementById('powerOutagesChart');
-                                    
-                                    // Create a temporary canvas with higher resolution for better quality
-                                    const tempCanvas = document.createElement('canvas');
-                                    const tempCtx = tempCanvas.getContext('2d');
-                                    const scale = 2; // Higher resolution
-                                    
-                                    tempCanvas.width = canvas.width * scale;
-                                    tempCanvas.height = canvas.height * scale;
-                                    
-                                    // Scale the context for higher resolution
-                                    tempCtx.scale(scale, scale);
-                                    
-                                    // Draw the original chart on the temporary canvas
-                                    tempCtx.drawImage(canvas, 0, 0);
-                                    
-                                    // Convert to PNG and download
-                                    const url = tempCanvas.toDataURL('image/png', 1.0);
-                                    const link = document.createElement('a');
-                                    link.download = `power-outages-chart-${new Date().toISOString().split('T')[0]}.png`;
-                                    link.href = url;
-                                    document.body.appendChild(link);
-                                    link.click();
-                                    document.body.removeChild(link);
-                                    
-                                    // Show success message
-                                    showExportSuccess();
-                                } catch (error) {
-                                    console.error('Error exporting chart:', error);
-                                    showExportError();
-                                }
-                            } else {
-                                showExportError();
-                            }
-                        }
-
-                        function fullscreenChart() {
-                            const chartContainer = document.getElementById('chartContainer');
-                            const exitBtn = document.getElementById('fullscreenExitBtn');
-                            
-                            if (!document.fullscreenElement) {
-                                // Enter fullscreen
-                                if (chartContainer.requestFullscreen) {
-                                    chartContainer.requestFullscreen();
-                                } else if (chartContainer.webkitRequestFullscreen) {
-                                    chartContainer.webkitRequestFullscreen();
-                                } else if (chartContainer.msRequestFullscreen) {
-                                    chartContainer.msRequestFullscreen();
-                                } else if (chartContainer.mozRequestFullScreen) {
-                                    chartContainer.mozRequestFullScreen();
-                                }
-                                
-                                // Add fullscreen styles
-                                chartContainer.style.height = '100vh';
-                                chartContainer.style.width = '100vw';
-                                chartContainer.style.position = 'fixed';
-                                chartContainer.style.top = '0';
-                                chartContainer.style.left = '0';
-                                chartContainer.style.zIndex = '9999';
-                                chartContainer.style.background = 'white';
-                                chartContainer.style.padding = '2rem';
-                                chartContainer.style.borderRadius = '0';
-                                
-                                // Show exit button
-                                exitBtn.style.display = 'block';
-                                
-                                // Resize chart for fullscreen
-                                setTimeout(() => {
-                                    if (powerOutagesChart) {
-                                        powerOutagesChart.resize();
-                                    }
-                                }, 100);
-                                
-                            } else {
-                                // Exit fullscreen
-                                if (document.exitFullscreen) {
-                                    document.exitFullscreen();
-                                } else if (document.webkitExitFullscreen) {
-                                    document.webkitExitFullscreen();
-                                } else if (document.msExitFullscreen) {
-                                    document.msExitFullscreen();
-                                } else if (document.mozCancelFullScreen) {
-                                    document.mozCancelFullScreen();
-                                }
-                                
-                                // Reset styles
-                                chartContainer.style.height = '400px';
-                                chartContainer.style.width = 'auto';
-                                chartContainer.style.position = 'relative';
-                                chartContainer.style.top = 'auto';
-                                chartContainer.style.left = 'auto';
-                                chartContainer.style.zIndex = 'auto';
-                                chartContainer.style.background = 'linear-gradient(135deg, #f8fafc 0%, #ffffff 100%)';
-                                chartContainer.style.padding = '20px';
-                                chartContainer.style.borderRadius = '12px';
-                                
-                                // Hide exit button
-                                exitBtn.style.display = 'none';
-                                
-                                // Resize chart back to normal
-                                setTimeout(() => {
-                                    if (powerOutagesChart) {
-                                        powerOutagesChart.resize();
-                                    }
-                                }, 100);
-                            }
-                        }
+                        /*
+                         * Power Outages Chart Implementation
+                         * NOTE: The corresponding chart HTML and Chart.js library
+                         * are not included on this page anymore. To avoid runtime
+                         * errors (which can break other dashboard scripts,
+                         * especially in production on Railway), the chart
+                         * functionality has been disabled. Re‑enable it only
+                         * after restoring the markup and Chart.js include.
+                         */
 
                         // Show export success message
                         function showExportSuccess() {
@@ -1646,7 +1242,7 @@
                         // Fetch dashboard statistics
                         async function fetchDashboardStats() {
                             try {
-                                const response = await fetch('/dashboard/stats', {
+                                const response = await fetch('{{ url('/dashboard/stats') }}', {
                                     headers: {
                                         'X-Requested-With': 'XMLHttpRequest',
                                         'Content-Type': 'application/json'
