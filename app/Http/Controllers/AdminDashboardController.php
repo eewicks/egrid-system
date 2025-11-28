@@ -100,35 +100,51 @@ class AdminDashboardController extends Controller
     }
 
     // JSON for devices with derived display status
-    public function getDevices()
-    {
-        try {
-            $devices = Device::select('id','device_id','household_name','barangay','status','last_seen')
-                ->orderBy('household_name')
-                ->get()
-                ->map(function($d){
-                    $displayStatus = $d->display_status; // This will call the accessor
-                    $statusBadgeClass = $displayStatus === 'Active' ? 'bg-success' : 'bg-danger';
-                    $statusIconClass = $displayStatus === 'Active' ? 'text-success' : 'text-danger';
-                    
-                    return [
-                        'id' => $d->id,
-                        'device_id' => $d->device_id,
-                        'household_name' => $d->household_name,
-                        'barangay' => $d->barangay,
-                        'status' => $d->status,
-                        'last_seen' => $d->last_seen,
-                        'display_status' => $displayStatus,
-                        'status_badge_class' => $statusBadgeClass,
-                        'status_icon_class' => $statusIconClass,
-                        'last_seen_human' => $d->last_seen ? $d->last_seen->diffForHumans() : 'Never',
-                    ];
-                });
-            return response()->json(['success' => true, 'devices' => $devices]);
-        } catch (\Throwable $e) {
-            return response()->json(['success' => false, 'message' => 'Server error', 'error' => $e->getMessage()], 500);
-        }
+   public function getDevices()
+{
+    try {
+        $thresholdMin = (int) cache(
+            'settings.heartbeat_timeout_minutes',
+            config('services.arduino.heartbeat_timeout_minutes', 5)
+        );
+
+        $now = \Carbon\Carbon::now();
+
+        $devices = Device::orderBy('household_name')
+            ->get()
+            ->map(function ($d) use ($now, $thresholdMin) {
+
+                // Calculate offline/online based on last_seen time difference
+                $lastSeen     = $d->last_seen;
+                $ageSecs      = $lastSeen ? $now->diffInSeconds($lastSeen) : null;
+                $fresh        = $lastSeen ? $ageSecs <= ($thresholdMin * 60) : false;
+
+                // Derived status
+                $displayStatus = $fresh ? 'Active' : 'Inactive';
+                $statusBadgeClass = $fresh ? 'bg-success' : 'bg-danger';
+                $statusIconClass  = $fresh ? 'text-success' : 'text-danger';
+
+                return [
+                    'id' => $d->id,
+                    'device_id' => $d->device_id,
+                    'household_name' => $d->household_name,
+                    'barangay' => $d->barangay,
+                    'status' => $fresh ? 'ON' : 'OFF',
+                    'last_seen' => $lastSeen,
+                    'display_status' => $displayStatus,
+                    'status_badge_class' => $statusBadgeClass,
+                    'status_icon_class' => $statusIconClass,
+                    'last_seen_human' => $lastSeen ? $lastSeen->diffForHumans() : 'Never',
+                ];
+            });
+
+        return response()->json(['success' => true, 'devices' => $devices]);
+
+    } catch (\Throwable $e) {
+        return response()->json(['success' => false, 'message' => 'Server error', 'error' => $e->getMessage()], 500);
     }
+}
+
 
 
 }
