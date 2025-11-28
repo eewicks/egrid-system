@@ -1,22 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
 
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="description" content="">
-    <meta name="author" content="">
 
     <title>Dashboard-Testing</title>
 
-    <!-- Custom fonts for this template-->
-    <link href="{{asset('assets/admin/vendor/fontawesome-free/css/all.min.css')}}" rel="stylesheet" type="text/css">
-    <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
+    <!-- Custom fonts -->
+    <link href="{{ url('assets/admin/vendor/fontawesome-free/css/all.min.css') }}" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Nunito:200,400,600,700,900" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
-    <!-- Custom styles for this template-->
-    <link href="{{asset('assets/admin/css/sb-admin-2.min.css')}}" rel="stylesheet">
+
+    <!-- SB Admin CSS (FIXED PATH) -->
+    <link href="{{ url('assets/admin/css/sb-admin-2.min.css') }}" rel="stylesheet">
 
     <style>
         /* Fixed Sidebar Styles */
@@ -705,104 +703,76 @@
     <!-- Page Wrapper -->
     <div id="wrapper">
 
-        <!-- Enhanced Modern Dark Sidebar -->
-        <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar" style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f172a 100%); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);">
+        <!-- Sidebar -->
+        <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
 
-            <!-- Enhanced Orange Dark Sidebar Brand -->
-            <a class="sidebar-brand d-flex align-items-center justify-content-between" href="/dashboardtest" style="padding: 24px 24px; background: rgba(255, 255, 255, 0.05); border-bottom: 1px solid rgba(255, 255, 255, 0.1); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border-radius: 0 0 16px 16px; margin: 0 12px 16px 12px;">
-                <div class="sidebar-brand-icon d-flex align-items-center">
-                    <div style="width: 48px; height: 48px; background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); border-radius: 14px; display: flex; align-items: center; justify-content: center; margin-right: 12px; box-shadow: 0 8px 25px rgba(249, 115, 22, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2); border: 1px solid rgba(255, 255, 255, 0.1);">
-                        <i class="fas fa-desktop" style="color: white; font-size: 22px; text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);"></i>
+            <a class="sidebar-brand d-flex align-items-center justify-content-between" href="/dashboardtest">
+                <div class="sidebar-brand-icon">
+                    <div style="width: 48px; height: 48px; background: linear-gradient(135deg, #f97316, #ea580c); 
+                    border-radius: 14px; display: flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-desktop" style="color: white; font-size: 22px;"></i>
                     </div>
-                    <div style="color: white; font-weight: 800; font-size: 20px; font-family: 'Inter', sans-serif; letter-spacing: 0.5px; text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);">EGMS</div>
                 </div>
+                <div class="sidebar-brand-text mx-3">EGMS</div>
             </a>
 
             <!-- Enhanced Dark Divider -->
-            <hr class="sidebar-divider my-0" style="border-color: rgba(255, 255, 255, 0.08); margin: 0 20px; border-width: 1px;">
+             <hr class="sidebar-divider my-0">
 
-            <!-- Enhanced Orange Nav Item - Dashboard -->
-            <li class="nav-item active" style="margin: 8px 16px;">
-                <a class="nav-link" href="#" style="padding: 16px 20px; border-radius: 8px; background: rgba(255, 255, 255, 0.05); border: none; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: none;">
-                    <i class="fas fa-fw fa-tachometer-alt" style="font-size: 18px; margin-right: 14px; color: #f97316; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);"></i>
-                    <span style="font-weight: 600; font-size: 14px; color: white; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);">Dashboard</span>
+            <li class="nav-item active">
+                <a class="nav-link" href="#">
+                    <i class="fas fa-fw fa-tachometer-alt" style="color:#f97316;"></i>
+                    <span>Dashboard</span>
                 </a>
             </li>
 
             <!-- Enhanced Dark Divider -->
-            <hr class="sidebar-divider" style="border-color: rgba(255, 255, 255, 0.08); margin: 20px 20px; border-width: 1px;">
-
-            <!-- Enhanced Orange Navigation Items -->
-            <li class="nav-item" style="margin: 6px 16px;">
-                <a class="nav-link" href="{{ route('devices.index') }}" style="padding: 16px 20px; border-radius: 8px; background: transparent; border: none; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); color: rgba(255, 255, 255, 0.9); font-weight: 500;">
-                    <i class="fas fa-network-wired" style="font-size: 18px; margin-right: 14px; color: rgba(255, 255, 255, 0.7); text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);"></i>
-                    <span style="font-size: 14px; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);">Manage Devices</span>
+          <li class="nav-item">
+                <a class="nav-link" href="{{ route('analytics.index') }}">
+                    <i class="fas fa-chart-area"></i>
+                    <span>Analytics</span>
                 </a>
             </li>
 
-            <li class="nav-item" style="margin: 6px 16px;">
-                <a class="nav-link" href="{{ route('analytics.index') }}" style="padding: 16px 20px; border-radius: 8px; background: transparent; border: none; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); color: rgba(255, 255, 255, 0.9); font-weight: 500;">
-                    <i class="fas fa-fw fa-chart-area" style="font-size: 18px; margin-right: 14px; color: rgba(255, 255, 255, 0.7); text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);"></i>
-                    <span style="font-size: 14px; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);">Analytics</span>
+            <li class="nav-item">
+                <a class="nav-link" href="{{ route('settings.alerts') }}">
+                    <i class="fas fa-cog"></i>
+                    <span>Alert Settings</span>
                 </a>
             </li>
 
-            <li class="nav-item" style="margin: 6px 16px;">
-                <a class="nav-link" href="{{ route('settings.alerts') }}" style="padding: 16px 20px; border-radius: 8px; background: transparent; border: none; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); color: rgba(255, 255, 255, 0.9); font-weight: 500;">
-                    <i class="fas fa-fw fa-cog" style="font-size: 18px; margin-right: 14px; color: rgba(255, 255, 255, 0.7); text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);"></i>
-                    <span style="font-size: 14px; color: #ffffff !important; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3); font-weight: 500;">Alert Settings</span>
-                </a>
-            </li>
-
-           
-
-            <!-- Enhanced Dark Divider -->
-            <hr class="sidebar-divider d-none d-md-block" style="border-color: rgba(255, 255, 255, 0.08); margin: 24px 20px; border-width: 1px;">
+            <hr class="sidebar-divider d-none d-md-block">
 
         </ul>
         <!-- End of Sidebar -->
 
         <!-- Content Wrapper -->
-        <div id="content-wrapper" class="d-flex flex-column" style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%); min-height: 100vh;">
+       <div id="content-wrapper" class="d-flex flex-column">
 
             <!-- Main Content -->
-            <div id="content" style="background: transparent;">
+            <div id="content">
 
                 <!-- Topbar -->
-                <nav class="navbar navbar-expand navbar-light topbar mb-4 static-top shadow" style="background: linear-gradient(135deg, #1e293b 0%, #334155 100%); border-bottom: 1px solid rgba(255, 255, 255, 0.1); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);">
+                <nav class="navbar navbar-expand navbar-light topbar mb-4 static-top shadow">
 
-
-                  
                     <ul class="navbar-nav ml-auto">
-
-
-                        <!-- Nav Item - Alerts -->
-                  
-
                         <div class="topbar-divider d-none d-sm-block"></div>
 
-                        <!-- Nav Item - User Information -->
                         <li class="nav-item dropdown no-arrow">
-                            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
-                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="color: white;">
-                                <span class="mr-2 d-none d-lg-inline small" style="color: rgba(255, 255, 255, 0.9);">Administrator</span>
+                            <a class="nav-link dropdown-toggle" href="#" data-toggle="dropdown" style="color:white;">
+                                <span class="mr-2 d-none d-lg-inline text-white small">Administrator</span>
                                 <img class="img-profile rounded-circle"
-                                    src="{{asset('assets/admin/img/admin.png')}}" style="border: 2px solid rgba(255, 255, 255, 0.2);">
+                                     src="{{ url('assets/admin/img/admin.png') }}">
                             </a>
-                            <!-- Dropdown - User Information -->
-                            <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in"
-                                aria-labelledby="userDropdown" style="background: linear-gradient(135deg, #1e293b 0%, #334155 100%); border: 1px solid rgba(255, 255, 255, 0.1); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);">
-                                
-                               
-                                <a class="dropdown-item" href="#" data-toggle="modal" data-target="#logoutModal" style="color: rgba(255, 255, 255, 0.9); background: transparent; transition: all 0.3s ease;">
-                                    <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2" style="color: rgba(255, 255, 255, 0.7);"></i>
+
+                            <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in">
+                                <a class="dropdown-item" href="#" data-toggle="modal" data-target="#logoutModal">
+                                    <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2"></i>
                                     Logout
                                 </a>
                             </div>
                         </li>
-
                     </ul>
-
                 </nav>
                 <!-- End of Topbar -->
 
@@ -1001,38 +971,42 @@
         <i class="fas fa-angle-up"></i>
     </a>
 
-    <!-- Logout Modal-->
-    <div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
-        aria-hidden="true">
-        <div class="modal-dialog" role="document">
+    <!-- Logout Modal -->
+    <div class="modal fade" id="logoutModal" tabindex="-1">
+        <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel">Ready to Leave?</h5>
-                    <button class="close" type="button" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">×</span>
-                    </button>
+                    <h5 class="modal-title">Ready to Leave?</h5>
+                    <button class="close" type="button" data-dismiss="modal">×</button>
                 </div>
-                <div class="modal-body">Select "Logout" below if you are ready to end your current session.</div>
+                <div class="modal-body">Select "Logout" below to end your session.</div>
+
                 <div class="modal-footer">
                     <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
-                    <form method="POST" action="{{ route('admin.logout') }}" style="display: inline;">
+
+                    <form method="POST" action="{{ route('admin.logout') }}">
                         @csrf
                         <button type="submit" class="btn btn-primary">Logout</button>
                     </form>
                 </div>
+
             </div>
         </div>
     </div>
 
+
     <!-- Bootstrap core JavaScript-->
-    <script src="{{asset('assets/admin/vendor/jquery/jquery.min.js')}}"></script>
-    <script src="{{asset('assets/admin/vendor/bootstrap/js/bootstrap.bundle.min.js')}}"></script>
+     <script src="{{ url('assets/admin/vendor/jquery/jquery.min.js') }}"></script>
 
-    <!-- Core plugin JavaScript-->
-    <script src="{{asset('assets/admin/vendor/jquery-easing/jquery.easing.min.js')}}"></script>
+    <!-- Bootstrap -->
+    <script src="{{ url('assets/admin/vendor/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
 
-    <!-- Custom scripts for all pages-->
-    <script src="{{asset('assets/admin/js/sb-admin-2.min.js')}}"></script>
+    <!-- jQuery Easing -->
+    <script src="{{ url('assets/admin/vendor/jquery-easing/jquery.easing.min.js') }}"></script>
+
+    <!-- SB Admin JS -->
+    <script src="{{ url('assets/admin/js/sb-admin-2.min.js') }}"></script>
+
 
     <!-- Page level plugins removed: Chart.js not used on this page -->
 
