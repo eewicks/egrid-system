@@ -54,11 +54,9 @@ Route::post('/admin/logout', function(Request $request) {
 */
 Route::middleware('web')->group(function () {
 
-    // Dashboard (MAIN)
     Route::get('/admin/dashboard', [AdminDashboardController::class, 'index'])
         ->name('admin.dashboardtest');
 
-    // Dashboard API
     Route::get('/admin/api/stats', [AdminDashboardController::class, 'stats'])
         ->name('admin.api.stats');
 

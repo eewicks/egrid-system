@@ -1088,82 +1088,68 @@
                             return 'Never';
                         }
 
-                        async function loadDevices() {
-                            const loadingState = document.getElementById('deviceLoadingState');
-                            const errorState = document.getElementById('deviceErrorState');
-                            const cardsContainer = document.getElementById('deviceCardsContainer');
-                            const emptyState = document.getElementById('deviceEmptyState');
-                            const deviceCount = document.getElementById('deviceCount');
-                            const lastUpdate = document.getElementById('lastUpdate');
-                            
-                            try {
-                                // Show loading state
-                                loadingState.style.display = 'block';
-                                errorState.style.display = 'none';
-                                cardsContainer.style.display = 'none';
-                                emptyState.style.display = 'none';
+                       async function loadDevices() {
+    const loadingState = document.getElementById('deviceLoadingState');
+    const errorState   = document.getElementById('deviceErrorState');
+    const cardsContainer = document.getElementById('deviceCardsContainer');
+    const emptyState   = document.getElementById('deviceEmptyState');
+    const deviceCount  = document.getElementById('deviceCount');
+    const lastUpdate   = document.getElementById('lastUpdate');
 
-                                const data = await fetchJSON('{{ route("api.devices") }}');
-                                
-                                if (!data.success) {
-                                    throw new Error(data.message || 'Failed to fetch devices');
-                                }
+    try {
+        loadingState.style.display = 'block';
+        errorState.style.display = 'none';
+        cardsContainer.style.display = 'none';
+        emptyState.style.display = 'none';
 
-                                const devices = data.devices || [];
-                                
-                                // Update device count
-                                deviceCount.textContent = `${devices.length} device${devices.length !== 1 ? 's' : ''}`;
-                                
-                                if (devices.length === 0) {
-                                    loadingState.style.display = 'none';
-                                    emptyState.style.display = 'block';
-                                } else {
-                                    // Create device cards
-                                    const deviceCards = devices.map(device => `
-                                        <div class="device-card compact">
-                                            <div class="device-field device-name">
-                                                ${formatDeviceName(device)}
-                                            </div>
-                                            <div class="device-field device-id">
-                                                <span>ID: ${device.device_id || 'N/A'}</span>
-                                            </div>
-                                            <div class="device-field device-location">
-                                                <i class="fas fa-map-marker-alt"></i>
-                                                <span>${formatDeviceLocation(device)}</span>
-                                                <span class="device-meta-inline">
-                                                    <span class="meta-divider">•</span>
-                                                    <span class="device-last-seen">
-                                                        <i class="fas fa-clock"></i>
-                                                        ${formatLastSeen(device)}
-                                                    </span>
-                                                </span>
-                                            </div>
-                                            <div class="device-field status">
-                                                ${getStatusBadge(device)}
-                                            </div>
-                                        </div>
-                                    `).join('');
+        const data = await fetchJSON('{{ route("admin.api.devices") }}');
 
-                                    cardsContainer.innerHTML = deviceCards;
-                                    
-                                    // Show cards container
-                                    loadingState.style.display = 'none';
-                                    cardsContainer.style.display = 'block';
-                                }
+        if (!data.success) {
+            throw new Error('Invalid response');
+        }
 
-                                // Update last update time
-                                lastUpdate.textContent = new Date().toLocaleTimeString();
-                                
-                            } catch (error) {
-                                console.error('Device loading error:', error);
-                                
-                                // Show error state
-                                loadingState.style.display = 'none';
-                                errorState.style.display = 'block';
-                                cardsContainer.style.display = 'none';
-                                emptyState.style.display = 'none';
-                            }
-                        }
+        const devices = data.devices || [];
+
+        deviceCount.textContent = `${devices.length} device${devices.length !== 1 ? 's' : ''}`;
+
+        if (devices.length === 0) {
+            loadingState.style.display = 'none';
+            emptyState.style.display = 'block';
+            return;
+        }
+
+        cardsContainer.innerHTML = devices.map(device => `
+            <div class="device-card compact">
+                <div class="device-field device-name">${device.household_name}</div>
+                <div class="device-field device-id">ID: ${device.device_id}</div>
+                <div class="device-field device-location">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <span>${device.barangay}</span>
+                    <span class="device-meta-inline">
+                        <span class="meta-divider">•</span>
+                        <span class="device-last-seen">
+                            <i class="fas fa-clock"></i>
+                            ${device.last_seen_human}
+                        </span>
+                    </span>
+                </div>
+                <div class="device-field status">
+                    ${getStatusBadge(device)}
+                </div>
+            </div>
+        `).join('');
+
+        loadingState.style.display = 'none';
+        cardsContainer.style.display = 'block';
+        lastUpdate.textContent = new Date().toLocaleTimeString();
+
+    } catch (error) {
+        console.error(error);
+        loadingState.style.display = 'none';
+        errorState.style.display = 'block';
+    }
+}
+
 
                         // Auto-refresh functionality
                         let refreshInterval;
