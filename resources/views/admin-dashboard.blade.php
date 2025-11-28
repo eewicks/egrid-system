@@ -5,265 +5,176 @@
     <title>SOLECO | Admin Dashboard</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <!-- BOOTSTRAP + ICONS + FONT -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- TAILWIND CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
 
-    <!-- FIXED & IMPROVED STYLE -->
+    <!-- HEROICONS -->
+    <script src="https://unpkg.com/heroicons@2.0.18/dist/heroicons.js"></script>
+
     <style>
-        body { 
-            background: #f4f7fb; 
-            font-family: 'Roboto', sans-serif;
-        }
-
-        /* NAVBAR */
-        .navbar {
-            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-        }
-        .navbar-brand { 
-            font-weight: 800; 
-            letter-spacing: -0.5px;
-        }
-        .navbar-logo {
-            width: 45px;
-            height: 45px;
-            object-fit: contain;
-        }
-
-        /* METRIC CARDS */
-        .card-metric { 
-            border: none; 
-            border-radius: 14px; 
-            box-shadow: 0 8px 20px rgba(0,0,0,.06);
-            transition: all .2s ease;
-            background: #ffffff;
-        }
-        .card-metric:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 12px 24px rgba(0,0,0,.08);
-        }
-
-        .metric-badge { 
-            font-size: .85rem; 
-            color: #888;
-        }
-
-        /* STATUS PILLS */
-        .status-pill { 
-            padding: .35rem .7rem; 
-            border-radius: 999px; 
-            font-weight: 600; 
-            font-size: 0.9rem;
-        }
-        .pill-on  { background:#d6f5d8; color:#1e7d32; }
-        .pill-off { background:#ffd7dd; color:#b71c1c; }
-
-        /* TABLE */
-        .table thead th { 
-            background:#eef2f7; 
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            font-size: 0.8rem;
-        }
-        .table tbody tr:hover {
-            background: #f8fafc;
-        }
-
-        /* FOOTER */
-        .footer { 
-            color:#6c757d; 
-            font-size: 0.9rem; 
-            margin-top: 40px;
-        }
-
-        /* MOBILE FIXES */
-        @media (max-width: 768px) {
-            .navbar-brand { font-size: 1.1rem; }
-            .card-metric { margin-bottom: 12px; }
-            h5 { font-size: 1rem; }
-        }
+        body { font-family: 'Inter', sans-serif; }
     </style>
 </head>
-<body>
+<body class="bg-gray-100">
 
 <!-- NAVBAR -->
-<nav class="navbar navbar-expand-lg bg-white border-bottom sticky-top">
-    <div class="container">
-        <a class="navbar-brand text-primary fw-bold d-flex align-items-center" href="{{ route('admin.dashboardtest') }}">
-            <img src="{{ asset('photos/final.png') }}" alt="Logo" class="navbar-logo me-2">
-            MONITORING DASHBOARD
+<header class="bg-white shadow sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+        
+        <!-- Logo + Name -->
+        <a href="{{ route('admin.dashboardtest') }}" class="flex items-center space-x-3">
+            <img src="{{ asset('photos/final.png') }}" class="h-12 w-12 object-contain">
+            <h1 class="text-xl font-bold text-blue-600 tracking-tight">MONITORING DASHBOARD</h1>
         </a>
 
-        <div class="ms-auto d-flex align-items-center gap-2">
-            <a href="{{ route('devices.index') }}" class="btn btn-outline-secondary btn-sm">
-                <i class="bi bi-gear me-1"></i> Manage Devices
+        <!-- Right Buttons -->
+        <div class="flex items-center space-x-3">
+            <a href="{{ route('devices.index') }}" 
+               class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-200">
+                ⚙ Manage Devices
             </a>
-            
-            <form action="{{ route('admin.logout') }}" method="POST" class="d-inline">
+
+            <form action="{{ route('admin.logout') }}" method="POST">
                 @csrf
-                <button class="btn btn-danger btn-sm">
-                    <i class="bi bi-box-arrow-right me-1"></i> Logout
+                <button class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-md">
+                    Logout
                 </button>
             </form>
         </div>
+
     </div>
-</nav>
+</header>
 
-<!-- MAIN DASHBOARD -->
-<main class="container py-4">
 
-    <!-- METRICS -->
-    <div class="row g-3">
-        <div class="col-md-3">
-            <div class="card card-metric">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <div class="text-muted">Total Devices</div>
-                            <div class="h3 fw-bold" id="m-total">—</div>
-                        </div>
-                        <i class="bi bi-hdd-network fs-2 text-primary"></i>
-                    </div>
-                    <span class="metric-badge">Latest status per device</span>
+<!-- MAIN -->
+<main class="max-w-7xl mx-auto px-6 py-6">
+
+    <!-- METRICS GRID -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+
+        <!-- Total Devices -->
+        <div class="bg-white p-5 rounded-xl shadow hover:shadow-lg transition">
+            <div class="flex justify-between items-center">
+                <div>
+                    <p class="text-gray-500">Total Devices</p>
+                    <p id="m-total" class="text-3xl font-bold">—</p>
                 </div>
+                <span class="text-blue-600 text-4xl">🖥️</span>
             </div>
         </div>
 
-        <div class="col-md-3">
-            <div class="card card-metric">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <div class="text-muted">Online (ON)</div>
-                            <div class="h3 fw-bold text-success" id="m-on">—</div>
-                        </div>
-                        <i class="bi bi-check-circle fs-2 text-success"></i>
-                    </div>
-                    <span class="metric-badge">Currently reporting</span>
+        <!-- Online -->
+        <div class="bg-white p-5 rounded-xl shadow hover:shadow-lg transition">
+            <div class="flex justify-between items-center">
+                <div>
+                    <p class="text-gray-500">Online (ON)</p>
+                    <p id="m-on" class="text-3xl font-bold text-green-600">—</p>
                 </div>
+                <span class="text-green-600 text-4xl">✔️</span>
             </div>
         </div>
 
-        <div class="col-md-3">
-            <div class="card card-metric">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <div class="text-muted">Offline (OFF)</div>
-                            <div class="h3 fw-bold text-danger" id="m-off">—</div>
-                        </div>
-                        <i class="bi bi-exclamation-octagon fs-2 text-danger"></i>
-                    </div>
-                    <span class="metric-badge">Needs attention</span>
+        <!-- Offline -->
+        <div class="bg-white p-5 rounded-xl shadow hover:shadow-lg transition">
+            <div class="flex justify-between items-center">
+                <div>
+                    <p class="text-gray-500">Offline (OFF)</p>
+                    <p id="m-off" class="text-3xl font-bold text-red-600">—</p>
                 </div>
+                <span class="text-red-600 text-4xl">⚠️</span>
             </div>
         </div>
 
-        <div class="col-md-3">
-            <div class="card card-metric">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <div class="text-muted">Outages Today</div>
-                            <div class="h3 fw-bold" id="m-today">—</div>
-                        </div>
-                        <i class="bi bi-calendar-event fs-2 text-secondary"></i>
-                    </div>
-                    <span class="metric-badge">OFF events (24h)</span>
+        <!-- Outages Today -->
+        <div class="bg-white p-5 rounded-xl shadow hover:shadow-lg transition">
+            <div class="flex justify-between items-center">
+                <div>
+                    <p class="text-gray-500">Outages Today</p>
+                    <p id="m-today" class="text-3xl font-bold text-gray-800">—</p>
                 </div>
+                <span class="text-gray-400 text-4xl">📅</span>
             </div>
         </div>
+
     </div>
 
     <!-- CHARTS -->
-    <div class="row g-3 mt-1">
-        <div class="col-lg-7">
-            <div class="card card-metric h-100">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between">
-                        <h5 class="mb-0">Outages (last 12 hours)</h5>
-                        <span class="text-muted small">Auto-updating</span>
-                    </div>
-                    <canvas id="lineChart" height="120"></canvas>
-                </div>
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
+
+        <!-- Line Chart -->
+        <div class="bg-white p-6 rounded-xl shadow col-span-2">
+            <div class="flex justify-between items-center mb-2">
+                <h2 class="text-lg font-semibold">Outages (Last 12 Hours)</h2>
+                <span class="text-sm text-gray-500">Auto-update</span>
             </div>
+            <canvas id="lineChart" height="150"></canvas>
         </div>
 
-        <div class="col-lg-5">
-            <div class="card card-metric h-100">
-                <div class="card-body">
-                    <h5>Current Status</h5>
-                    <canvas id="donutChart" height="120"></canvas>
-                </div>
-            </div>
+        <!-- Donut -->
+        <div class="bg-white p-6 rounded-xl shadow">
+            <h2 class="text-lg font-semibold mb-2">Current Status</h2>
+            <canvas id="donutChart" height="150"></canvas>
         </div>
+
     </div>
 
-    <!-- LOGS -->
-    <div class="card card-metric mt-3">
-        <div class="card-body">
-            <div class="d-flex justify-content-between mb-2">
-                <h5 class="mb-0">Latest Activity</h5>
-                <span class="text-muted small">Last 20 records</span>
-            </div>
-            <div class="table-responsive">
-                <table class="table align-middle">
-                    <thead>
-                        <tr>
-                            <th>Device ID</th>
-                            <th>Status</th>
-                            <th>Timestamp</th>
-                        </tr>
-                    </thead>
-                    <tbody id="logsBody">
-                        <tr><td colspan="3" class="text-center text-muted">Loading…</td></tr>
-                    </tbody>
-                </table>
-            </div>
+
+    <!-- Latest Logs -->
+    <div class="bg-white p-6 rounded-xl shadow mt-6">
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-lg font-semibold">Latest Activity</h2>
+            <span class="text-sm text-gray-500">Last 20 records</span>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="w-full border-collapse">
+                <thead>
+                    <tr class="bg-gray-100 text-left text-gray-600 uppercase text-sm">
+                        <th class="px-4 py-2">Device ID</th>
+                        <th class="px-4 py-2">Status</th>
+                        <th class="px-4 py-2">Timestamp</th>
+                    </tr>
+                </thead>
+                <tbody id="logsBody" class="text-gray-700 text-sm">
+                    <tr><td colspan="3" class="text-center py-3">Loading…</td></tr>
+                </tbody>
+            </table>
         </div>
     </div>
 
 </main>
 
+
 <!-- FOOTER -->
-<footer class="container py-4 footer text-center">
-    &copy; {{ date('Y') }} Southern Leyte Electric Cooperative (SOLECO). All Rights Reserved.
+<footer class="text-center text-gray-500 text-sm py-6">
+    &copy; {{ date('Y') }} SOLECO. All Rights Reserved.
 </footer>
 
-<!-- JS -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+<!-- SCRIPTS -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
 let lineChart, donutChart;
 
 async function fetchJSON(url){
-    const r = await fetch(url, {
-        headers: { 'X-Requested-With': 'XMLHttpRequest' }
-    });
+    const r = await fetch(url);
     return r.json();
 }
 
-function fmtDate(dt){
-    return new Date(dt).toLocaleString();
-}
+function fmtDate(dt){ return new Date(dt).toLocaleString(); }
 
 function ensureCharts(){
-    const lc = document.getElementById('lineChart').getContext('2d');
-    const dc = document.getElementById('donutChart').getContext('2d');
-
     if(!lineChart){
-        lineChart = new Chart(lc, {
+        lineChart = new Chart(document.getElementById('lineChart'), {
             type: 'line',
-            data: { labels: [], datasets: [{ label: 'OFF events', data: [], borderColor:'#c62828', tension:.3 }] },
+            data: { labels: [], datasets: [{ label:'OFF Events', data:[], borderColor:'#dc2626', tension:.3 }] }
         });
     }
-
     if(!donutChart){
-        donutChart = new Chart(dc, {
-            type: 'doughnut',
-            data: { labels: ['ON','OFF'], datasets: [{ data: [0,0], backgroundColor:['#2e7d32','#c62828'] }] },
+        donutChart = new Chart(document.getElementById('donutChart'), {
+            type:'doughnut',
+            data:{ labels:['ON','OFF'], datasets:[{ data:[0,0], backgroundColor:['#16a34a','#dc2626'] }] }
         });
     }
 }
@@ -272,8 +183,8 @@ async function loadStats(){
     const data = await fetchJSON('{{ route("admin.api.stats") }}');
 
     document.getElementById('m-total').textContent = data.totals.devices;
-    document.getElementById('m-on').textContent    = data.totals.on;
-    document.getElementById('m-off').textContent   = data.totals.off;
+    document.getElementById('m-on').textContent = data.totals.on;
+    document.getElementById('m-off').textContent = data.totals.off;
     document.getElementById('m-today').textContent = data.totals.todayOutages;
 
     ensureCharts();
@@ -288,25 +199,24 @@ async function loadStats(){
 
 async function loadLogs(){
     const logs = await fetchJSON('{{ route("admin.api.logs") }}');
-    const tbody = document.getElementById('logsBody');
+    const tbody = document.getElementById("logsBody");
 
     if(!logs.length){
-        tbody.innerHTML = `<tr><td colspan="3" class="text-center text-muted">No data</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="3" class="text-center py-3 text-gray-400">No data</td></tr>`;
         return;
     }
 
-    tbody.innerHTML = logs.map(l => {
-        const pill = l.status === "ON"
-            ? `<span class="status-pill pill-on">ON</span>`
-            : `<span class="status-pill pill-off">OFF</span>`;
-
-        return `
-        <tr>
-            <td>${l.device_id}</td>
-            <td>${pill}</td>
-            <td>${fmtDate(l.created_at)}</td>
-        </tr>`;
-    }).join('');
+    tbody.innerHTML = logs.map(l => `
+        <tr class="hover:bg-gray-50">
+            <td class="px-4 py-2">${l.device_id}</td>
+            <td class="px-4 py-2">
+                ${l.status === "ON"
+                    ? `<span class="px-3 py-1 bg-green-200 text-green-700 rounded-full">ON</span>`
+                    : `<span class="px-3 py-1 bg-red-200 text-red-700 rounded-full">OFF</span>`}
+            </td>
+            <td class="px-4 py-2">${fmtDate(l.created_at)}</td>
+        </tr>
+    `).join("");
 }
 
 async function refreshAll(){
