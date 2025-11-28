@@ -6,18 +6,14 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="description" content="">
-    <meta name="author" content="">
 
-    <title>Dashboard-Testing</title>
+    <title>Dashboard</title>
 
-    <!-- Custom fonts for this template-->
-    <link href="{{ url('/assets/admin/vendor/fontawesome-free/css/all.min.css') }}" rel="stylesheet" type="text/css">
+    <!-- FIXED ASSET PATHS -->
+    <link href="{{ asset('assets/admin/vendor/fontawesome-free/css/all.min.css') }}" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css?family=Nunito:200,300,400,600,700,800,900" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
-
-    <!-- SB Admin 2 CSS -->
-    <link href="{{ url('/assets/admin/css/sb-admin-2.min.css') }}" rel="stylesheet">
+    <link href="{{ asset('assets/admin/css/sb-admin-2.min.css') }}" rel="stylesheet">
 
     <style>
         /* Fixed Sidebar Styles */
@@ -174,64 +170,9 @@
 
 </head>
 
-<body id="page-top">
-
-    <div id="wrapper">
-
-        <!-- Sidebar -->
-        <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion"
-            id="accordionSidebar"
-            style="background: linear-gradient(135deg,#1a1a2e,#16213e,#0f172a);">
-
-            <!-- BRAND -->
-            <a class="sidebar-brand d-flex align-items-center justify-content-between" href="/dashboard"
-               style="padding:24px;">
-                <div class="sidebar-brand-icon d-flex align-items-center">
-                    <div style="width:48px;height:48px;background:linear-gradient(135deg,#f97316,#ea580c);
-                                border-radius:14px;display:flex;align-items:center;justify-content:center;margin-right:12px;">
-                        <i class="fas fa-desktop" style="color:white;font-size:22px;"></i>
-                    </div>
-                    <div style="color:white;font-weight:800;font-size:20px;">EGMS</div>
-                </div>
-            </a>
-
-            <hr class="sidebar-divider my-0">
-
-            <!-- Dashboard -->
-            <li class="nav-item active">
-                <a class="nav-link" href="/dashboard">
-                    <i class="fas fa-fw fa-tachometer-alt" style="color:#f97316;"></i>
-                    <span>Dashboard</span>
-                </a>
+/a>
             </li>
 
-            <hr class="sidebar-divider">
-
-            <!-- Manage Devices -->
-            <li class="nav-item">
-                <a class="nav-link" href="{{ route('devices.index') }}">
-                    <i class="fas fa-network-wired"></i>
-                    <span>Manage Devices</span>
-                </a>
-            </li>
-
-            <!-- Analytics -->
-            <li class="nav-item">
-                <a class="nav-link" href="{{ route('analytics.index') }}">
-                    <i class="fas fa-chart-area"></i>
-                    <span>Analytics</span>
-                </a>
-            </li>
-
-            <!-- Alerts -->
-            <li class="nav-item">
-                <a class="nav-link" href="{{ route('settings.alerts') }}">
-                    <i class="fas fa-cog"></i>
-                    <span>Alert Settings</span>
-                </a>
-            </li>
-
-            <!-- Backup -->
             <li class="nav-item">
                 <a class="nav-link" href="{{ route('backup_recovery.index') }}">
                     <i class="fas fa-wrench"></i>
@@ -239,42 +180,31 @@
                 </a>
             </li>
 
-            <hr class="sidebar-divider d-none d-md-block">
-
         </ul>
-        <!-- End Sidebar -->
 
         <!-- Content Wrapper -->
-        <div id="content-wrapper" class="d-flex flex-column"
-             style="background:linear-gradient(135deg,#0f172a,#1e293b,#334155);">
+        <div id="content-wrapper" class="d-flex flex-column">
 
             <!-- Topbar -->
-            <nav class="navbar navbar-expand navbar-light topbar mb-4 static-top shadow"
-                 style="background:linear-gradient(135deg,#1e293b,#334155);">
+            <nav class="navbar navbar-expand navbar-light topbar mb-4 static-top shadow">
 
                 <ul class="navbar-nav ml-auto">
 
-                    <div class="topbar-divider d-none d-sm-block"></div>
-
-                    <!-- User Info -->
                     <li class="nav-item dropdown no-arrow">
-                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown"
-                           data-toggle="dropdown" style="color:white;">
+                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" data-toggle="dropdown">
                             <span class="mr-2 d-none d-lg-inline small">Administrator</span>
-                            <img class="img-profile rounded-circle"
-                                 src="{{ url('/assets/admin/img/admin.png') }}">
+                            <img class="img-profile rounded-circle" 
+                                 src="{{ asset('assets/admin/img/admin.png') }}">
                         </a>
 
                         <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in">
                             <a class="dropdown-item" href="#" data-toggle="modal" data-target="#logoutModal">
-                                <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2"></i>
-                                Logout
+                                <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2"></i> Logout
                             </a>
                         </div>
                     </li>
 
                 </ul>
-
             </nav>
             <!-- End Topbar -->
 
@@ -558,50 +488,31 @@
     <!-- END WRAPPER -->
 
     <!-- Logout Modal -->
-    <div class="modal fade" id="logoutModal" tabindex="-1" role="dialog"
-         aria-labelledby="exampleModalLabel" aria-hidden="true">
-
-        <div class="modal-dialog" role="document">
-            <div class="modal-content"
-                 style="background:#1e293b; color:white; border-radius:12px;
-                        border:1px solid rgba(255,255,255,0.1);">
-
+       <div class="modal fade" id="logoutModal">
+        <div class="modal-dialog">
+            <div class="modal-content" style="background:#1e293b;color:white;">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel">Ready to Leave?</h5>
-                    <button class="close" type="button" data-dismiss="modal"
-                            aria-label="Close" style="color:white;">
-                        <span aria-hidden="true">×</span>
-                    </button>
+                    <h5 class="modal-title">Ready to Leave?</h5>
+                    <button class="close" type="button" data-dismiss="modal" style="color:white;">×</button>
                 </div>
-
                 <div class="modal-body">
-                    Select "Logout" below if you are ready to end your current session.
+                    Select "Logout" to end your session.
                 </div>
-
                 <div class="modal-footer">
-                    <button class="btn btn-secondary" type="button" data-dismiss="modal">
-                        Cancel
-                    </button>
-
-                    <form action="{{ route('admin.logout') }}" method="POST">
-                        @csrf
-                        <button class="btn btn-primary" type="submit">
-                            Logout
-                        </button>
+                    <button class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <form action="{{ route('admin.logout') }}" method="POST">@csrf
+                        <button class="btn btn-primary">Logout</button>
                     </form>
                 </div>
-
             </div>
         </div>
     </div>
 
-    <!-- Vendor JS -->
-    <script src="{{ url('/assets/admin/vendor/jquery/jquery.min.js') }}"></script>
-    <script src="{{ url('/assets/admin/vendor/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
-    <script src="{{ url('/assets/admin/vendor/jquery-easing/jquery.easing.min.js') }}"></script>
-
-    <!-- SB Admin Core -->
-    <script src="{{ url('/assets/admin/js/sb-admin-2.min.js') }}"></script>
+    <!-- FIXED JS PATHS -->
+    <script src="{{ asset('assets/admin/vendor/jquery/jquery.min.js') }}"></script>
+    <script src="{{ asset('assets/admin/vendor/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
+    <script src="{{ asset('assets/admin/vendor/jquery-easing/jquery.easing.min.js') }}"></script>
+    <script src="{{ asset('assets/admin/js/sb-admin-2.min.js') }}"></script>
 
     <!-- Page level plugins removed: Chart.js not used on this page -->
 
