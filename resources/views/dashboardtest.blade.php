@@ -1037,20 +1037,23 @@
     <script>
         // Removed System Status and Recent Events auto-refresh scripts
     </script>
- <script>
-
+<script>
+// ---------------------------
+// GLOBAL JSON FETCH HELPER
+// ---------------------------
 async function fetchJSON(url) {
     const r = await fetch(url, {
         headers: {
-            "X-Requested-With": "XMLHttpRequest",
-            "Content-Type": "application/json"
+            "X-Requested-With": "XMLHttpRequest"
         }
     });
     if (!r.ok) throw new Error("HTTP " + r.status);
     return r.json();
 }
 
-// Status Badge
+// ---------------------------
+// STATUS BADGE
+// ---------------------------
 function getStatusBadge(device) {
     const status = device.display_status || device.status;
     const isOnline =
@@ -1066,14 +1069,16 @@ function getStatusBadge(device) {
     `;
 }
 
-// MAIN FUNCTION – LOAD DEVICES
+// ---------------------------
+// LOAD DEVICES (MAIN FUNCTION)
+// ---------------------------
 async function loadDevices() {
-    const loadingState     = document.getElementById('deviceLoadingState');
-    const errorState       = document.getElementById('deviceErrorState');
-    const cardsContainer   = document.getElementById('deviceCardsContainer');
-    const emptyState       = document.getElementById('deviceEmptyState');
-    const deviceCount      = document.getElementById('deviceCount');
-    const lastUpdate       = document.getElementById('lastUpdate');
+    const loadingState   = document.getElementById('deviceLoadingState');
+    const errorState     = document.getElementById('deviceErrorState');
+    const cardsContainer = document.getElementById('deviceCardsContainer');
+    const emptyState     = document.getElementById('deviceEmptyState');
+    const deviceCount    = document.getElementById('deviceCount');
+    const lastUpdate     = document.getElementById('lastUpdate');
 
     loadingState.style.display = "block";
     errorState.style.display   = "none";
@@ -1081,7 +1086,8 @@ async function loadDevices() {
     emptyState.style.display     = "none";
 
     try {
-        const data = await fetchJSON("{{ route('admin.api.devices') }}");
+        // 🚀 FIXED: ALWAYS HTTPS USING RELATIVE URL
+        const data = await fetchJSON("/admin/api/devices");
 
         if (!data || !data.success) {
             throw new Error("Invalid JSON response");
@@ -1089,15 +1095,17 @@ async function loadDevices() {
 
         const devices = data.devices || [];
 
+        // Update device counter
         deviceCount.textContent = `${devices.length} device${devices.length !== 1 ? "s" : ""}`;
 
+        // If empty
         if (devices.length === 0) {
             loadingState.style.display = "none";
             emptyState.style.display   = "block";
             return;
         }
 
-        // Build cards INSIDE try block
+        // Build device cards
         cardsContainer.innerHTML = devices.map(device => `
             <div class="device-card compact">
                 <div class="device-field device-name">${device.household_name}</div>
@@ -1125,10 +1133,9 @@ async function loadDevices() {
             </div>
         `).join("");
 
-        loadingState.style.display = "none";
+        loadingState.style.display   = "none";
         cardsContainer.style.display = "block";
-
-        lastUpdate.textContent = new Date().toLocaleTimeString();
+        lastUpdate.textContent       = new Date().toLocaleTimeString();
 
     } catch (err) {
         console.error("Device loading error:", err);
@@ -1138,7 +1145,9 @@ async function loadDevices() {
     }
 }
 
-// Auto-refresh
+// ---------------------------
+// AUTO REFRESH
+// ---------------------------
 let refreshInterval;
 
 function startAutoRefresh() {
@@ -1154,6 +1163,7 @@ function stopAutoRefresh() {
 document.addEventListener('DOMContentLoaded', startAutoRefresh);
 window.addEventListener('beforeunload', stopAutoRefresh);
 </script>
+
 
 </body>
 
