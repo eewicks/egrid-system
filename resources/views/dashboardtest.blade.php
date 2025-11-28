@@ -1097,6 +1097,7 @@ async function loadDevices() {
             return;
         }
 
+        // Build cards INSIDE try block
         cardsContainer.innerHTML = devices.map(device => `
             <div class="device-card compact">
                 <div class="device-field device-name">${device.household_name}</div>
@@ -1136,66 +1137,23 @@ async function loadDevices() {
         errorState.style.display   = "block";
     }
 }
-
-
-        // Build Cards – NOW INSIDE TRY BLOCK ✔
-        cardsContainer.innerHTML = devices.map(device => `
-            <div class="device-card compact">
-                <div class="device-field device-name">${device.household_name}</div>
-
-                <div class="device-field device-id">
-                    <span>ID: ${device.device_id}</span>
-                </div>
-
-                <div class="device-field device-location">
-                    <i class="fas fa-map-marker-alt"></i>
-                    <span>${device.barangay}</span>
-
-                    <span class="device-meta-inline">
-                        <span class="meta-divider">•</span>
-                        <span class="device-last-seen">
-                            <i class="fas fa-clock"></i>
-                            ${device.last_seen_human}
-                        </span>
-                    </span>
-                </div>
-
-                <div class="device-field status">
-                    ${getStatusBadge(device)}
-                </div>
-            </div>
-        `).join("");
-
-        loadingState.style.display = "none";
-        cardsContainer.style.display = "block";
-        lastUpdate.textContent = new Date().toLocaleTimeString();
-
-    } catch (err) {
-        console.error("Device loading error:", err);
-
-        loadingState.style.display = "none";
-        errorState.style.display   = "block";
-    }
-}
-
 
 // Auto-refresh
 let refreshInterval;
+
 function startAutoRefresh() {
     if (refreshInterval) clearInterval(refreshInterval);
     loadDevices();
     refreshInterval = setInterval(loadDevices, 60000);
 }
+
 function stopAutoRefresh() {
     if (refreshInterval) clearInterval(refreshInterval);
 }
 
 document.addEventListener('DOMContentLoaded', startAutoRefresh);
 window.addEventListener('beforeunload', stopAutoRefresh);
-
 </script>
-
-
 
 </body>
 
