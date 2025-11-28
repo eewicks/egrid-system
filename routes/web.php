@@ -59,10 +59,21 @@ Route::middleware('web')->group(function () {
 
 });
 
-Route::get('/admin/api/stats', [AdminDashboardController::class, 'stats'])->withoutMiddleware('web');
-Route::get('/admin/api/logs', [AdminDashboardController::class, 'logs'])->withoutMiddleware('web');
-Route::get('/admin/api/device-status', [AdminDashboardController::class, 'deviceStatus'])->withoutMiddleware('web');
-Route::get('/admin/api/devices', [AdminDashboardController::class, 'getDevices'])->withoutMiddleware('web');
+Route::get('/admin/api/stats', [AdminDashboardController::class, 'stats'])
+    ->withoutMiddleware('web')
+    ->name('admin.api.stats');
+
+Route::get('/admin/api/logs', [AdminDashboardController::class, 'logs'])
+    ->withoutMiddleware('web')
+    ->name('admin.api.logs');
+
+Route::get('/admin/api/device-status', [AdminDashboardController::class, 'deviceStatus'])
+    ->withoutMiddleware('web')
+    ->name('admin.api.device_status');
+
+Route::get('/admin/api/devices', [AdminDashboardController::class, 'getDevices'])
+    ->withoutMiddleware('web')
+    ->name('admin.api.devices');
 
 
 
