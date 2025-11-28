@@ -105,60 +105,60 @@ class AdminDashboardController extends Controller
 public function getDevices()
 {
     try {
-        $thresholdSec = 60; // 1 minute timeout
-        $alertCooldownSec = 300; // 5 minutes cooldown
+        $thresholdMin = (int) cache(
+            'settings.heartbeat_timeout_minutes',
+            config('services.arduino.heartbeat_timeout_minutes', 1)
+        );
 
         $now = \Carbon\Carbon::now();
 
         $devices = Device::orderBy('household_name')
             ->get()
-            ->map(function ($d) use ($now, $thresholdSec, $alertCooldownSec) {
+            ->map(function ($d) use ($now, $thresholdMin) {
 
-                $lastSeen = $d->last_seen;
-                $ageSecs  = $lastSeen ? $now->diffInSeconds($lastSeen) : 999999;
-                $isOnline = $ageSecs <= $thresholdSec;
+                // Convert last_seen to Carbon safely
+                $lastSeen = $d->last_seen ? \Carbon\Carbon::parse($d->last_seen) : null;
 
-                // -------------------------------
-                // 🔥 SMS TRIGGER WHEN OFFLINE
-                // -------------------------------
-                if (!$isOnline) {
+                $ageSecs = $lastSeen ? $now->diffInSeconds($lastSeen) : null;
 
-                    // If device was previously ONLINE → send SMS
-                    if (!$d->last_alert_sent || $now->diffInSeconds($d->last_alert_sent) > $alertCooldownSec) {
+                $fresh = $lastSeen ? ($ageSecs <= ($thresholdMin * 60)) : false;
 
-                        $sms = new \App\Http\Controllers\TwilioSMSController();
-                        $sms->sendAlertSMS(
-                            $d->device_id,
-                            "⚠️ ALERT: Device {$d->device_id} ({$d->household_name}) is OFFLINE. No heartbeat for more than 60 seconds."
-                        );
-
-                        // Update last alert timestamp
-                        $d->last_alert_sent = $now;
-                        $d->save();
-                    }
-                }
+                $displayStatus = $fresh ? 'Active' : 'Inactive';
 
                 return [
-                    'id'                 => $d->id,
-                    'device_id'          => $d->device_id,
-                    'household_name'     => $d->household_name,
-                    'barangay'           => $d->barangay,
-                    'status'             => $isOnline ? 'ON' : 'OFF',
-                    'last_seen'          => $lastSeen,
-                    'display_status'     => $isOnline ? 'Active' : 'Inactive',
-                    'status_badge_class' => $isOnline ? 'bg-success' : 'bg-danger',
-                    'status_icon_class'  => $isOnline ? 'text-success' : 'text-danger',
-                    'last_seen_human'    => $lastSeen ? $lastSeen->diffForHumans() : 'Never',
+                    'id'   => $d->id,
+                    'device_id' => $d->device_id,
+                    'household_name' => $d->household_name,
+                    'barangay' => $d->barangay,
+                    'status' => $fresh ? 'ON' : 'OFF',
+
+                    // Carbon safe format
+                    'last_seen' => $lastSeen ? $lastSeen->toDateTimeString() : null,
+
+                    'display_status' => $displayStatus,
+                    'status_badge_class' => $fresh ? 'bg-success' : 'bg-danger',
+                    'status_icon_class'  => $fresh ? 'text-success' : 'text-danger',
+
+                    // Human readable time
+                    'last_seen_human' => $lastSeen
+                        ? $lastSeen->diffForHumans()
+                        : 'Never',
                 ];
             });
 
-        return response()->json(['success' => true, 'devices' => $devices]);
+        return response()->json([
+            'success' => true,
+            'devices' => $devices
+        ]);
 
     } catch (\Throwable $e) {
+
+        // Debug output
         return response()->json([
             'success' => false,
             'message' => 'Server error',
-            'error'   => $e->getMessage()
+            'error' => $e->getMessage(),
+            'line' => $e->getLine()
         ], 500);
     }
 }
