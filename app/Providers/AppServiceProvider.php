@@ -1,8 +1,10 @@
 <?php
 
 namespace App\Providers;
+
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Http\Request;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -17,19 +19,18 @@ class AppServiceProvider extends ServiceProvider
     /**
      * Bootstrap any application services.
      */
-public function boot(): void
-{
-    if ($this->app->environment('production')) {
+    public function boot(Request $request): void
+    {
+        if ($this->app->environment('production')) {
 
-        // Trust all proxies behind Railway
-        \Request::setTrustedProxies(
-            ['*'],   // <-- only this
-            \Illuminate\Http\Request::HEADER_X_FORWARDED_ALL
-        );
+            // TRUST ALL PROXIES (Railway Load Balancer)
+            $request->setTrustedProxies(
+                [ $request->getClientIp() ],   // SAFE fallback for Railway
+                Request::HEADER_X_FORWARDED_ALL
+            );
 
-        // Force HTTPS correctly
-        URL::forceScheme('https');
+            // FORCE HTTPS
+            URL::forceScheme('https');
+        }
     }
-}   
-    
 }
