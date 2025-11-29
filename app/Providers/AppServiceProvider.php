@@ -4,7 +4,6 @@ namespace App\Providers;
 
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
-use Symfony\Component\HttpFoundation\Request;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -15,16 +14,8 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        // Force HTTPS ONLY in production (Railway)
         if ($this->app->environment('production')) {
-
-            // Trust Railway Reverse Proxy
-            $request = request();
-            $request->setTrustedProxies(
-                [$request->getClientIp(), '*'],
-                Request::HEADER_X_FORWARDED_ALL
-            );
-
-            // Force HTTPS
             URL::forceScheme('https');
         }
     }
