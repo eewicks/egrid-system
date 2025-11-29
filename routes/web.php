@@ -93,7 +93,7 @@ Route::get('/fix-cache', function () {
 Route::get('/send-sms', function () {
 
     $apiKey = env('SEMAPHORE_API_KEY');
-    $sender = env('SEMAPHORE_SENDER_NAME', 'EGMS');
+    $sender = env('SEMAPHORE_SENDER_NAME', 'SEMAPHORE');
     $phone  = env('ALERT_PHONE');
 
     if (!$apiKey || !$phone) {
@@ -104,7 +104,6 @@ Route::get('/send-sms', function () {
         ]);
     }
 
-    // ---- SEND TO SEMAPHORE ----
     $response = Http::asForm()->post("https://api.semaphore.co/api/v4/messages", [
         "apikey"     => $apiKey,
         "number"     => $phone,
@@ -112,16 +111,17 @@ Route::get('/send-sms', function () {
         "sendername" => $sender
     ]);
 
-    // ---- RETURN RESPONSE TEXT SO YOU CAN SEE ERRORS ----
-    return response()->json([
+    return [
         "request_sent" => [
             "apikey" => $apiKey,
             "number" => $phone,
             "sender" => $sender
         ],
-        "semaphore_response" => $response->json()
-    ]);
+        "raw_response" => $response->body(),
+        "json_response" => $response->json()
+    ];
 });
+
 
 
 Route::get('/semaphore-test', [\App\Http\Controllers\SemaphoreSMSController::class, 'testSMS']);
