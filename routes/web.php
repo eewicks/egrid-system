@@ -76,6 +76,15 @@ Route::post('/heartbeat', function (Request $request) {
     return response()->json(['success' => true]);
 });
 
+
+Route::get('/fix-cache', function () {
+    \Artisan::call('config:clear');
+    \Artisan::call('cache:clear');
+    \Artisan::call('config:cache');
+
+    return "CACHE CLEARED";
+});
+
 /*
 |--------------------------------------------------------------------------
 | TEST SMS ROUTE (TWILIO)
