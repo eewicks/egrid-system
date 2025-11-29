@@ -81,6 +81,9 @@ Route::post('/heartbeat', function (Request $request) {
 | TEST SMS ROUTE (TWILIO)
 |--------------------------------------------------------------------------
 */
+
+Route::get('/semaphore-test', [\App\Http\Controllers\SemaphoreSMSController::class, 'testSMS']);
+
 Route::get('/test-sms', function () {
 
     $sid   = env('TWILIO_SID');
@@ -102,6 +105,9 @@ Route::get('/test-sms', function () {
 
     return $response->json();
 });
+
+
+
 
 /*
 |--------------------------------------------------------------------------

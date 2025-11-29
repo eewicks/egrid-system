@@ -22,53 +22,19 @@ class SMSService
     /**
      * Send SMS to a single recipient
      */
-    public function sendSMS($phoneNumber, $message)
+    public static function send($to, $message)
     {
-        try {
-            // Clean phone number (remove spaces, dashes, etc.)
-            $cleanPhone = $this->cleanPhoneNumber($phoneNumber);
-            
-            if (!$this->isValidPhoneNumber($cleanPhone)) {
-                throw new \Exception("Invalid phone number format: {$phoneNumber}");
-            }
+        $apiKey = env('SEMAPHORE_API_KEY');
+        $sender = env('SEMAPHORE_SENDER_NAME', 'EGMS');
 
-            $response = Http::timeout(30)->post($this->apiUrl, [
-                'apikey' => $this->apiKey,
-                'number' => $cleanPhone,
-                'message' => $message,
-                'sendername' => $this->senderName
-            ]);
+        $response = Http::asForm()->post('https://api.semaphore.co/api/v4/messages', [
+            'apikey'     => $apiKey,
+            'number'     => $to,
+            'message'    => $message,
+            'sendername' => $sender
+        ]);
 
-            if ($response->successful()) {
-                $responseData = $response->json();
-                
-                Log::info("SMS sent successfully", [
-                    'phone' => $cleanPhone,
-                    'message' => $message,
-                    'response' => $responseData
-                ]);
-
-                return [
-                    'success' => true,
-                    'message_id' => $responseData['message_id'] ?? null,
-                    'response' => $responseData
-                ];
-            } else {
-                throw new \Exception("SMS API error: " . $response->body());
-            }
-
-        } catch (\Exception $e) {
-            Log::error("SMS sending failed", [
-                'phone' => $phoneNumber,
-                'message' => $message,
-                'error' => $e->getMessage()
-            ]);
-
-            return [
-                'success' => false,
-                'error' => $e->getMessage()
-            ];
-        }
+        return $response->json();
     }
 
     /**
