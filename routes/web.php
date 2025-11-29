@@ -97,18 +97,22 @@ Route::get('/send-sms', function () {
     $sender = env('SEMAPHORE_SENDER_NAME', 'EGMS');
     $phone  = env('ALERT_PHONE');
 
-    if (!$apiKey || !$sender || !$phone) {
-        return response()->json(['error' => 'Missing environment vars'], 400);
+    if (!$apiKey || !$phone) {
+        return response()->json([
+            "error" => "Missing environment variables",
+            "api_key" => $apiKey,
+            "phone" => $phone
+        ]);
     }
 
     $response = Http::asForm()->post("https://api.semaphore.co/api/v4/messages", [
         "apikey" => $apiKey,
         "number" => $phone,
-        "message" => "EGMS Test SMS: Your Semaphore integration works!",
+        "message" => "EGMS Test SMS: Semaphore SMS is working!",
         "sendername" => $sender
     ]);
 
-    return $response->json();
+    return $response->json();  // <----- THIS WAS MISSING
 });
 
 
