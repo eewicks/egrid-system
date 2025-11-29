@@ -90,7 +90,6 @@ Route::get('/fix-cache', function () {
 | TEST SMS ROUTE (TWILIO)
 |--------------------------------------------------------------------------
 */
-
 Route::get('/send-sms', function () {
 
     $apiKey = env('SEMAPHORE_API_KEY');
@@ -105,14 +104,23 @@ Route::get('/send-sms', function () {
         ]);
     }
 
+    // ---- SEND TO SEMAPHORE ----
     $response = Http::asForm()->post("https://api.semaphore.co/api/v4/messages", [
-        "apikey" => $apiKey,
-        "number" => $phone,
-        "message" => "EGMS Test SMS: Semaphore SMS is working!",
+        "apikey"     => $apiKey,
+        "number"     => $phone,
+        "message"    => "EGMS Test SMS: Semaphore SMS is working!",
         "sendername" => $sender
     ]);
 
-    return $response->json();  // <----- THIS WAS MISSING
+    // ---- RETURN RESPONSE TEXT SO YOU CAN SEE ERRORS ----
+    return response()->json([
+        "request_sent" => [
+            "apikey" => $apiKey,
+            "number" => $phone,
+            "sender" => $sender
+        ],
+        "semaphore_response" => $response->json()
+    ]);
 });
 
 
