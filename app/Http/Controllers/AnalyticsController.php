@@ -141,42 +141,105 @@ class AnalyticsController extends Controller
     }
 
    public function weeklyOutageAnalytics()
-    {
-        $now = Carbon::now();
-        $weeks = [];
+{
+    $now = Carbon::now();
 
-        for ($i = 0; $i < 4; $i++) {
-            $start = $now->copy()->subWeeks($i)->startOfWeek();
-            $end = $now->copy()->subWeeks($i)->endOfWeek();
+    // -----------------------------
+    // GET 4 WEEKS RANGE
+    // -----------------------------
+    $weeks = [];
+    for ($i = 0; $i < 4; $i++) {
+        $start = $now->copy()->subWeeks($i)->startOfWeek();
+        $end = $now->copy()->subWeeks($i)->endOfWeek();
 
-            $weeks[$i] = [
-                'label' => "Week " . ($i + 1),
-                'start' => $start->toDateString(),
-                'end' => $end->toDateString(),
-                'count' => DB::table('status_logs')
-                    ->where('status', 'OFF')
-                    ->whereBetween('created_at', [$start, $end])
-                    ->count(),
+        $weeks[] = [
+            'label' => 'W' . ($i + 1),
+            'start' => $start,
+            'end' => $end
+        ];
+    }
+
+    // -----------------------------
+    // GET ALL DEVICES
+    // -----------------------------
+    $devices = DB::table('devices')->get();
+
+    $households = [];
+
+    foreach ($devices as $device) {
+        $weekly_counts = [];
+        $timeline = [];
+
+        // Weekly counts (per device)
+        foreach ($weeks as $w) {
+            $count = DB::table('status_logs')
+                ->where('device_id', $device->device_id)
+                ->where('status', 'OFF')
+                ->whereBetween('created_at', [$w['start'], $w['end']])
+                ->count();
+
+            $weekly_counts[] = $count;
+        }
+
+        // Outage events timeline (last 3)
+        $timelineRaw = DB::table('status_logs')
+            ->where('device_id', $device->device_id)
+            ->where('status', 'OFF')
+            ->orderBy('created_at', 'desc')
+            ->limit(3)
+            ->get();
+
+        foreach ($timelineRaw as $log) {
+            // attempt to find next ON log
+            $endLog = DB::table('status_logs')
+                ->where('device_id', $device->device_id)
+                ->where('status', 'ON')
+                ->where('created_at', '>', $log->created_at)
+                ->orderBy('created_at')
+                ->first();
+
+            $timeline[] = [
+                'start' => $log->created_at,
+                'end'   => $endLog->created_at ?? null
             ];
         }
 
-        // get top household (most outages this week)
-        $top = DB::table('status_logs')
-            ->select('device_id', DB::raw('COUNT(*) as c'))
-            ->where('status', 'OFF')
-            ->whereBetween('created_at', [Carbon::now()->startOfWeek(), Carbon::now()->endOfWeek()])
-            ->groupBy('device_id')
-            ->orderByDesc('c')
-            ->first();
-
-        return response()->json([
-            'success' => true,
-            'weeks' => $weeks,
-            'top' => $top
-        ]);
+        $households[] = [
+            'label' => $device->household_name ?? 'Unknown',
+            'location' => $device->barangay ?? 'No Location',
+            'weekly_counts' => $weekly_counts,
+            'outages_total' => array_sum($weekly_counts),
+            'timeline' => $timeline,
+        ];
     }
+ $thisWeekStart = Carbon::now()->startOfWeek();
+    $thisWeekEnd   = Carbon::now()->endOfWeek();
 
+    $totalThisWeek = DB::table('status_logs')
+        ->where('status', 'OFF')
+        ->whereBetween('created_at', [$thisWeekStart, $thisWeekEnd])
+        ->count();
 
+    // -----------------------------
+    // META: MOST AFFECTED HOUSEHOLD
+    // -----------------------------
+    $top = collect($households)->sortByDesc('outages_total')->first();
+
+    $meta = [
+        'total_outages_this_week' => $totalThisWeek,
+        'top_household' => $top ? [
+            'label' => $top['label'],
+            'count' => $top['outages_total'],
+        ] : null,
+        'updated_at' => now()->toDateTimeString()
+    ];
+
+    return response()->json([
+        'success' => true,
+        'meta' => $meta,
+        'households' => $households
+    ]);
+}
     /**
      * Get weekly outage view data showing Day 1-7 for each week
      */
