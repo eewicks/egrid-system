@@ -172,12 +172,13 @@ Route::get('/dashboardtest', fn() => view('dashboardtest'));
 |--------------------------------------------------------------------------
 */
 Route::get('/analytics', [AnalyticsController::class, 'analytics'])->name('analytics.index');
-Route::get('/analytics/stats', [AnalyticsController::class, 'stats']);
-Route::get('/analytics/logs', [AnalyticsController::class, 'logs']);
-Route::get('/analytics/monthly-outages', [AnalyticsController::class, 'getMonthlyOutages']);
-Route::get('/analytics/outage-stats', [AnalyticsController::class, 'getOutageStats']);
-Route::get('/analytics/weekly-devices', [AnalyticsController::class, 'weeklyOutageAnalytics']);
-Route::get('/analytics/weekly-outage-view', [AnalyticsController::class, 'getWeeklyOutageView']);
+Route::get('/analytics/stats', [AnalyticsController::class, 'stats'])->name('analytics.stats');
+Route::get('/analytics/logs', [AnalyticsController::class, 'logs'])->name('analytics.logs');
+Route::get('/analytics/monthly-outages', [AnalyticsController::class, 'getMonthlyOutages'])->name('analytics.monthly');
+Route::get('/analytics/outage-stats', [AnalyticsController::class, 'getOutageStats'])->name('analytics.outage-stats');
+Route::get('/analytics/weekly-devices', [AnalyticsController::class, 'weeklyOutageAnalytics'])->name('analytics.weekly-devices');
+Route::get('/analytics/weekly-outage-view', [AnalyticsController::class, 'getWeeklyOutageView'])->name('analytics.weekly-outages');
+
 
 /*
 |--------------------------------------------------------------------------
