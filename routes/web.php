@@ -93,6 +93,7 @@ Route::get('/fix-cache', function () {
 
 Route::get('/semaphore-test', [\App\Http\Controllers\SemaphoreSMSController::class, 'testSMS']);
 
+
 Route::get('/test-sms', function () {
 
     $sid   = env('TWILIO_SID');

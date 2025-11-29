@@ -9,11 +9,10 @@ class SemaphoreSMSController extends Controller
 {
      public function testSMS()
     {
-        $to = env('ALERT_PHONE');
-        $msg = "EGMS Test: Your SMS system is working using Semaphore.";
-
-        $result = SMSService::send($to, $msg);
-
-        return response()->json($result);
+        return [
+            'api_key' => env('SEMAPHORE_API_KEY'),
+            'sender'  => env('SEMAPHORE_SENDER_NAME'),
+            'phone'   => env('ALERT_PHONE'),
+        ];
     }
 }
