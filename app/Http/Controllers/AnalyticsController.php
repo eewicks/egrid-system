@@ -216,10 +216,9 @@ class AnalyticsController extends Controller
     $thisWeekEnd   = Carbon::now()->endOfWeek();
 
     $totalThisWeek = DB::table('status_logs')
-        ->where('status', 'OFF')
-        ->whereBetween('created_at', [$thisWeekStart, $thisWeekEnd])
-        ->count();
-
+    ->where('status', 'OFF')
+    ->whereRaw('YEARWEEK(created_at, 1) = YEARWEEK(CURDATE(), 1)')
+    ->count();
     // -----------------------------
     // META: MOST AFFECTED HOUSEHOLD
     // -----------------------------
