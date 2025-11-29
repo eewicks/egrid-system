@@ -17,20 +17,24 @@ use App\Http\Controllers\TwilioSMSController;
 
 /*
 |--------------------------------------------------------------------------
-| Public Route
+| PUBLIC ROUTE
 |--------------------------------------------------------------------------
 */
 Route::get('/', function () {
     return view('welcome');
 });
 
+
 /*
 |--------------------------------------------------------------------------
-| Admin Authentication
+| ADMIN AUTHENTICATION
 |--------------------------------------------------------------------------
 */
-Route::get('/admin-login', [AdminAuthController::class, 'showLoginForm'])->name('admin.login');
-Route::post('/admin-login', [AdminAuthController::class, 'postlogin'])->name('admin.login.submit');
+Route::get('/admin-login', [AdminAuthController::class, 'showLoginForm'])
+    ->name('admin.login');
+
+Route::post('/admin-login', [AdminAuthController::class, 'postlogin'])
+    ->name('admin.login.submit');
 
 Route::post('/admin/logout', function(Request $request) {
     $request->session()->forget('admin_logged_in');
@@ -39,32 +43,48 @@ Route::post('/admin/logout', function(Request $request) {
     return redirect('/');
 })->name('admin.logout');
 
+
 /*
 |--------------------------------------------------------------------------
-| Admin Dashboard (Protected)
+| ADMIN DASHBOARD (Protected)
 |--------------------------------------------------------------------------
 */
 Route::middleware('web')->group(function () {
     Route::get('/admin/dashboard-test', [AdminDashboardController::class, 'index'])
-    ->name('admin.dashboardtest');
+        ->name('admin.dashboardtest');
 });
 
-/*
-|--------------------------------------------------------------------------
-| API ROUTES (NO SESSION)
-|--------------------------------------------------------------------------
-*/
-Route::get('/admin/api/stats', [AdminDashboardController::class, 'stats'])->withoutMiddleware('web');
-Route::get('/admin/api/logs', [AdminDashboardController::class, 'logs'])->withoutMiddleware('web');
-Route::get('/admin/api/device-status', [AdminDashboardController::class, 'deviceStatus'])->withoutMiddleware('web');
-Route::get('/admin/api/devices', [AdminDashboardController::class, 'getDevices'])->withoutMiddleware('web');
 
 /*
 |--------------------------------------------------------------------------
-| Heartbeat Route (Arduino)
+| DASHBOARD API ROUTES  (IMPORTANT: KEEP WEB MIDDLEWARE!)
+|--------------------------------------------------------------------------
+| These MUST keep session + cookies for SB Admin JS.
+| Removing middleware will break AJAX and cause empty cards.
+|--------------------------------------------------------------------------
+*/
+Route::prefix('admin/api')->group(function () {
+    Route::get('/stats', [AdminDashboardController::class, 'stats'])
+        ->name('api.stats');
+
+    Route::get('/logs', [AdminDashboardController::class, 'logs'])
+        ->name('api.logs');
+
+    Route::get('/device-status', [AdminDashboardController::class, 'deviceStatus'])
+        ->name('api.device-status');
+
+    Route::get('/devices', [AdminDashboardController::class, 'getDevices'])
+        ->name('api.devices');
+});
+
+
+/*
+|--------------------------------------------------------------------------
+| HEARTBEAT ENDPOINT (Arduino)
 |--------------------------------------------------------------------------
 */
 Route::post('/heartbeat', function (Request $request) {
+
     $device = \App\Models\Device::where('device_id', $request->device_id)->first();
 
     if ($device) {
@@ -77,17 +97,22 @@ Route::post('/heartbeat', function (Request $request) {
 });
 
 
+/*
+|--------------------------------------------------------------------------
+| CACHE FIX ROUTE
+|--------------------------------------------------------------------------
+*/
 Route::get('/fix-cache', function () {
     \Artisan::call('config:clear');
     \Artisan::call('cache:clear');
     \Artisan::call('config:cache');
-
     return "CACHE CLEARED";
 });
 
+
 /*
 |--------------------------------------------------------------------------
-| TEST SMS ROUTE (TWILIO)
+| TEST SMS ROUTES
 |--------------------------------------------------------------------------
 */
 Route::get('/send-sms', function () {
@@ -122,10 +147,7 @@ Route::get('/send-sms', function () {
     ];
 });
 
-
-
 Route::get('/semaphore-test', [\App\Http\Controllers\SemaphoreSMSController::class, 'testSMS']);
-
 
 Route::get('/test-sms', function () {
 
@@ -150,8 +172,6 @@ Route::get('/test-sms', function () {
 });
 
 
-
-
 /*
 |--------------------------------------------------------------------------
 | DEVICES CRUD
@@ -159,24 +179,38 @@ Route::get('/test-sms', function () {
 */
 Route::resource('devices', DeviceController::class);
 
+
 /*
 |--------------------------------------------------------------------------
-| Dashboard Test (Optional)
+| DASHBOARDTEST VIEW
 |--------------------------------------------------------------------------
 */
 Route::get('/dashboardtest', fn() => view('dashboardtest'));
 
+
 /*
 |--------------------------------------------------------------------------
-| Analytics Routes
+| ANALYTICS ROUTES
 |--------------------------------------------------------------------------
 */
-Route::get('/analytics', [AnalyticsController::class, 'analytics'])->name('analytics.index');
-Route::get('/analytics/stats', [AnalyticsController::class, 'stats'])->name('analytics.stats');
-Route::get('/analytics/logs', [AnalyticsController::class, 'logs'])->name('analytics.logs');
-Route::get('/analytics/monthly-outages', [AnalyticsController::class, 'getMonthlyOutages'])->name('analytics.monthly');
-Route::get('/analytics/outage-stats', [AnalyticsController::class, 'getOutageStats'])->name('analytics.outage-stats');
-Route::get('/analytics/weekly-devices', [AnalyticsController::class, 'weeklyOutageAnalytics'])->name('analytics.weekly-devices');
+Route::get('/analytics', [AnalyticsController::class, 'analytics'])
+    ->name('analytics.index');
+
+Route::get('/analytics/stats', [AnalyticsController::class, 'stats'])
+    ->name('analytics.stats');
+
+Route::get('/analytics/logs', [AnalyticsController::class, 'logs'])
+    ->name('analytics.logs');
+
+Route::get('/analytics/monthly-outages', [AnalyticsController::class, 'getMonthlyOutages'])
+    ->name('analytics.monthly');
+
+Route::get('/analytics/outage-stats', [AnalyticsController::class, 'getOutageStats'])
+    ->name('analytics.outage-stats');
+
+Route::get('/analytics/weekly-devices', [AnalyticsController::class, 'weeklyOutageAnalytics'])
+    ->name('analytics.weekly-devices');
+
 Route::get('/analytics/weekly-outage-view', 
     [AnalyticsController::class, 'getWeeklyOutageView'])
     ->name('analytics.weekly-outage-view');
@@ -184,15 +218,16 @@ Route::get('/analytics/weekly-outage-view',
 
 /*
 |--------------------------------------------------------------------------
-| Power Outages API
+| DASHBOARD POWER OUTAGE API
 |--------------------------------------------------------------------------
 */
 Route::get('/dashboard/stats', [DashboardController::class, 'getDashboardStats']);
 Route::get('/api/power-outages', [DashboardController::class, 'getPowerOutagesData']);
 
+
 /*
 |--------------------------------------------------------------------------
-| Alert Settings
+| ALERT SETTINGS ROUTES (FIXED)
 |--------------------------------------------------------------------------
 */
 Route::get('/settings/alerts', [AlertSettingsController::class, 'index'])
@@ -204,9 +239,10 @@ Route::post('/settings/alerts/save', [AlertSettingsController::class, 'store'])
 Route::post('/settings/alerts/test', [AlertSettingsController::class, 'testAlert'])
     ->name('settings.alerts.test');
 
+
 /*
 |--------------------------------------------------------------------------
-| Backup & Recovery
+| BACKUP & RECOVERY
 |--------------------------------------------------------------------------
 */
 Route::get('/backup-recovery', [BackupRecoveryController::class, 'index'])
@@ -215,7 +251,7 @@ Route::get('/backup-recovery', [BackupRecoveryController::class, 'index'])
 
 /*
 |--------------------------------------------------------------------------
-| Push Notifications
+| WEB PUSH ROUTES
 |--------------------------------------------------------------------------
 */
 Route::prefix('api/webpush')->group(function () {
@@ -226,9 +262,10 @@ Route::prefix('api/webpush')->group(function () {
     Route::post('/test', [WebPushController::class, 'testNotification']);
 });
 
+
 /*
 |--------------------------------------------------------------------------
-| SMS API (Controller-Based)
+| SMS API ROUTES
 |--------------------------------------------------------------------------
 */
 Route::prefix('api/sms')->group(function () {
