@@ -4,7 +4,6 @@ namespace App\Providers;
 
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
-use Illuminate\Http\Request;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -21,16 +20,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        if ($this->app->environment('production')) {
-
-            // Force HTTPS on all generated URLs
+        if (config('app.env') !== 'local') {
             URL::forceScheme('https');
-
-            // TRUST RAILWAY PROXY HEADERS
-            Request::setTrustedProxies(
-                [Request::HEADER_X_FORWARDED_FOR],
-                Request::HEADER_X_FORWARDED_ALL
-            );
         }
     }
 }
