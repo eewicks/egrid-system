@@ -17,6 +17,34 @@ class AdminDashboardController extends Controller
         return view('dashboardtest');
     }
 
+
+
+private function recordOutageIfMissing($device)
+{
+    $derived = $device->derived_status; // ON or OFF based on timeout
+
+    $lastLog = \App\Models\StatusLog::where('device_id', $device->device_id)
+        ->orderBy('created_at', 'desc')
+        ->first();
+
+    // If OFF but last log was ON → create OFF log
+    if ($derived === 'OFF' && (!$lastLog || $lastLog->status === 'ON')) {
+        \App\Models\StatusLog::create([
+            'device_id' => $device->device_id,
+            'status' => 'OFF',
+        ]);
+    }
+
+    // If ON but last log was OFF → create ON log
+    if ($derived === 'ON' && $lastLog && $lastLog->status === 'OFF') {
+        \App\Models\StatusLog::create([
+            'device_id' => $device->device_id,
+            'status' => 'ON',
+        ]);
+    }
+}
+
+
   
     public function stats()
     {
@@ -69,38 +97,24 @@ class AdminDashboardController extends Controller
     
 
 
-    public function deviceStatus()
-    {
-        $thresholdMin = (int) cache(
-            'settings.heartbeat_timeout_minutes',
-            config('services.arduino.heartbeat_timeout_minutes', 5)
-        );
-        $now = Carbon::now();
+   public function deviceStatus()
+{
+    $devices = Device::all();
 
-        $devices = Device::orderBy('household_name')
-            ->get(['device_id', 'household_name', 'barangay', 'status', 'last_seen'])
-            ->map(function (Device $device) use ($now, $thresholdMin) {
-                $lastSeen = $device->last_seen;
-                $ageSecs = $lastSeen ? $now->diffInSeconds($lastSeen) : null;
-                $fresh = $lastSeen ? $ageSecs <= ($thresholdMin * 60) : false;
-                $rawStatus = strtoupper($device->status ?? 'OFF');
-                $derived = ($fresh && $rawStatus === 'ON') ? 'ON' : 'OFF';
-
-                return [
-                    'device_id'      => $device->device_id,
-                    'household_name' => $device->household_name ?? 'Unknown Household',
-                    'barangay'       => $device->barangay ?? 'Unknown',
-                    'status'         => $derived,
-                    'raw_status'     => $rawStatus,
-                    'last_seen'      => optional($lastSeen)->toDateTimeString(),
-                    'age_secs'       => $ageSecs,
-                    'fresh'          => $fresh,
-                ];
-            });
-
-        return response()->json(['devices' => $devices]);
+    foreach ($devices as $device) {
+        $this->recordOutageIfMissing($device);
     }
 
+    return response()->json([
+        'devices' => $devices->map(function($device) {
+            return [
+                'device_id' => $device->device_id,
+                'status' => $device->derived_status,
+                'last_seen' => optional($device->last_seen)->toDateTimeString(),
+            ];
+        })
+    ]);
+}
     // JSON for devices with derived display status
 public function getDevices()
 {

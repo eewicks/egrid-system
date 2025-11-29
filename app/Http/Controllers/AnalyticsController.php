@@ -112,10 +112,15 @@ class AnalyticsController extends Controller
     /**
      * Legacy methods for backward compatibility
      */
-    public function stats()
-    {
-        return $this->getOutageStats();
+   public function stats()
+{
+    $devices = Device::all();
+
+    // AUTO GENERATE OUTAGES
+    foreach ($devices as $d) {
+        $this->recordOutageIfMissing($d);
     }
+}
 
     public function logs()
     {
@@ -139,6 +144,21 @@ class AnalyticsController extends Controller
             ], 500);
         }
     }
+
+    public function getDerivedStatusAttribute()
+{
+    $thresholdMin = config('services.arduino.heartbeat_timeout_minutes', 1);
+    $now = now();
+
+    if (!$this->last_seen) {
+        return 'OFF';
+    }
+
+    $ageSecs = $now->diffInSeconds($this->last_seen);
+
+    return $ageSecs <= ($thresholdMin * 60) ? 'ON' : 'OFF';
+}
+
 
    public function weeklyOutageAnalytics()
 {
