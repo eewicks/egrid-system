@@ -1070,7 +1070,7 @@
                 <div class="stat-icon">
                     <i class="fas fa-bolt"></i>
                 </div>
-                <div class="stat-value" id="totalOutages">—</div>
+              <div class="stat-value" id="totalOutages">—</div>
                 <div class="stat-label">Total Outages</div>
             </div>
             
@@ -1261,10 +1261,10 @@
                 return Number.isFinite(num) ? num : 0;
             };
 
-            document.getElementById('totalOutages').textContent = normalized(stats.totalOutages);
-            document.getElementById('thisMonthOutages').textContent = normalized(stats.thisMonth);
-            document.getElementById('todayOutages').textContent = normalized(stats.today);
-            document.getElementById('lastMonthOutages').textContent = normalized(stats.lastMonth);
+        document.getElementById('totalOutages').textContent = stats.totalOutages;
+document.getElementById('todayOutages').textContent = stats.today;
+document.getElementById('thisMonthOutages').textContent = stats.thisMonth;
+document.getElementById('lastMonthOutages').textContent = stats.lastMonth;
         }
         function formatDayShort(dateStr) {
             if (!dateStr) return '—';
