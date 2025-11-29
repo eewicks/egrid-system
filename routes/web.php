@@ -45,8 +45,8 @@ Route::post('/admin/logout', function(Request $request) {
 |--------------------------------------------------------------------------
 */
 Route::middleware('web')->group(function () {
-    Route::get('/admin/dashboard', [AdminDashboardController::class, 'index'])
-        ->name('admin.dashboard');
+    Route::get('/admin/dashboard-test', [AdminDashboardController::class, 'index'])
+    ->name('admin.dashboardtest');
 });
 
 /*
