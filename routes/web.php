@@ -202,7 +202,9 @@ Route::post('/settings/alerts/test', [AlertSettingsController::class, 'testAlert
 | Backup & Recovery
 |--------------------------------------------------------------------------
 */
-Route::get('/backup-recovery', [BackupRecoveryController::class, 'index']);
+Route::get('/backup-recovery', [BackupRecoveryController::class, 'index'])
+    ->name('backup_recovery.index');
+
 
 /*
 |--------------------------------------------------------------------------
