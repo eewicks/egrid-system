@@ -143,7 +143,8 @@ Route::get('/api/power-outages', [DashboardController::class, 'getPowerOutagesDa
 | Alert Settings
 |--------------------------------------------------------------------------
 */
-Route::get('/settings/alerts', [AlertSettingsController::class, 'index']);
+Route::get('/settings/alerts', [AlertSettingsController::class, 'index'])
+    ->name('settings.alerts');
 Route::post('/settings/alerts/save', [AlertSettingsController::class, 'store']);
 Route::post('/settings/alerts/test', [AlertSettingsController::class, 'testAlert']);
 
