@@ -548,13 +548,7 @@
             </li>
 
             <!-- Enhanced Orange Nav Item - Backup & Recovery -->
-            <li class="nav-item" style="margin: 6px 16px;">
-                <a class="nav-link" href="{{ route('backup_recovery.index') }}" style="padding: 16px 20px; border-radius: 8px; background: transparent; border: none; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); color: rgba(255, 255, 255, 0.9); font-weight: 500;">
-                    <i class="fas fa-fw fa-wrench" style="font-size: 18px; margin-right: 14px; color: rgba(255, 255, 255, 0.7); text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);"></i>
-                    <span style="font-size: 14px; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);">Backup & Recovery</span>
-                </a>
-            </li>
-
+          
             <!-- Enhanced Dark Divider -->
             <hr class="sidebar-divider d-none d-md-block" style="border-color: rgba(255, 255, 255, 0.08); margin: 24px 20px; border-width: 1px;">
 

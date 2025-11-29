@@ -605,12 +605,7 @@
             </li>
 
             <!-- Enhanced Nav Item - Backup & Recovery -->
-            <li class="nav-item" style="margin: 4px 16px;">
-                <a class="nav-link" href="{{ route('backup_recovery.index') }}" style="padding: 14px 20px; border-radius: 12px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); color: rgba(255, 255, 255, 0.85); font-weight: 500;">
-                    <i class="fas fa-fw fa-wrench" style="font-size: 14px; margin-right: 12px; color: rgba(255, 255, 255, 0.8);"></i>
-                    <span style="font-size: 15px;">Backup & Recovery</span>
-                </a>
-            </li>
+           
 
             <!-- Enhanced Divider -->
             <hr class="sidebar-divider d-none d-md-block" style="border-color: rgba(255, 255, 255, 0.1); margin: 24px 0;">
