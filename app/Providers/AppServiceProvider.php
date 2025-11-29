@@ -21,15 +21,14 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // Force HTTPS for Railway production environment
         if ($this->app->environment('production')) {
 
-            // Force URL generation to HTTPS
+            // Force HTTPS on all generated URLs
             URL::forceScheme('https');
 
-            // Allow Railway proxy headers so HTTPS is detected correctly
+            // TRUST RAILWAY PROXY HEADERS
             Request::setTrustedProxies(
-                [Request::getClientIp()],
+                [Request::HEADER_X_FORWARDED_FOR],
                 Request::HEADER_X_FORWARDED_ALL
             );
         }
