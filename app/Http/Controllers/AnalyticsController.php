@@ -81,46 +81,43 @@ class AnalyticsController extends Controller
     /**
      * Get real-time outage statistics
      */
-       public function getOutageStats()
+    public function getOutageStats()
     {
-        $today = Carbon::today();
-        $month = Carbon::now()->month;
-        $lastMonth = Carbon::now()->subMonth()->month;
+        try {
+            $today = Carbon::today();
+            $thisMonth = Carbon::now()->startOfMonth();
+            $lastMonthStart = Carbon::now()->copy()->subMonth()->startOfMonth();
+            $lastMonthEnd = $thisMonth->copy()->subSecond();
 
-        return response()->json([
-            'success' => true,
-            'stats' => [
-                'totalOutages' => DB::table('status_logs')->where('status', 'OFF')->count(),
+            $stats = [
+                'today' => Outage::whereDate('started_at', $today)->count(),
+                'thisMonth' => Outage::whereBetween('started_at', [$thisMonth, Carbon::now()])->count(),
+                'lastMonth' => Outage::whereBetween('started_at', [$lastMonthStart, $lastMonthEnd])->count(),
+                'totalOutages' => Outage::count(),
+                'totalDevices' => Device::count(),
+            ];
 
-                'today' => DB::table('status_logs')
-                    ->where('status', 'OFF')
-                    ->whereDate('created_at', $today)
-                    ->count(),
+            return response()->json([
+                'success' => true,
+                'stats' => $stats
+            ]);
 
-                'thisMonth' => DB::table('status_logs')
-                    ->where('status', 'OFF')
-                    ->whereMonth('created_at', $month)
-                    ->count(),
-
-                'lastMonth' => DB::table('status_logs')
-                    ->where('status', 'OFF')
-                    ->whereMonth('created_at', $lastMonth)
-                    ->count(),
-            ]
-        ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to load statistics',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
+
     /**
      * Legacy methods for backward compatibility
      */
-   public function stats()
-{
-    $devices = Device::all();
-
-    // AUTO GENERATE OUTAGES
-    foreach ($devices as $d) {
-        $this->recordOutageIfMissing($d);
+    public function stats()
+    {
+        return $this->getOutageStats();
     }
-}
 
     public function logs()
     {
@@ -145,163 +142,300 @@ class AnalyticsController extends Controller
         }
     }
 
-    public function getDerivedStatusAttribute()
-{
-    $thresholdMin = config('services.arduino.heartbeat_timeout_minutes', 1);
-    $now = now();
+    public function weeklyOutageAnalytics()
+    {
+        try {
+            $this->syncHouseholdsFromDevices();
 
-    if (!$this->last_seen) {
-        return 'OFF';
-    }
+            $now = Carbon::now();
+            $weeks = collect(range(0, 3))->map(function ($offset) use ($now) {
+                $position = 3 - $offset;
+                $start = $now->copy()->startOfWeek(Carbon::MONDAY)->subWeeks($position);
+                $end = $start->copy()->endOfWeek(Carbon::SUNDAY);
 
-    $ageSecs = $now->diffInSeconds($this->last_seen);
+                return [
+                    'label' => 'W'.($offset + 1),
+                    'iso_week' => $start->isoWeek(),
+                    'iso_year' => $start->isoWeekYear(),
+                    'start' => $start,
+                    'end' => $end,
+                ];
+            });
 
-    return $ageSecs <= ($thresholdMin * 60) ? 'ON' : 'OFF';
-}
+            $rangeStart = $weeks->first()['start']->copy()->startOfDay();
+            $rangeEnd = $weeks->last()['end']->copy()->endOfDay();
 
+            $households = Household::withCount('outages as outages_total')
+                ->with(['outages' => function ($query) use ($rangeStart, $rangeEnd) {
+                    $query->whereBetween('started_at', [$rangeStart, $rangeEnd])
+                        ->orderByDesc('started_at');
+                }])
+                ->orderBy('name')
+                ->get();
 
-   public function weeklyOutageAnalytics()
-{
-    $now = Carbon::now();
+            $householdPayload = $households->map(function (Household $household) use ($weeks) {
+                $weeklyCounts = $weeks->map(function ($week) use ($household) {
+                    return $household->outages
+                        ->filter(function ($outage) use ($week) {
+                            return $outage->started_at &&
+                                $outage->started_at->betweenIncluded($week['start'], $week['end']);
+                        })
+                        ->count();
+                })->values();
 
-    // -----------------------------
-    // GET 4 WEEKS RANGE
-    // -----------------------------
-    $weeks = [];
-    for ($i = 0; $i < 4; $i++) {
-        $start = $now->copy()->subWeeks($i)->startOfWeek();
-        $end = $now->copy()->subWeeks($i)->endOfWeek();
+                $timeline = $household->outages->map(function (Outage $outage) {
+                    return [
+                        'start' => optional($outage->started_at)->toIso8601String(),
+                        'end' => optional($outage->ended_at)->toIso8601String(),
+                        'duration_minutes' => $outage->duration_minutes,
+                        'duration_human' => $outage->duration_human,
+                        'status' => $outage->status,
+                    ];
+                });
 
-        $weeks[] = [
-            'label' => 'W' . ($i + 1),
-            'start' => $start,
-            'end' => $end
-        ];
-    }
+                return [
+                    'id' => $household->id,
+                    'label' => $household->display_label,
+                    'location' => $household->location,
+                    'weekly_counts' => $weeklyCounts,
+                    'outages_total' => $household->outages_total,
+                    'timeline' => $timeline,
+                ];
+            });
 
-    // -----------------------------
-    // GET ALL DEVICES
-    // -----------------------------
-    $devices = DB::table('devices')->get();
+            $currentWeek = $weeks->last();
+            $totalThisWeek = Outage::whereBetween('started_at', [$currentWeek['start'], $currentWeek['end']])->count();
 
-    $households = [];
-
-    foreach ($devices as $device) {
-        $weekly_counts = [];
-        $timeline = [];
-
-        // Weekly counts (per device)
-        foreach ($weeks as $w) {
-            $count = DB::table('status_logs')
-                ->where('device_id', $device->device_id)
-                ->where('status', 'OFF')
-                ->whereBetween('created_at', [$w['start'], $w['end']])
-                ->count();
-
-            $weekly_counts[] = $count;
-        }
-
-        // Outage events timeline (last 3)
-        $timelineRaw = DB::table('status_logs')
-            ->where('device_id', $device->device_id)
-            ->where('status', 'OFF')
-            ->orderBy('created_at', 'desc')
-            ->limit(3)
-            ->get();
-
-        foreach ($timelineRaw as $log) {
-            // attempt to find next ON log
-            $endLog = DB::table('status_logs')
-                ->where('device_id', $device->device_id)
-                ->where('status', 'ON')
-                ->where('created_at', '>', $log->created_at)
-                ->orderBy('created_at')
+            $topHousehold = Outage::select('household_id', DB::raw('COUNT(*) as total'))
+                ->whereBetween('started_at', [$rangeStart, $rangeEnd])
+                ->groupBy('household_id')
+                ->orderByDesc('total')
                 ->first();
 
-            $timeline[] = [
-                'start' => $log->created_at,
-                'end'   => $endLog->created_at ?? null
-            ];
+            $topHouseholdPayload = null;
+            if ($topHousehold) {
+                $household = $households->firstWhere('id', $topHousehold->household_id)
+                    ?? Household::find($topHousehold->household_id);
+
+                if ($household) {
+                    $topHouseholdPayload = [
+                        'id' => $household->id,
+                        'label' => $household->display_label,
+                        'count' => (int) $topHousehold->total,
+                    ];
+                }
+            }
+
+            $logs = Outage::with('household')
+                ->orderByDesc('started_at')
+                ->limit(12)
+                ->get()
+                ->map(function (Outage $outage) {
+                    return [
+                        'household' => $outage->household?->display_label,
+                        'start' => optional($outage->started_at)->toIso8601String(),
+                        'end' => optional($outage->ended_at)->toIso8601String(),
+                        'duration_minutes' => $outage->duration_minutes,
+                        'status' => $outage->status,
+                    ];
+                });
+
+            return response()->json([
+                'success' => true,
+                'meta' => [
+                    'weeks' => $weeks->map(function ($week) {
+                        return [
+                            'label' => $week['label'],
+                            'iso_week' => $week['iso_week'],
+                            'iso_year' => $week['iso_year'],
+                            'start' => $week['start']->toIso8601String(),
+                            'end' => $week['end']->toIso8601String(),
+                        ];
+                    }),
+                    'total_outages_this_week' => $totalThisWeek,
+                    'top_household' => $topHouseholdPayload,
+                    'updated_at' => now()->toIso8601String(),
+                ],
+                'households' => $householdPayload,
+                'logs' => $logs,
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to load outage analytics',
+                'error' => $e->getMessage(),
+            ], 500);
         }
-
-        $households[] = [
-            'label' => $device->household_name ?? 'Unknown',
-            'location' => $device->barangay ?? 'No Location',
-            'weekly_counts' => $weekly_counts,
-            'outages_total' => array_sum($weekly_counts),
-            'timeline' => $timeline,
-        ];
     }
- $thisWeekStart = Carbon::now()->startOfWeek();
-    $thisWeekEnd   = Carbon::now()->endOfWeek();
 
-    $totalThisWeek = DB::table('status_logs')
-    ->where('status', 'OFF')
-    ->whereRaw('YEARWEEK(created_at, 1) = YEARWEEK(CURDATE(), 1)')
-    ->count();
-    // -----------------------------
-    // META: MOST AFFECTED HOUSEHOLD
-    // -----------------------------
-    $top = collect($households)->sortByDesc('outages_total')->first();
-
-    $meta = [
-        'total_outages_this_week' => $totalThisWeek,
-        'top_household' => $top ? [
-            'label' => $top['label'],
-            'count' => $top['outages_total'],
-        ] : null,
-        'updated_at' => now()->toDateTimeString()
-    ];
-
-    return response()->json([
-        'success' => true,
-        'meta' => $meta,
-        'households' => $households
-    ]);
-}
     /**
      * Get weekly outage view data showing Day 1-7 for each week
      */
-     public function getWeeklyOutageView()
+    public function getWeeklyOutageView()
     {
-        $weeks = [];
-        for ($i = 0; $i < 4; $i++) {
-            $start = Carbon::now()->subWeeks($i)->startOfWeek();
-            $end = Carbon::now()->subWeeks($i)->endOfWeek();
+        try {
+            $now = Carbon::now();
+            $weeks = collect(range(0, 3))->map(function ($offset) use ($now) {
+                $position = 3 - $offset;
+                $start = $now->copy()->startOfWeek(Carbon::MONDAY)->subWeeks($position);
+                $end = $start->copy()->endOfWeek(Carbon::SUNDAY);
 
-            $days = [];
-            for ($d = 0; $d < 7; $d++) {
-                $day = $start->copy()->addDays($d);
+                // Get outages for this week
+                $outages = Outage::whereBetween('started_at', [
+                    $start->copy()->startOfDay(),
+                    $end->copy()->endOfDay()
+                ])->get();
 
-                $count = DB::table('status_logs')
-                    ->where('status', 'OFF')
-                    ->whereDate('created_at', $day->toDateString())
-                    ->count();
+                // Initialize days array (Day 1 = Monday, Day 7 = Sunday)
+                $days = [];
+                for ($day = 1; $day <= 7; $day++) {
+                    $dayDate = $start->copy()->addDays($day - 1);
+                    $dayOutages = $outages->filter(function ($outage) use ($dayDate) {
+                        return $outage->started_at && 
+                               $outage->started_at->format('Y-m-d') === $dayDate->format('Y-m-d');
+                    });
 
-                $days[] = [
-                    'date' => $day->toDateString(),
-                    'day_name' => $day->format('D'),
-                    'day_number' => $day->format('d'),
-                    'has_outage' => $count > 0,
-                    'outage_count' => $count
+                    $days[] = [
+                        'day_number' => $day,
+                        'date' => $dayDate->format('Y-m-d'),
+                        'day_name' => $dayDate->format('D'),
+                        'has_outage' => $dayOutages->count() > 0,
+                        'outage_count' => $dayOutages->count(),
+                    ];
+                }
+
+                return [
+                    'week_label' => 'Week ' . ($offset + 1),
+                    'iso_week' => $start->isoWeek(),
+                    'iso_year' => $start->isoWeekYear(),
+                    'start_date' => $start->format('Y-m-d'),
+                    'end_date' => $end->format('Y-m-d'),
+                    'start_formatted' => $start->format('M d'),
+                    'end_formatted' => $end->format('M d, Y'),
+                    'days' => $days,
+                    'total_outages' => $outages->count(),
                 ];
-            }
+            });
 
-            $weeks[$i] = [
-                'week_label' => "Week " . ($i + 1),
-                'start_formatted' => $start->format('M d'),
-                'end_formatted' => $end->format('M d'),
-                'total_outages' => array_sum(array_column($days, 'outage_count')),
-                'days' => $days
-            ];
+            return response()->json([
+                'success' => true,
+                'weeks' => $weeks,
+                'updated_at' => now()->toIso8601String(),
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to load weekly outage view',
+                'error' => $e->getMessage()
+            ], 500);
         }
-
-        return response()->json([
-            'success' => true,
-            'weeks' => $weeks
-        ]);
     }
 
+    /**
+     * Get weekly outage view with barangay percentages
+     * Percentage = (outage occurrences / 7 days) * 100
+     */
+    public function getWeeklyOutageViewBarangay()
+    {
+        try {
+            $now = Carbon::now();
+            
+            // Get all unique barangays from devices table
+            $allBarangays = Device::whereNotNull('barangay')
+                ->where('barangay', '!=', '')
+                ->distinct()
+                ->pluck('barangay')
+                ->toArray();
+
+            $weeks = collect(range(0, 3))->map(function ($offset) use ($now, $allBarangays) {
+                $position = 3 - $offset;
+                $start = $now->copy()->startOfWeek(Carbon::MONDAY)->subWeeks($position);
+                $end = $start->copy()->endOfWeek(Carbon::SUNDAY);
+
+                // Get outages for this week with device/household info
+                $outages = Outage::with('household')
+                    ->whereBetween('started_at', [
+                        $start->copy()->startOfDay(),
+                        $end->copy()->endOfDay()
+                    ])->get();
+
+                // Initialize days array (Day 1 = Monday, Day 7 = Sunday)
+                $days = [];
+                for ($day = 1; $day <= 7; $day++) {
+                    $dayDate = $start->copy()->addDays($day - 1);
+                    $dayOutages = $outages->filter(function ($outage) use ($dayDate) {
+                        return $outage->started_at && 
+                               $outage->started_at->format('Y-m-d') === $dayDate->format('Y-m-d');
+                    });
+
+                    // Get barangays affected on this day
+                    $affectedBarangays = $dayOutages->groupBy(function ($outage) {
+                        return $outage->household?->location ?? 'Unknown';
+                    })->map(function ($outagesGroup, $barangay) {
+                        return [
+                            'name' => $barangay,
+                            'outage_count' => $outagesGroup->count(),
+                        ];
+                    })->values();
+
+                    $days[] = [
+                        'day_number' => $day,
+                        'date' => $dayDate->format('Y-m-d'),
+                        'day_name' => $dayDate->format('D'),
+                        'has_outage' => $dayOutages->count() > 0,
+                        'outage_count' => $dayOutages->count(),
+                        'affected_barangays' => $affectedBarangays,
+                    ];
+                }
+
+                // Calculate barangay outage percentages
+                // Group outages by barangay (from household location)
+                $outagesByBarangay = $outages->groupBy(function ($outage) {
+                    return $outage->household?->location ?? 'Unknown';
+                });
+
+                // Build barangay list with all barangays from database
+                $barangayOutages = collect($allBarangays)->map(function ($barangay) use ($outagesByBarangay) {
+                    $outagesGroup = $outagesByBarangay->get($barangay, collect());
+                    $outageCount = $outagesGroup->count();
+                    // Percentage = (outage occurrences / 7 days) * 100
+                    $percentage = ($outageCount / 7) * 100;
+                    
+                    return [
+                        'name' => $barangay,
+                        'outage_count' => $outageCount,
+                        'percentage' => round($percentage, 1),
+                    ];
+                })->sortByDesc('percentage')->values();
+
+                return [
+                    'week_label' => 'Week ' . ($offset + 1),
+                    'iso_week' => $start->isoWeek(),
+                    'iso_year' => $start->isoWeekYear(),
+                    'start_date' => $start->format('Y-m-d'),
+                    'end_date' => $end->format('Y-m-d'),
+                    'start_formatted' => $start->format('M d'),
+                    'end_formatted' => $end->format('M d, Y'),
+                    'days' => $days,
+                    'total_outages' => $outages->count(),
+                    'barangays' => $barangayOutages,
+                ];
+            });
+
+            return response()->json([
+                'success' => true,
+                'weeks' => $weeks,
+                'all_barangays' => $allBarangays,
+                'updated_at' => now()->toIso8601String(),
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to load weekly outage view',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
 
     protected function syncHouseholdsFromDevices(): void
     {

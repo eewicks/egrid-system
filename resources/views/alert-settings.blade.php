@@ -665,58 +665,7 @@
                 </div>
 
                 <!-- Web Push Notifications Section -->
-                <div class="card mt-4">
-                    <div class="card-header">
-                        <h5 class="mb-0">
-                            <i class="fas fa-mobile-alt me-2 text-info"></i>
-                            Web Push Notifications
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-md-8">
-                                <h6 class="text-gray-800 mb-3">Real-time Power Outage Alerts</h6>
-                                <p class="text-muted mb-4">
-                                    Enable browser push notifications to receive instant alerts when power outages are detected 
-                                    in your monitoring devices. These notifications will appear even when the dashboard is minimized.
-                                </p>
-                                
-                                <div class="d-flex align-items-center mb-3">
-                                    <span class="me-3">Push Status:</span>
-                                    <span id="push-status" class="badge badge-warning">Checking...</span>
-                                </div>
-                            </div>
-                            
-                            <div class="col-md-4">
-                                <div class="card border-left-info">
-                                    <div class="card-body">
-                                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
-                                            Notification Features
-                                        </div>
-                                        <ul class="list-unstyled text-sm">
-                                            <li class="mb-2">
-                                                <i class="fas fa-check text-success me-2"></i>
-                                                Real-time outage Monitoring
-                                            </li>
-                                            <li class="mb-2">
-                                                <i class="fas fa-check text-success me-2"></i>
-                                                Works when tab is minimized
-                                            </li>
-                                            <li class="mb-2">
-                                                <i class="fas fa-check text-success me-2"></i>
-                                                Direct link to dashboard
-                                            </li>
-                                            <li class="mb-2">
-                                                <i class="fas fa-check text-success me-2"></i>
-                                                Desktop support
-                                            </li>
-                                        </ul>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+              
 
                 <!-- Recent Logs Section -->
                 <div class="card mt-4" style="background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%); border: none; border-radius: 16px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); overflow: hidden;">

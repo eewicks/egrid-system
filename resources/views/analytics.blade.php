@@ -450,6 +450,218 @@
             opacity: 0.5;
         }
 
+        /* Week Selector Dropdown */
+        #weekSelector {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23fff' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 0.75rem center;
+        }
+
+        #weekSelector:focus {
+            outline: none;
+            border-color: rgba(239, 68, 68, 0.6);
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2);
+        }
+
+        /* Day Number Cells - Smaller */
+        .day-num-cell {
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 0.5rem 0.35rem;
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.8), rgba(30, 41, 59, 0.6));
+            border: 2px solid rgba(148, 163, 184, 0.25);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            min-height: 60px;
+        }
+
+        .day-num-cell:hover {
+            transform: translateY(-2px);
+            border-color: rgba(148, 163, 184, 0.5);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .day-num-cell.has-outage {
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.4), rgba(220, 38, 38, 0.5));
+            border-color: rgba(239, 68, 68, 0.7);
+            box-shadow: 0 0 15px rgba(239, 68, 68, 0.3);
+        }
+
+        .day-num-cell .day-num {
+            font-size: 1rem;
+            font-weight: 800;
+            color: #fff;
+        }
+
+        .day-num-cell .day-label {
+            font-size: 0.55rem;
+            color: rgba(255, 255, 255, 0.6);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 0.15rem;
+        }
+
+        .day-num-cell.has-outage .day-label {
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        /* Outage indicator on day cell */
+        .day-num-cell .outage-indicator {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            width: 8px;
+            height: 8px;
+            background: #ef4444;
+            border-radius: 50%;
+            box-shadow: 0 0 6px rgba(239, 68, 68, 0.8);
+            animation: pulse-dot 1.5s ease-in-out infinite;
+        }
+
+        @keyframes pulse-dot {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.2); opacity: 0.8; }
+        }
+
+        /* Day popup/dropdown */
+        .day-popup {
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            margin-top: 8px;
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            border: 1px solid rgba(148, 163, 184, 0.3);
+            border-radius: 10px;
+            padding: 0.75rem;
+            min-width: 180px;
+            max-width: 220px;
+            z-index: 100;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+            display: none;
+        }
+
+        .day-num-cell.active .day-popup {
+            display: block;
+        }
+
+        .day-popup::before {
+            content: '';
+            position: absolute;
+            top: -6px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-left: 6px solid transparent;
+            border-right: 6px solid transparent;
+            border-bottom: 6px solid rgba(148, 163, 184, 0.3);
+        }
+
+        .day-popup-title {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 0.5rem;
+            padding-bottom: 0.4rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .day-popup-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.35rem 0;
+            font-size: 0.7rem;
+        }
+
+        .day-popup-item .brgy-name {
+            color: rgba(255, 255, 255, 0.9);
+            font-weight: 500;
+        }
+
+        .day-popup-item .brgy-status {
+            padding: 0.15rem 0.4rem;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 0.6rem;
+        }
+
+        .day-popup-item .brgy-status.yes {
+            background: rgba(239, 68, 68, 0.2);
+            color: #fca5a5;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        .day-popup-item .brgy-status.no {
+            background: rgba(16, 185, 129, 0.2);
+            color: #6ee7b7;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .day-popup-empty {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.7rem;
+            text-align: center;
+            padding: 0.5rem 0;
+            font-style: italic;
+        }
+
+        /* Barangay List Styles */
+        .barangay-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.7), rgba(30, 41, 59, 0.5));
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            border-radius: 10px;
+            padding: 0.75rem 1rem;
+            margin-bottom: 0.5rem;
+            transition: all 0.2s ease;
+        }
+
+        .barangay-item:hover {
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.85), rgba(30, 41, 59, 0.65));
+            transform: translateX(3px);
+        }
+
+        .barangay-item .barangay-name {
+            flex: 1;
+            color: #fff;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .barangay-item .outage-percentage {
+            background: rgba(239, 68, 68, 0.2);
+            color: #fecaca;
+            padding: 0.3rem 0.65rem;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 0.8rem;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            min-width: 55px;
+            text-align: center;
+        }
+
+        .no-outages-note {
+            text-align: center;
+            padding: 1.5rem;
+            color: rgba(255, 255, 255, 0.6);
+            font-style: italic;
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            border-radius: 10px;
+        }
+
+        .no-outages-note i {
+            color: #10b981;
+            margin-right: 0.5rem;
+        }
+
         /* Responsive adjustments */
         @media (max-width: 768px) {
             .weekly-outage-container {
@@ -1058,9 +1270,8 @@
                     <div class="d-sm-flex align-items-center justify-content-between mb-4">
                         <h1 class="h3 mb-0" style="color: white; text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);">Analytics Dashboard</h1>
                         <div>
-                            <button class="refresh-btn" onclick="refreshData(this)" data-refresh-btn>
+                            <button class="refresh-btn" onclick="window.location.reload()" data-refresh-btn>
                                 <span class="btn-text">Refresh Data</span>
-                                <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
                             </button>
                         </div>
                     </div>
@@ -1070,7 +1281,7 @@
                 <div class="stat-icon">
                     <i class="fas fa-bolt"></i>
                 </div>
-              <div class="stat-value" id="totalOutages">—</div>
+                <div class="stat-value" id="totalOutages">—</div>
                 <div class="stat-label">Total Outages</div>
             </div>
             
@@ -1099,66 +1310,47 @@
             </div>
         </div>
 
-        <!-- Weekly Household Analytics -->
-        <div class="analytics-card slide-up">
-            <div class="card-header d-flex align-items-center justify-content-between">
+        <!-- Weekly Outage View - Redesigned -->
+        <div class="analytics-card slide-up" style="margin-top: 2rem;">
+            <div class="card-header" style="background: linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(220, 38, 38, 0.1) 100%); border-bottom: 2px solid rgba(239, 68, 68, 0.2); padding: 1.25rem 1.5rem;">
+                <div class="d-flex align-items-center justify-content-between flex-wrap" style="gap: 1rem;">
                 <div>
-                    <h5 class="mb-0"><i class="fas fa-chart-line me-2 text-primary"></i>Weekly Outage Analytics</h5>
-                    <small class="text-muted">Outage counts per week and recent outage times</small>
+                        <h5 class="mb-1" style="color: #fff; font-weight: 700;">
+                            <i class="fas fa-calendar-week me-2" style="color: #ef4444;"></i>
+                            Weekly Outage Analytics
+                        </h5>
+                        <small style="color: rgba(255, 255, 255, 0.7);">Barangay outage percentages per week</small>
                 </div>
-                <span id="topOutageBadge" class="badge-top" style="display:none;"></span>
+                    <div>
+                        <select id="weekSelector" class="form-select" style="background: rgba(30, 41, 59, 0.9); color: #fff; border: 1px solid rgba(239, 68, 68, 0.4); border-radius: 8px; padding: 0.5rem 2rem 0.5rem 1rem; font-weight: 600; cursor: pointer; min-width: 130px;">
+                            <option value="0">Week 1</option>
+                            <option value="1">Week 2</option>
+                            <option value="2">Week 3</option>
+                            <option value="3" selected>Week 4</option>
+                        </select>
             </div>
-            <div class="card-body">
-                <div class="weekly-meta">
-                    <div class="meta-item" data-theme="warning">
-                        <span class="meta-label">Outages this week</span>
-                        <span class="meta-value" id="weeklyOutageTotal">--</span>
                     </div>
-                    <div class="meta-item" data-theme="danger">
-                        <span class="meta-label">Most affected household</span>
-                        <span class="meta-value" id="mostAffectedHousehold">--</span>
-                        <small class="meta-sub" id="mostAffectedCount">—</small>
                     </div>
-                    <div class="meta-item" data-theme="info">
-                        <span class="meta-label">Last refreshed</span>
-                        <span class="meta-value" id="analyticsUpdated">--</span>
-                    </div>
-                </div>
-                <div id="householdGrid" class="household-grid"></div>
-            </div>
+            <div class="card-body" style="padding: 1.5rem;">
+                <!-- Date Range Display -->
+                <div id="weekDateRange" style="text-align: center; margin-bottom: 1.25rem;">
+                    <span style="background: rgba(59, 130, 246, 0.2); color: #93c5fd; padding: 0.5rem 1.25rem; border-radius: 20px; font-weight: 600; font-size: 0.95rem; border: 1px solid rgba(59, 130, 246, 0.3);">
+                        <i class="fas fa-calendar-alt me-2"></i>
+                        <span id="weekRangeText">Loading...</span>
+                    </span>
         </div>
 
-        <!-- Weekly Outage View -->
-        <div class="analytics-card slide-up" style="margin-top: 2rem;">
-            <div class="card-header d-flex align-items-center justify-content-between" style="background: linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(220, 38, 38, 0.1) 100%); border-bottom: 2px solid rgba(239, 68, 68, 0.2);">
-                <div>
-                    <h5 class="mb-1" style="color: #fff; font-weight: 700;">
-                        <i class="fas fa-calendar-week me-2" style="color: #ef4444; text-shadow: 0 2px 4px rgba(239, 68, 68, 0.3);"></i>
-                        Weekly Outage View
-                    </h5>
-                    <small style="color: rgba(255, 255, 255, 0.7); font-size: 0.85rem;">
-                        <i class="fas fa-info-circle me-1"></i>
-                        Day-by-day power outage tracking for the last 4 weeks. Days with outages are highlighted in red.
-                    </small>
+                <!-- Day Numbers (1-7) -->
+                <div id="dayNumbersGrid" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 0.5rem; margin-bottom: 1.5rem;">
+                    <!-- Days will be rendered here -->
                 </div>
-                <div style="display: flex; align-items: center; gap: 0.5rem;">
-                    <span style="display: inline-flex; align-items: center; gap: 0.5rem; background: rgba(239, 68, 68, 0.2); padding: 0.4rem 0.8rem; border-radius: 20px; border: 1px solid rgba(239, 68, 68, 0.3);">
-                        <span style="width: 12px; height: 12px; background: #ef4444; border-radius: 50%; box-shadow: 0 0 8px rgba(239, 68, 68, 0.6);"></span>
-                        <span style="font-size: 0.75rem; color: #fecaca; font-weight: 600;">Outage Day</span>
-                    </span>
-                    <span style="display: inline-flex; align-items: center; gap: 0.5rem; background: rgba(148, 163, 184, 0.15); padding: 0.4rem 0.8rem; border-radius: 20px; border: 1px solid rgba(148, 163, 184, 0.25);">
-                        <span style="width: 12px; height: 12px; background: rgba(148, 163, 184, 0.4); border-radius: 50%;"></span>
-                        <span style="font-size: 0.75rem; color: rgba(255, 255, 255, 0.7); font-weight: 600;">Normal Day</span>
-                    </span>
-                </div>
-            </div>
-            <div class="card-body" style="padding: 2rem;">
-                <div id="weeklyOutageView" class="weekly-outage-container">
-                    <div class="text-center py-5">
-                        <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem; border-width: 0.3rem;">
+
+                <!-- Barangay List with Percentages -->
+                <div id="barangayOutageList" style="margin-top: 1rem;">
+                    <div class="text-center py-4">
+                        <div class="spinner-border text-primary" role="status" style="width: 2rem; height: 2rem;">
                             <span class="sr-only">Loading...</span>
                         </div>
-                        <p class="mt-3" style="color: rgba(255, 255, 255, 0.7); font-size: 1rem;">Loading weekly outage data...</p>
                     </div>
                 </div>
             </div>
@@ -1261,10 +1453,10 @@
                 return Number.isFinite(num) ? num : 0;
             };
 
-        document.getElementById('totalOutages').textContent = stats.totalOutages;
-document.getElementById('todayOutages').textContent = stats.today;
-document.getElementById('thisMonthOutages').textContent = stats.thisMonth;
-document.getElementById('lastMonthOutages').textContent = stats.lastMonth;
+            document.getElementById('totalOutages').textContent = normalized(stats.totalOutages);
+            document.getElementById('thisMonthOutages').textContent = normalized(stats.thisMonth);
+            document.getElementById('todayOutages').textContent = normalized(stats.today);
+            document.getElementById('lastMonthOutages').textContent = normalized(stats.lastMonth);
         }
         function formatDayShort(dateStr) {
             if (!dateStr) return '—';
@@ -1450,76 +1642,144 @@ document.getElementById('lastMonthOutages').textContent = stats.lastMonth;
             analyticsAutoRefresh = setInterval(loadData, 60000); // 1 minute
         }
         
-        // Fetch and display weekly outage view
+        // Store weekly outage data globally
+        let weeklyOutageData = null;
+
+        // Fetch and display weekly outage view with barangay percentages
         async function loadWeeklyOutageView() {
             try {
-                const response = await fetch('{{ route("analytics.weekly-outage-view") }}');
+                const response = await fetch('{{ route("analytics.weekly-outage-view-barangay") }}');
                 const data = await response.json();
                 
                 if (!data.success) {
                     throw new Error(data.message || 'Failed to load weekly outage data');
                 }
 
-                const container = document.getElementById('weeklyOutageView');
-                if (!container) return;
+                weeklyOutageData = data.weeks;
+                
+                // Render the selected week (default: Week 4 = index 3)
+                const selector = document.getElementById('weekSelector');
+                renderSelectedWeek(parseInt(selector.value));
+            } catch (error) {
+                console.error('Error loading weekly outage view:', error);
+                document.getElementById('weekRangeText').textContent = 'Error loading data';
+                document.getElementById('dayNumbersGrid').innerHTML = '';
+                document.getElementById('barangayOutageList').innerHTML = `
+                    <div class="error-message" style="text-align: center; padding: 1.5rem;">
+                        <i class="fas fa-exclamation-triangle" style="color: #ef4444; font-size: 1.5rem;"></i>
+                        <p style="color: rgba(255,255,255,0.7); margin-top: 0.5rem;">Failed to load data. Please refresh.</p>
+                    </div>
+                `;
+            }
+        }
 
-                if (!data.weeks || data.weeks.length === 0) {
-                    container.innerHTML = '<div class="no-outages-message"><i class="fas fa-calendar-check fa-2x mb-3"></i><p>No weekly outage data available</p></div>';
+        // Render the selected week's data
+        function renderSelectedWeek(weekIndex) {
+            if (!weeklyOutageData || !weeklyOutageData[weekIndex]) {
                     return;
                 }
 
-                container.innerHTML = data.weeks.map((week, weekIndex) => {
-                    const daysHtml = week.days.map(day => {
-                        const outageClass = day.has_outage ? 'has-outage' : '';
-                        const outageCount = day.has_outage ? `<span class="day-outage-count">${day.outage_count} ${day.outage_count === 1 ? 'outage' : 'outages'}</span>` : '';
-                        const dateObj = new Date(day.date);
-                        const dayOfMonth = dateObj.getDate();
-                        
+            const week = weeklyOutageData[weekIndex];
+            
+            // Update date range display
+            document.getElementById('weekRangeText').textContent = `${week.start_formatted} – ${week.end_formatted}`;
+
+            // Render day numbers (1-7) with popup
+            const daysGrid = document.getElementById('dayNumbersGrid');
+            const allBarangays = week.barangays || [];
+            
+            daysGrid.innerHTML = week.days.map((day, index) => {
+                const hasOutage = day.has_outage;
+                const outageClass = hasOutage ? 'has-outage' : '';
+                const affectedBarangays = day.affected_barangays || [];
+                
+                // Build popup content showing all barangays with their status
+                let popupContent = '';
+                if (allBarangays.length > 0) {
+                    const affectedNames = affectedBarangays.map(b => b.name);
+                    popupContent = allBarangays.map(brgy => {
+                        const hadOutage = affectedNames.includes(brgy.name);
+                        const statusClass = hadOutage ? 'yes' : 'no';
+                        const statusText = hadOutage ? 'Yes' : 'No';
                         return `
-                            <div class="day-cell ${outageClass}" 
-                                 title="${day.day_name}, ${day.date}${day.has_outage ? ` - ${day.outage_count} outage(s)` : ' - No outages'}"
-                                 style="animation-delay: ${weekIndex * 0.1 + (day.day_number - 1) * 0.05}s">
-                                <span class="day-number">Day ${day.day_number}</span>
-                                <span class="day-name">${day.day_name}</span>
-                                <small style="font-size: 0.6rem; color: rgba(255,255,255,0.5); margin-top: 0.2rem;">${dayOfMonth}</small>
-                                ${outageCount}
+                            <div class="day-popup-item">
+                                <span class="brgy-name">${brgy.name}</span>
+                                <span class="brgy-status ${statusClass}">${statusText}</span>
                             </div>
                         `;
                     }).join('');
+                } else {
+                    popupContent = '<div class="day-popup-empty">No barangays registered.</div>';
+                }
 
-                    const weekStatus = week.total_outages > 0 ? 'has-outages' : 'no-outages';
+                const outageIndicator = hasOutage ? '<span class="outage-indicator"></span>' : '';
                     
                     return `
-                        <div class="week-card ${weekStatus}" style="animation: fadeInUp 0.5s ease-out ${weekIndex * 0.1}s both">
-                            <div class="week-header">
-                                <div style="flex: 1;">
-                                    <h6 class="week-title">
-                                        ${week.week_label}
-                                        ${week.total_outages > 0 ? `<span class="week-outage-count">${week.total_outages} ${week.total_outages === 1 ? 'outage' : 'outages'}</span>` : ''}
-                                    </h6>
-                                    <div class="week-date-range">${week.start_formatted} - ${week.end_formatted}</div>
-                                </div>
-                            </div>
-                            <div class="days-grid">
-                                ${daysHtml}
+                    <div class="day-num-cell ${outageClass}" data-day-index="${index}" onclick="toggleDayPopup(this)">
+                        ${outageIndicator}
+                        <span class="day-num">${day.day_number}</span>
+                        <span class="day-label">${day.day_name}</span>
+                        <div class="day-popup">
+                            <div class="day-popup-title">${day.day_name}, ${day.date}</div>
+                            ${hasOutage ? popupContent : '<div class="day-popup-empty">No outages recorded for this day.</div>'}
                             </div>
                         </div>
                     `;
                 }).join('');
-            } catch (error) {
-                console.error('Error loading weekly outage view:', error);
-                const container = document.getElementById('weeklyOutageView');
-                if (container) {
-                    container.innerHTML = `
-                        <div class="error-message" style="grid-column:1/-1; text-align: center; padding: 2rem;">
-                            <i class="fas fa-exclamation-triangle fa-2x mb-3" style="color: #ef4444;"></i>
-                            <h6 style="color: #fff; margin-bottom: 0.5rem;">Failed to Load Weekly Outage Data</h6>
-                            <p style="color: rgba(255,255,255,0.6);">Please try refreshing the page.</p>
+
+            // Render barangay list with percentages from database
+            const barangayList = document.getElementById('barangayOutageList');
+            const barangays = week.barangays || [];
+
+            if (barangays.length === 0) {
+                barangayList.innerHTML = `
+                    <div class="no-outages-note">
+                        <i class="fas fa-check-circle"></i>
+                        No barangays registered.
                         </div>
                     `;
-                }
+                return;
             }
+
+            // Barangays are already sorted by percentage from API
+            barangayList.innerHTML = barangays.map((brgy) => `
+                <div class="barangay-item">
+                    <span class="barangay-name">${brgy.name}</span>
+                    <span class="outage-percentage">${brgy.percentage.toFixed(1)}%</span>
+                </div>
+            `).join('');
         }
+
+        // Toggle day popup
+        function toggleDayPopup(element) {
+            // Close all other popups
+            document.querySelectorAll('.day-num-cell.active').forEach(cell => {
+                if (cell !== element) {
+                    cell.classList.remove('active');
+                }
+            });
+            // Toggle current popup
+            element.classList.toggle('active');
+        }
+
+        // Close popup when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.day-num-cell')) {
+                document.querySelectorAll('.day-num-cell.active').forEach(cell => {
+                    cell.classList.remove('active');
+                });
+            }
+        });
+
+        // Week selector change handler
+        document.addEventListener('DOMContentLoaded', function() {
+            const weekSelector = document.getElementById('weekSelector');
+            if (weekSelector) {
+                weekSelector.addEventListener('change', function() {
+                    renderSelectedWeek(parseInt(this.value));
+                });
+            }
+        });
 
         // Initialize when page loads
         document.addEventListener('DOMContentLoaded', function() {
