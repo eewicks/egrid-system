@@ -198,7 +198,9 @@ Route::get('/analytics/outage-stats', [AnalyticsController::class, 'getOutageSta
 Route::get('/analytics/weekly-devices', [AnalyticsController::class, 'weeklyOutageAnalytics'])->name('analytics.weekly-devices');
 Route::get('/analytics/weekly-outage-view', [AnalyticsController::class, 'getWeeklyOutageView'])->name('analytics.weekly-outage-view');
 Route::get('/analytics/logs', [AnalyticsController::class, 'logs'])->name('analytics.logs');
-
+Route::get('/analytics/weekly-outage-view-barangay', 
+    [AnalyticsController::class, 'getWeeklyOutageViewBarangay']
+)->name('analytics.weekly-outage-view-barangay');
 
 /*
 |--------------------------------------------------------------------------
