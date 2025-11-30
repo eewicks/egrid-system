@@ -58,4 +58,24 @@ class Device extends Model
     {
         return $this->hasOne(Household::class, 'device_pk');
     }
+
+    public function checkForOutage()
+{
+    if ($this->status === "ON") {
+        return; // No outage
+    }
+
+    // If device was OFF for more than 1 minute → Outage
+    if ($this->last_seen && now()->diffInSeconds($this->last_seen) > 60) {
+
+        Outage::create([
+            'device_id' => $this->id,
+            'household_id' => $this->household->id ?? null,
+            'started_at' => $this->last_seen,
+            'ended_at' => null,
+            'status' => 'active',
+        ]);
+    }
+}
+
 }
