@@ -4,9 +4,10 @@ namespace App\Console\Commands;
 
 use App\Models\Outage;
 use Illuminate\Console\Command;
-
+use App\Models\Device;
 class DetectOutages extends Command
 {
+    
     /**
      * The name and signature of the console command.
      *
