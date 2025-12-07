@@ -83,7 +83,7 @@ Route::middleware('web')->group(function () {
 //     Route::get('/logs', [AdminDashboardController::class, 'logs']);
 // });
 
-Route::prefix('admin/api')->group(function () {
+Route::middleware('web')->prefix('admin/api')->group(function () {
 
     Route::get('/stats', [AdminDashboardController::class, 'stats'])
         ->name('api.stats');
