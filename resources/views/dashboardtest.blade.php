@@ -15,6 +15,8 @@
     <link href="{{asset('assets/admin/vendor/fontawesome-free/css/all.min.css')}}" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css?family=Nunito:200,300,400,600,700,800,900" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 
     <!-- SB Admin CSS -->
    <link rel="stylesheet" href="{{ asset('assets/admin/css/sb-admin-2.min.css') }}">
@@ -1041,19 +1043,18 @@
 // ---------------------------
 // GLOBAL JSON FETCH HELPER
 // ---------------------------
+let lastDeviceStates = {};  // Stores previous status per device
+
+// Universal JSON fetcher
 async function fetchJSON(url) {
     const r = await fetch(url, {
-        headers: {
-            "X-Requested-With": "XMLHttpRequest"
-        }
+        headers: { "X-Requested-With": "XMLHttpRequest" }
     });
     if (!r.ok) throw new Error("HTTP " + r.status);
     return r.json();
 }
 
-// ---------------------------
-// STATUS BADGE
-// ---------------------------
+// Build ONLINE/OFFLINE badge
 function getStatusBadge(device) {
     const status = device.display_status || device.status;
     const isOnline =
@@ -1069,9 +1070,9 @@ function getStatusBadge(device) {
     `;
 }
 
-// ---------------------------
-// LOAD DEVICES (MAIN FUNCTION)
-// ---------------------------
+// ----------------------------------------------------
+// MAIN FUNCTION — LOAD DEVICES AND TRIGGER NOTIFICATIONS
+// ----------------------------------------------------
 async function loadDevices() {
     const loadingState   = document.getElementById('deviceLoadingState');
     const errorState     = document.getElementById('deviceErrorState');
@@ -1086,26 +1087,63 @@ async function loadDevices() {
     emptyState.style.display     = "none";
 
     try {
-        // 🚀 FIXED: ALWAYS HTTPS USING RELATIVE URL
         const data = await fetchJSON("/admin/api/devices");
 
-        if (!data || !data.success) {
-            throw new Error("Invalid JSON response");
-        }
+        if (!data.success) throw new Error("Invalid JSON");
 
         const devices = data.devices || [];
-
-        // Update device counter
         deviceCount.textContent = `${devices.length} device${devices.length !== 1 ? "s" : ""}`;
 
-        // If empty
+        // ----------------------------------------------------
+        // DETECT ONLINE → OFFLINE TRANSITIONS
+        // ----------------------------------------------------
+        devices.forEach(device => {
+
+            const id = device.device_id;
+            const newStatus = (device.display_status || device.status).toUpperCase();
+
+            // Check if previous state existed
+            if (lastDeviceStates[id]) {
+                const oldStatus = lastDeviceStates[id];
+
+                // IF: was ON → now OFF → trigger pop-up
+                if (oldStatus === "ON" && newStatus === "OFF") {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Device Offline',
+                        text: `${device.household_name} just went offline.`,
+                        footer: `Last seen: ${device.last_seen_human}`,
+                        timer: 5000,
+                        timerProgressBar: true
+                    });
+                }
+
+                // IF: was OFF → now ON → show "back online"
+                if (oldStatus === "OFF" && newStatus === "ON") {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Device Online',
+                        text: `${device.household_name} is now back online.`,
+                        footer: `Updated: ${device.last_seen_human}`,
+                        timer: 3500,
+                        timerProgressBar: true
+                    });
+                }
+            }
+
+            // Always update memory state
+            lastDeviceStates[id] = newStatus;
+        });
+
+        // ----------------------------------------------------
+        // BUILD DEVICE CARDS
+        // ----------------------------------------------------
         if (devices.length === 0) {
             loadingState.style.display = "none";
             emptyState.style.display   = "block";
             return;
         }
 
-        // Build device cards
         cardsContainer.innerHTML = devices.map(device => `
             <div class="device-card compact">
                 <div class="device-field device-name">${device.household_name}</div>
@@ -1133,26 +1171,29 @@ async function loadDevices() {
             </div>
         `).join("");
 
-        loadingState.style.display   = "none";
+        loadingState.style.display = "none";
         cardsContainer.style.display = "block";
-        lastUpdate.textContent       = new Date().toLocaleTimeString();
+        lastUpdate.textContent = new Date().toLocaleTimeString();
 
     } catch (err) {
-        console.error("Device loading error:", err);
-
+        console.error("Device load error:", err);
         loadingState.style.display = "none";
-        errorState.style.display   = "block";
+        errorState.style.display = "block";
     }
 }
 
-// ---------------------------
-// AUTO REFRESH
-// ---------------------------
+// ----------------------------------------------------
+// AUTO REFRESH EVERY 1 MINUTE
+// ----------------------------------------------------
 let refreshInterval;
 
 function startAutoRefresh() {
     if (refreshInterval) clearInterval(refreshInterval);
+    
+    // First load instantly
     loadDevices();
+
+    // Refresh every 1 minute
     refreshInterval = setInterval(loadDevices, 60000);
 }
 
@@ -1163,7 +1204,6 @@ function stopAutoRefresh() {
 document.addEventListener('DOMContentLoaded', startAutoRefresh);
 window.addEventListener('beforeunload', stopAutoRefresh);
 </script>
-
 
 </body>
 
