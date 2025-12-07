@@ -23,7 +23,7 @@ class Outage extends Model
     ];
 
     protected $attributes = [
-        'status' => 'open', // Default new outages to open
+        'status' => 'active',
     ];
 
     protected $casts = [
@@ -38,41 +38,16 @@ class Outage extends Model
 
     public function device()
     {
-        return $this->belongsTo(Device::class, 'device_id', 'device_id');
+        return $this->belongsTo(Device::class, 'device_id', 'id'); // FK INT
     }
 
-    public function scopeCurrentWeek($query)
-    {
-        return $query->where('iso_year', now()->isoWeekYear())
-                     ->where('week_number', now()->isoWeek());
-    }
-
-    public function closeAt(\DateTimeInterface $endedAt): void
-    {
-        $ended = Carbon::instance($endedAt);
-        $duration = $this->started_at ? $ended->diffInSeconds($this->started_at) : null;
-
-        $this->forceFill([
-            'ended_at' => $ended,
-            'duration_seconds' => $duration,
-            'status' => 'closed',
-        ])->save();
-    }
-
-    public function getDurationMinutesAttribute(): ?int
-    {
-        return $this->duration_seconds ? (int) round($this->duration_seconds / 60) : null;
-    }
-
-    public function getDurationHumanAttribute(): ?string
+    public function getDurationHumanAttribute()
     {
         if (!$this->duration_seconds) return null;
 
-        return CarbonInterval::seconds($this->duration_seconds)
-            ->cascade()
-            ->forHumans([
-                'parts' => 2,
-                'short' => true,
-            ]);
+        return CarbonInterval::seconds($this->duration_seconds)->cascade()->forHumans([
+            'parts' => 2,
+            'short' => true,
+        ]);
     }
 }
