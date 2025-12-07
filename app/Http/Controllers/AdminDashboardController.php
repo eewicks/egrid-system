@@ -23,27 +23,56 @@ private function recordOutageIfMissing($device)
 {
     $derived = $device->derived_status; // ON or OFF based on timeout
 
-    $lastLog = \App\Models\StatusLog::where('device_id', $device->device_id)
+    // get last status log
+    $lastLog = StatusLog::where('device_id', $device->device_id)
         ->orderBy('created_at', 'desc')
         ->first();
 
-    // If OFF but last log was ON → create OFF log
+    // ---------------------------------------
+    // 1. Create missing status logs
+    // ---------------------------------------
     if ($derived === 'OFF' && (!$lastLog || $lastLog->status === 'ON')) {
-        \App\Models\StatusLog::create([
+        StatusLog::create([
             'device_id' => $device->device_id,
             'status' => 'OFF',
         ]);
     }
 
-    // If ON but last log was OFF → create ON log
     if ($derived === 'ON' && $lastLog && $lastLog->status === 'OFF') {
-        \App\Models\StatusLog::create([
+        StatusLog::create([
             'device_id' => $device->device_id,
             'status' => 'ON',
         ]);
     }
-}
 
+    // ---------------------------------------
+    // 2. Outage LOGIC
+    // ---------------------------------------
+
+    // find existing open outage for this device
+    $openOutage = \App\Models\Outage::where('device_id', $device->id)
+        ->whereNull('ended_at')
+        ->first();
+
+    // When device goes OFF → start outage
+    if ($derived === 'OFF' && !$openOutage) {
+        \App\Models\Outage::create([
+            'device_id'    => $device->id,
+            'household_id' => $device->household_id,
+            'started_at'   => now(),
+            'status'       => 'open'
+        ]);
+    }
+
+    // When device goes ON → close outage
+    if ($derived === 'ON' && $openOutage) {
+        $openOutage->update([
+            'ended_at'          => now(),
+            'duration_seconds'  => now()->diffInSeconds($openOutage->started_at),
+            'status'            => 'closed'
+        ]);
+    }
+}
 
   
     public function stats()
