@@ -27,64 +27,60 @@ class AdminDashboardController extends Controller
      * - Uses string device_id for logs
      * -------------------------------------------------------------------------
      */
-    private function recordOutageIfMissing($device)
-    {
-        $derived = $device->derived_status;   // ON or OFF (computed)
-        $devicePk = $device->id;              // INT FK for outages
-        $householdId = $device->household_id;
+   private function recordOutageIfMissing($device)
+{
+    $derived = $device->derived_status;
+    $devicePk = $device->id;
+    $householdId = $device->household->id ?? null;
 
-        // Find active outage (no ended_at)
-        $openOutage = Outage::where('device_id', $devicePk)
-            ->where('status', 'active')
-            ->whereNull('ended_at')
-            ->first();
+    $openOutage = Outage::where('device_id', $devicePk)
+        ->where('status', 'active')
+        ->whereNull('ended_at')
+        ->first();
 
-        /*
-        |--------------------------------------------------------------------------
-        | 1. DEVICE WENT OFFLINE → CREATE OUTAGE
-        |--------------------------------------------------------------------------
-        */
-        if ($derived === 'OFF' && !$openOutage) {
+    // ------------------------------
+    // DEVICE WENT OFFLINE
+    // ------------------------------
+    if ($derived === 'OFF' && !$openOutage) {
 
-            Outage::create([
-                'device_id'    => $devicePk,
-                'household_id' => $householdId,
-                'started_at'   => now(),
-                'status'       => 'active',   // ENUM-safe value
-            ]);
+        Outage::create([
+            'device_id'      => $devicePk,
+            'household_id'   => $householdId,
+            'started_at'     => now(),
+            'status'         => 'active',
+            'week_number'    => now()->weekOfYear,
+            'iso_year'       => now()->year,
+        ]);
 
-            // Log OFF only once per outage
-            StatusLog::create([
-                'device_id' => $device->device_id,   // string ID for logs
-                'status'    => 'OFF',
-            ]);
+        StatusLog::create([
+            'device_id' => $device->device_id,
+            'status'    => 'OFF',
+        ]);
 
-            return;
-        }
-
-        /*
-        |--------------------------------------------------------------------------
-        | 2. DEVICE CAME BACK ONLINE → CLOSE OUTAGE
-        |--------------------------------------------------------------------------
-        */
-        if ($derived === 'ON' && $openOutage) {
-
-            $endTime = $device->last_seen ?? now();
-
-            $openOutage->update([
-                'ended_at'         => $endTime,
-                'duration_seconds' => $endTime->diffInSeconds($openOutage->started_at),
-                'status'           => 'closed',
-            ]);
-
-            // Log ON only once per outage closing
-            StatusLog::create([
-                'device_id' => $device->device_id,
-                'status'    => 'ON',
-            ]);
-        }
+        return;
     }
 
+    // ------------------------------
+    // DEVICE CAME BACK ONLINE
+    // ------------------------------
+    if ($derived === 'ON' && $openOutage) {
+
+        $endTime = $device->last_seen ?? now();
+
+        $openOutage->update([
+            'ended_at'         => $endTime,
+            'duration_seconds' => $endTime->diffInSeconds($openOutage->started_at),
+            'status'           => 'closed',
+        ]);
+
+        StatusLog::create([
+            'device_id' => $device->device_id,
+            'status'    => 'ON',
+        ]);
+
+        return;
+    }
+}
     /**
      * -------------------------------------------------------------------------
      * API: USED BY DEVICE STATUS ENDPOINT
