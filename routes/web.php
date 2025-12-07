@@ -63,20 +63,25 @@ Route::middleware('web')->group(function () {
 | Removing middleware will break AJAX and cause empty cards.
 |--------------------------------------------------------------------------
 */
-Route::prefix('admin/api')->group(function () {
-    Route::get('/stats', [AdminDashboardController::class, 'stats'])
-        ->name('api.stats');
+// Route::prefix('admin/api')->group(function () {
+//     Route::get('/stats', [AdminDashboardController::class, 'stats'])
+//         ->name('api.stats');
 
-    Route::get('/logs', [AdminDashboardController::class, 'logs'])
-        ->name('api.logs');
+//     Route::get('/logs', [AdminDashboardController::class, 'logs'])
+//         ->name('api.logs');
 
-    Route::get('/device-status', [AdminDashboardController::class, 'deviceStatus'])
-        ->name('api.device-status');
+//     Route::get('/device-status', [AdminDashboardController::class, 'deviceStatus'])
+//         ->name('api.device-status');
 
-    Route::get('/devices', [AdminDashboardController::class, 'getDevices'])
-        ->name('api.devices');
+//     Route::get('/devices', [AdminDashboardController::class, 'getDevices'])
+//         ->name('api.devices');
+// });
+
+Route::middleware('web')->prefix('admin/api')->group(function () {
+    Route::get('/devices', [AdminDashboardController::class, 'getDevices']);
+    Route::get('/stats', [AdminDashboardController::class, 'stats']);
+    Route::get('/logs', [AdminDashboardController::class, 'logs']);
 });
-
 
 /*
 |--------------------------------------------------------------------------
