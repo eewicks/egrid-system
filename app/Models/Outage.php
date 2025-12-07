@@ -2,18 +2,17 @@
 
 namespace App\Models;
 
-use Carbon\CarbonInterval;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Carbon;
+use Carbon\Carbon;
 
 class Outage extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-        'household_id',
         'device_id',
+        'household_id',
         'started_at',
         'ended_at',
         'duration_seconds',
@@ -22,32 +21,34 @@ class Outage extends Model
         'status',
     ];
 
-    protected $attributes = [
-        'status' => 'active',
-    ];
-
     protected $casts = [
         'started_at' => 'datetime',
         'ended_at'   => 'datetime',
     ];
+
+    protected $attributes = [
+        'status' => 'active',
+    ];
+
+    public function device()
+    {
+        return $this->belongsTo(Device::class);
+    }
 
     public function household()
     {
         return $this->belongsTo(Household::class);
     }
 
-    public function device()
+    // FIXED METHOD → REQUIRED BY CONTROLLER / WORKER
+    public function closeAt($time)
     {
-        return $this->belongsTo(Device::class, 'device_id', 'id'); // FK INT
-    }
+        $ended = Carbon::parse($time);
 
-    public function getDurationHumanAttribute()
-    {
-        if (!$this->duration_seconds) return null;
-
-        return CarbonInterval::seconds($this->duration_seconds)->cascade()->forHumans([
-            'parts' => 2,
-            'short' => true,
+        $this->update([
+            'ended_at'         => $ended,
+            'duration_seconds' => $ended->diffInSeconds($this->started_at),
+            'status'           => 'closed',
         ]);
     }
 }
