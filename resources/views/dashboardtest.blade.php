@@ -1043,9 +1043,9 @@
 // ---------------------------
 // GLOBAL JSON FETCH HELPER
 // ---------------------------
-let lastDeviceStates = {};  // Stores previous status per device
+let lastDeviceStates = {};  // { device_id: "ON" / "OFF" }
 
-// Universal JSON fetcher
+// Helper to fetch JSON
 async function fetchJSON(url) {
     const r = await fetch(url, {
         headers: { "X-Requested-With": "XMLHttpRequest" }
@@ -1054,13 +1054,23 @@ async function fetchJSON(url) {
     return r.json();
 }
 
-// Build ONLINE/OFFLINE badge
+// Convert display_status → ON/OFF
+function normalizeStatus(device) {
+    let raw = device.display_status || device.status || "";
+
+    raw = raw.toString().trim().toUpperCase();
+
+    // Convert Active/Inactive → ON/OFF
+    if (raw === "ACTIVE") raw = "ON";
+    if (raw === "INACTIVE") raw = "OFF";
+
+    return raw; // Should now ALWAYS be "ON" or "OFF"
+}
+
+// Build Online/Offline UI badge
 function getStatusBadge(device) {
-    const status = device.display_status || device.status;
-    const isOnline =
-        status === "Active" ||
-        status === "ON" ||
-        status === "Online";
+    const status = normalizeStatus(device);
+    const isOnline = status === "ON";
 
     return `
         <div class="status-badge ${isOnline ? "online" : "offline"}">
@@ -1070,9 +1080,9 @@ function getStatusBadge(device) {
     `;
 }
 
-// ----------------------------------------------------
-// MAIN FUNCTION — LOAD DEVICES AND TRIGGER NOTIFICATIONS
-// ----------------------------------------------------
+// ---------------------------------------------------
+// MAIN LOAD FUNCTION (Triggers notifications)
+// ---------------------------------------------------
 async function loadDevices() {
     const loadingState   = document.getElementById('deviceLoadingState');
     const errorState     = document.getElementById('deviceErrorState');
@@ -1089,24 +1099,22 @@ async function loadDevices() {
     try {
         const data = await fetchJSON("/admin/api/devices");
 
-        if (!data.success) throw new Error("Invalid JSON");
+        if (!data.success) throw new Error("API missing success:true");
 
         const devices = data.devices || [];
         deviceCount.textContent = `${devices.length} device${devices.length !== 1 ? "s" : ""}`;
 
-        // ----------------------------------------------------
-        // DETECT ONLINE → OFFLINE TRANSITIONS
-        // ----------------------------------------------------
+        // ---------------------------------------------------
+        // DETECT transitions AND show popups
+        // ---------------------------------------------------
         devices.forEach(device => {
-
             const id = device.device_id;
-            const newStatus = (device.display_status || device.status).toUpperCase();
+            const newStatus = normalizeStatus(device); // ON or OFF
 
-            // Check if previous state existed
             if (lastDeviceStates[id]) {
                 const oldStatus = lastDeviceStates[id];
 
-                // IF: was ON → now OFF → trigger pop-up
+                // ONLINE → OFFLINE
                 if (oldStatus === "ON" && newStatus === "OFF") {
                     Swal.fire({
                         icon: 'warning',
@@ -1118,7 +1126,7 @@ async function loadDevices() {
                     });
                 }
 
-                // IF: was OFF → now ON → show "back online"
+                // OFFLINE → ONLINE
                 if (oldStatus === "OFF" && newStatus === "ON") {
                     Swal.fire({
                         icon: 'success',
@@ -1131,13 +1139,13 @@ async function loadDevices() {
                 }
             }
 
-            // Always update memory state
+            // Save status to memory
             lastDeviceStates[id] = newStatus;
         });
 
-        // ----------------------------------------------------
+        // ---------------------------------------------------
         // BUILD DEVICE CARDS
-        // ----------------------------------------------------
+        // ---------------------------------------------------
         if (devices.length === 0) {
             loadingState.style.display = "none";
             emptyState.style.display   = "block";
@@ -1149,13 +1157,12 @@ async function loadDevices() {
                 <div class="device-field device-name">${device.household_name}</div>
 
                 <div class="device-field device-id">
-                    <span>ID: ${device.device_id}</span>
+                    ID: ${device.device_id}
                 </div>
 
                 <div class="device-field device-location">
                     <i class="fas fa-map-marker-alt"></i>
                     <span>${device.barangay}</span>
-
                     <span class="device-meta-inline">
                         <span class="meta-divider">•</span>
                         <span class="device-last-seen">
@@ -1178,33 +1185,16 @@ async function loadDevices() {
     } catch (err) {
         console.error("Device load error:", err);
         loadingState.style.display = "none";
-        errorState.style.display = "block";
+        errorState.style.display   = "block";
     }
 }
 
-// ----------------------------------------------------
-// AUTO REFRESH EVERY 1 MINUTE
-// ----------------------------------------------------
-let refreshInterval;
-
-function startAutoRefresh() {
-    if (refreshInterval) clearInterval(refreshInterval);
-    
-    // First load instantly
+// Auto-refresh every 60 seconds
+document.addEventListener('DOMContentLoaded', () => {
     loadDevices();
-
-    // Refresh every 1 minute
-    refreshInterval = setInterval(loadDevices, 60000);
-}
-
-function stopAutoRefresh() {
-    if (refreshInterval) clearInterval(refreshInterval);
-}
-
-document.addEventListener('DOMContentLoaded', startAutoRefresh);
-window.addEventListener('beforeunload', stopAutoRefresh);
+    setInterval(loadDevices, 60000);
+});
 </script>
-
 </body>
 
 </html>
