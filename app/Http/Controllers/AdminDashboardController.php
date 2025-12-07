@@ -18,144 +18,139 @@ class AdminDashboardController extends Controller
 
     /**
      * -------------------------------------------------------------------------
-     * OUTAGE ENGINE (Final, Correct, Guaranteed)
+     * OUTAGE ENGINE — FINAL WORKING VERSION
+     * -------------------------------------------------------------------------
+     * - Creates outage when Arduino stops sending ON
+     * - Closes outage when Arduino comes back online
+     * - Uses derived_status (heartbeat logic)
+     * - Uses device primary key for outages
+     * - Uses string device_id for logs
      * -------------------------------------------------------------------------
      */
-private function recordOutageIfMissing($device)
-{
-    $derived = $device->derived_status;   // ON or OFF
-    $devicePk = $device->id;              // PRIMARY KEY INT (correct for outages)
-    $householdId = $device->household->id ?? null;
+    private function recordOutageIfMissing($device)
+    {
+        $derived = $device->derived_status;   // ON or OFF (computed)
+        $devicePk = $device->id;              // INT FK for outages
+        $householdId = $device->household_id;
 
-    // Find any active (open) outage
-    $openOutage = Outage::where('device_id', $devicePk)
-        ->where('status', 'active')
-        ->whereNull('ended_at')
-        ->first();
+        // Find active outage (no ended_at)
+        $openOutage = Outage::where('device_id', $devicePk)
+            ->where('status', 'active')
+            ->whereNull('ended_at')
+            ->first();
 
-    /*
-    |--------------------------------------------------------------------------
-    | 1. DEVICE WENT OFFLINE (NO HEARTBEAT)
-    |--------------------------------------------------------------------------
-    */
-    if ($derived === 'OFF' && !$openOutage) {
+        /*
+        |--------------------------------------------------------------------------
+        | 1. DEVICE WENT OFFLINE → CREATE OUTAGE
+        |--------------------------------------------------------------------------
+        */
+        if ($derived === 'OFF' && !$openOutage) {
 
-        Outage::create([
-            'device_id'      => $devicePk,        // FK INT — FIXED
-            'household_id'   => $householdId,
-            'started_at'     => now(),
-            'status'         => 'active',          // ENUM: active/closed — FIXED
-        ]);
+            Outage::create([
+                'device_id'    => $devicePk,
+                'household_id' => $householdId,
+                'started_at'   => now(),
+                'status'       => 'active',   // ENUM-safe value
+            ]);
 
-        // Also auto-log OFF event
-        StatusLog::create([
-            'device_id' => $device->device_id,     // string ID for logs (correct)
-            'status'    => 'OFF',
-        ]);
+            // Log OFF only once per outage
+            StatusLog::create([
+                'device_id' => $device->device_id,   // string ID for logs
+                'status'    => 'OFF',
+            ]);
 
-        return;
+            return;
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | 2. DEVICE CAME BACK ONLINE → CLOSE OUTAGE
+        |--------------------------------------------------------------------------
+        */
+        if ($derived === 'ON' && $openOutage) {
+
+            $endTime = $device->last_seen ?? now();
+
+            $openOutage->update([
+                'ended_at'         => $endTime,
+                'duration_seconds' => $endTime->diffInSeconds($openOutage->started_at),
+                'status'           => 'closed',
+            ]);
+
+            // Log ON only once per outage closing
+            StatusLog::create([
+                'device_id' => $device->device_id,
+                'status'    => 'ON',
+            ]);
+        }
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | 2. DEVICE CAME BACK ONLINE (Arduino sending ON again)
-    |--------------------------------------------------------------------------
-    */
-    if ($derived === 'ON' && $openOutage) {
-
-        $endTime = $device->last_seen ?? now();
-
-        $openOutage->update([
-            'ended_at'         => $endTime,
-            'duration_seconds' => $endTime->diffInSeconds($openOutage->started_at),
-            'status'           => 'closed',
-        ]);
-
-        StatusLog::create([
-            'device_id' => $device->device_id,
-            'status'    => 'ON',
-        ]);
-
-        return;
-    }
-
-    /*
-    |--------------------------------------------------------------------------
-    | 3. Prevent duplicate logs (only log if state changed)
-    |--------------------------------------------------------------------------
-    */
-    $lastLog = StatusLog::where('device_id', $device->device_id)
-        ->orderBy('created_at', 'desc')
-        ->first();
-
-    if ($derived === 'OFF' && (!$lastLog || $lastLog->status === 'ON')) {
-        StatusLog::create([
-            'device_id' => $device->device_id,
-            'status'    => 'OFF',
-        ]);
-    }
-
-    if ($derived === 'ON' && $lastLog && $lastLog->status === 'OFF') {
-        StatusLog::create([
-            'device_id' => $device->device_id,
-            'status'    => 'ON',
-        ]);
-    }
-}
     /**
      * -------------------------------------------------------------------------
-     * API USED BY DASHBOARD — NOW WITH OUTAGE DETECTION
+     * API: USED BY DEVICE STATUS ENDPOINT
      * -------------------------------------------------------------------------
      */
-  public function getDevices()
-{
-    try {
-        $thresholdMin = (int) cache(
-            'settings.heartbeat_timeout_minutes',
-            config('services.arduino.heartbeat_timeout_minutes', 1)
-        );
+    public function deviceStatus()
+    {
+        $devices = Device::all();
 
-        $now = Carbon::now();
+        foreach ($devices as $device) {
+            $this->recordOutageIfMissing($device);
+        }
 
-        $devices = Device::orderBy('household_name')
-            ->get()
-            ->map(function ($d) use ($now, $thresholdMin) {
-
-                $lastSeen = $d->last_seen ? Carbon::parse($d->last_seen) : null;
-                $ageSecs  = $lastSeen ? $now->diffInSeconds($lastSeen) : null;
-                $fresh    = $lastSeen ? $ageSecs <= ($thresholdMin * 60) : false;
-
+        return response()->json([
+            'devices' => $devices->map(function ($device) {
                 return [
-                    'id'                => $d->id,
-                    'device_id'         => $d->device_id,   // string ID
-                    'household_name'    => $d->household_name,
-                    'barangay'          => $d->barangay,
-                    'status'            => $fresh ? 'ON' : 'OFF',
-                    'display_status'    => $fresh ? 'Active' : 'Inactive',
-                    'status_badge_class'=> $fresh ? 'bg-success' : 'bg-danger',
-                    'status_icon_class' => $fresh ? 'text-success' : 'text-danger',
-                    'last_seen'         => $lastSeen ? $lastSeen->toDateTimeString() : null,
-                    'last_seen_human'   => $lastSeen ? $lastSeen->diffForHumans() : 'Never',
+                    'device_id'  => $device->device_id, // string
+                    'status'     => $device->derived_status,
+                    'last_seen'  => optional($device->last_seen)->toDateTimeString(),
                 ];
-            });
+            })
+        ]);
+    }
+
+    /**
+     * -------------------------------------------------------------------------
+     * API USED BY DASHBOARD DEVICE CARDS
+     * -------------------------------------------------------------------------
+     */
+    public function getDevices()
+    {
+        $devices = Device::with('household')->get();
+
+        // Run outage detection for each device
+        foreach ($devices as $device) {
+            $this->recordOutageIfMissing($device);
+        }
+
+        $timeoutMin = config('services.arduino.heartbeat_timeout_minutes', 1);
+        $now = Carbon::now();
 
         return response()->json([
             'success' => true,
-            'devices' => $devices
+            'devices' => $devices->map(function ($d) use ($now, $timeoutMin) {
+
+                $lastSeen = $d->last_seen ? Carbon::parse($d->last_seen) : null;
+                $secondsAgo = $lastSeen ? $now->diffInSeconds($lastSeen) : null;
+                $isOnline = $secondsAgo !== null && $secondsAgo <= $timeoutMin * 60;
+
+                return [
+                    'device_id'       => $d->device_id,
+                    'household_name'  => $d->household_name,
+                    'barangay'        => $d->barangay,
+                    'status'          => $isOnline ? 'ON' : 'OFF',
+                    'display_status'  => $isOnline ? 'Active' : 'Inactive',
+                    'last_seen'       => $lastSeen ? $lastSeen->toDateTimeString() : null,
+                    'last_seen_human' => $lastSeen ? $lastSeen->diffForHumans() : 'Never',
+                ];
+            }),
         ]);
-
-    } catch (\Throwable $e) {
-
-        return response()->json([
-            'success' => false,
-            'message' => 'Server error',
-            'error'   => $e->getMessage(),
-            'line'    => $e->getLine()
-        ], 500);
     }
-}
+
     /**
-     * For charts and stats
+     * -------------------------------------------------------------------------
+     * SYSTEM STATS API (Counts ON/OFF devices)
+     * -------------------------------------------------------------------------
      */
     public function stats()
     {
@@ -165,8 +160,7 @@ private function recordOutageIfMissing($device)
         $latest = StatusLog::joinSub($latestPerDevice, 'lpd', function ($join) {
             $join->on('status_logs.device_id', '=', 'lpd.device_id')
                 ->on('status_logs.created_at', '=', 'lpd.max_time');
-        })
-        ->get();
+        })->get();
 
         return response()->json([
             'totals' => [
@@ -177,6 +171,11 @@ private function recordOutageIfMissing($device)
         ]);
     }
 
+    /**
+     * -------------------------------------------------------------------------
+     * RECENT STATUS LOG API
+     * -------------------------------------------------------------------------
+     */
     public function logs()
     {
         return response()->json(
