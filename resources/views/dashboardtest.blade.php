@@ -1153,7 +1153,7 @@ let refreshInterval;
 function startAutoRefresh() {
     if (refreshInterval) clearInterval(refreshInterval);
     loadDevices();
-    refreshInterval = setInterval(loadDevices, 60000);
+    refreshInterval = setInterval(loadDevices, 10000);
 }
 
 function stopAutoRefresh() {

@@ -88,31 +88,15 @@ Route::post('/heartbeat', function (Request $request) {
     $device = \App\Models\Device::where('device_id', $request->device_id)->first();
 
     if (!$device) {
-        return response()->json(['error' => 'Device not registered'], 404);
+        return response()->json(['error' => 'Device not found'], 404);
     }
 
-    // If device was OFF → close outage
-    if ($device->status === "OFF") {
-
-        $activeOutage = \App\Models\Outage::where('device_id', $device->id)
-            ->whereNull('ended_at')
-            ->first();
-
-        if ($activeOutage) {
-            $activeOutage->ended_at = now();
-            $activeOutage->status = 'closed';
-            $activeOutage->save();
-        }
-    }
-
-    // Update device status
-    $device->status = "ON";
+    // Heartbeat updates last_seen only
     $device->last_seen = now();
     $device->save();
 
     return response()->json(['success' => true]);
 });
-
 
 /*
 |--------------------------------------------------------------------------
