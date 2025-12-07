@@ -5,6 +5,7 @@ namespace App\Models;
 use Carbon\CarbonInterval;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Carbon;
 
 class Outage extends Model
 {
@@ -21,6 +22,10 @@ class Outage extends Model
         'status',
     ];
 
+    protected $attributes = [
+        'status' => 'open', // Default new outages to open
+    ];
+
     protected $casts = [
         'started_at' => 'datetime',
         'ended_at'   => 'datetime',
@@ -31,19 +36,21 @@ class Outage extends Model
         return $this->belongsTo(Household::class);
     }
 
+    public function device()
+    {
+        return $this->belongsTo(Device::class, 'device_id', 'device_id');
+    }
+
     public function scopeCurrentWeek($query)
     {
         return $query->where('iso_year', now()->isoWeekYear())
-            ->where('week_number', now()->isoWeek());
+                     ->where('week_number', now()->isoWeek());
     }
 
     public function closeAt(\DateTimeInterface $endedAt): void
     {
-        $ended = \Illuminate\Support\Carbon::instance($endedAt);
-        $duration = null;
-        if ($this->started_at) {
-            $duration = $ended->diffInSeconds($this->started_at);
-        }
+        $ended = Carbon::instance($endedAt);
+        $duration = $this->started_at ? $ended->diffInSeconds($this->started_at) : null;
 
         $this->forceFill([
             'ended_at' => $ended,
@@ -59,14 +66,13 @@ class Outage extends Model
 
     public function getDurationHumanAttribute(): ?string
     {
-        if (!$this->duration_seconds) {
-            return null;
-        }
+        if (!$this->duration_seconds) return null;
 
-        return CarbonInterval::seconds($this->duration_seconds)->cascade()->forHumans([
-            'parts' => 2,
-            'short' => true,
-        ]);
+        return CarbonInterval::seconds($this->duration_seconds)
+            ->cascade()
+            ->forHumans([
+                'parts' => 2,
+                'short' => true,
+            ]);
     }
 }
-

@@ -205,4 +205,14 @@ public function getDevices()
         ], 500);
     }
 }
+
+public function getDerivedStatusAttribute()
+{
+    if (!$this->last_seen) return 'OFF';
+
+    $thresholdMin = config('services.arduino.heartbeat_timeout_minutes', 1);
+    $age = now()->diffInSeconds($this->last_seen);
+
+    return $age <= ($thresholdMin * 60) ? 'ON' : 'OFF';
+}
 }
