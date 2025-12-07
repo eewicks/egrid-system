@@ -21,92 +21,139 @@ class AdminDashboardController extends Controller
      * OUTAGE ENGINE (Final, Correct, Guaranteed)
      * -------------------------------------------------------------------------
      */
-    private function recordOutageIfMissing($device)
-    {
-        $derived = $device->derived_status;   // 'ON' or 'OFF'
-        $deviceId = $device->device_id;       // Correct identifier
+private function recordOutageIfMissing($device)
+{
+    $derived = $device->derived_status;   // ON or OFF
+    $devicePk = $device->id;              // PRIMARY KEY INT (correct for outages)
+    $householdId = $device->household->id ?? null;
 
-        // Any open outage?
-        $openOutage = Outage::where('device_id', $deviceId)
-            ->whereNull('ended_at')
-            ->first();
+    // Find any active (open) outage
+    $openOutage = Outage::where('device_id', $devicePk)
+        ->where('status', 'active')
+        ->whereNull('ended_at')
+        ->first();
 
-        // --------------------------------------------------------
-        // DEVICE WENT OFFLINE → CREATE OUTAGE
-        // --------------------------------------------------------
-        if ($derived === 'OFF' && !$openOutage) {
+    /*
+    |--------------------------------------------------------------------------
+    | 1. DEVICE WENT OFFLINE (NO HEARTBEAT)
+    |--------------------------------------------------------------------------
+    */
+    if ($derived === 'OFF' && !$openOutage) {
 
-            Outage::create([
-                'device_id'     => $deviceId,
-                'household_id'  => $device->household_id,
-                'started_at'    => now(),
-                'status'        => 'open',
-            ]);
+        Outage::create([
+            'device_id'      => $devicePk,        // FK INT — FIXED
+            'household_id'   => $householdId,
+            'started_at'     => now(),
+            'status'         => 'active',          // ENUM: active/closed — FIXED
+        ]);
 
-            StatusLog::create([
-                'device_id' => $deviceId,
-                'status'    => 'OFF',
-            ]);
-        }
+        // Also auto-log OFF event
+        StatusLog::create([
+            'device_id' => $device->device_id,     // string ID for logs (correct)
+            'status'    => 'OFF',
+        ]);
 
-        // --------------------------------------------------------
-        // DEVICE CAME BACK ONLINE → CLOSE OUTAGE
-        // --------------------------------------------------------
-        if ($derived === 'ON' && $openOutage) {
-
-            $end = $device->last_seen ? Carbon::parse($device->last_seen) : now();
-
-            $openOutage->update([
-                'ended_at'         => $end,
-                'duration_seconds' => $end->diffInSeconds($openOutage->started_at),
-                'status'           => 'closed',
-            ]);
-
-            StatusLog::create([
-                'device_id' => $deviceId,
-                'status'    => 'ON',
-            ]);
-        }
+        return;
     }
 
+    /*
+    |--------------------------------------------------------------------------
+    | 2. DEVICE CAME BACK ONLINE (Arduino sending ON again)
+    |--------------------------------------------------------------------------
+    */
+    if ($derived === 'ON' && $openOutage) {
+
+        $endTime = $device->last_seen ?? now();
+
+        $openOutage->update([
+            'ended_at'         => $endTime,
+            'duration_seconds' => $endTime->diffInSeconds($openOutage->started_at),
+            'status'           => 'closed',
+        ]);
+
+        StatusLog::create([
+            'device_id' => $device->device_id,
+            'status'    => 'ON',
+        ]);
+
+        return;
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | 3. Prevent duplicate logs (only log if state changed)
+    |--------------------------------------------------------------------------
+    */
+    $lastLog = StatusLog::where('device_id', $device->device_id)
+        ->orderBy('created_at', 'desc')
+        ->first();
+
+    if ($derived === 'OFF' && (!$lastLog || $lastLog->status === 'ON')) {
+        StatusLog::create([
+            'device_id' => $device->device_id,
+            'status'    => 'OFF',
+        ]);
+    }
+
+    if ($derived === 'ON' && $lastLog && $lastLog->status === 'OFF') {
+        StatusLog::create([
+            'device_id' => $device->device_id,
+            'status'    => 'ON',
+        ]);
+    }
+}
     /**
      * -------------------------------------------------------------------------
      * API USED BY DASHBOARD — NOW WITH OUTAGE DETECTION
      * -------------------------------------------------------------------------
      */
-   public function getDevices()
+  public function getDevices()
 {
-    $devices = Device::all();
+    try {
+        $thresholdMin = (int) cache(
+            'settings.heartbeat_timeout_minutes',
+            config('services.arduino.heartbeat_timeout_minutes', 1)
+        );
 
-    // RUN OUTAGE ENGINE HERE
-    foreach ($devices as $device) {
-        $this->recordOutageIfMissing($device);
+        $now = Carbon::now();
+
+        $devices = Device::orderBy('household_name')
+            ->get()
+            ->map(function ($d) use ($now, $thresholdMin) {
+
+                $lastSeen = $d->last_seen ? Carbon::parse($d->last_seen) : null;
+                $ageSecs  = $lastSeen ? $now->diffInSeconds($lastSeen) : null;
+                $fresh    = $lastSeen ? $ageSecs <= ($thresholdMin * 60) : false;
+
+                return [
+                    'id'                => $d->id,
+                    'device_id'         => $d->device_id,   // string ID
+                    'household_name'    => $d->household_name,
+                    'barangay'          => $d->barangay,
+                    'status'            => $fresh ? 'ON' : 'OFF',
+                    'display_status'    => $fresh ? 'Active' : 'Inactive',
+                    'status_badge_class'=> $fresh ? 'bg-success' : 'bg-danger',
+                    'status_icon_class' => $fresh ? 'text-success' : 'text-danger',
+                    'last_seen'         => $lastSeen ? $lastSeen->toDateTimeString() : null,
+                    'last_seen_human'   => $lastSeen ? $lastSeen->diffForHumans() : 'Never',
+                ];
+            });
+
+        return response()->json([
+            'success' => true,
+            'devices' => $devices
+        ]);
+
+    } catch (\Throwable $e) {
+
+        return response()->json([
+            'success' => false,
+            'message' => 'Server error',
+            'error'   => $e->getMessage(),
+            'line'    => $e->getLine()
+        ], 500);
     }
-
-    $now = Carbon::now();
-    $timeoutMin = config('services.arduino.heartbeat_timeout_minutes', 1);
-
-    return response()->json([
-        'success' => true,
-        'devices' => $devices->map(function ($d) use ($now, $timeoutMin) {
-
-            $lastSeen = $d->last_seen ? Carbon::parse($d->last_seen) : null;
-            $age = $lastSeen ? $now->diffInSeconds($lastSeen) : null;
-            $fresh = $lastSeen ? ($age <= $timeoutMin * 60) : false;
-
-            return [
-                'device_id'       => $d->device_id,
-                'household_name'  => $d->household_name,
-                'barangay'        => $d->barangay,
-                'status'          => $fresh ? 'ON' : 'OFF',
-                'display_status'  => $fresh ? 'Active' : 'Inactive',
-                'last_seen'       => $lastSeen ? $lastSeen->toDateTimeString() : null,
-                'last_seen_human' => $lastSeen ? $lastSeen->diffForHumans() : 'Never',
-            ];
-        }),
-    ]);
 }
-
     /**
      * For charts and stats
      */
