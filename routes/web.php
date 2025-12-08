@@ -11,6 +11,7 @@ use App\Http\Controllers\AnalyticsController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\AlertSettingsController;
 use App\Http\Controllers\BackupRecoveryController;
+use App\Http\Controllers\OutageController;
 use App\Http\Controllers\WebPushController;
 use App\Http\Controllers\SMSController;
 use App\Http\Controllers\TwilioSMSController;
@@ -57,6 +58,9 @@ Route::middleware('web')->group(function () {
 /**
  * DASHBOARD API (CORRECT)
  */
+
+Route::middleware('web')->get('/admin/outage/latest', [OutageController::class, 'latest']);
+
 Route::middleware('web')->prefix('admin/api')->group(function () {
 
     Route::get('/stats', [AdminDashboardController::class, 'stats'])->name('api.stats');
