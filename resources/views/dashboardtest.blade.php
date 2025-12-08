@@ -1043,27 +1043,36 @@
 // ---------------------------
 // GLOBAL JSON FETCH HELPER
 // ---------------------------
-// ---------------------------
-// GLOBAL JSON FETCH HELPER
-// ---------------------------
-let lastDeviceStates = {};  // { device_id: "ON" / "OFF" }
+// ---------------------------------------------------
+// GLOBAL STATE
+// ---------------------------------------------------
+let lastDeviceStates = {};       // { device_id: "ON" / "OFF" / "5MIN_ALERTED" }
+let offlineTimestamp = {};       // { device_id: timestamp when device went offline }
+const OFFLINE_DELAY = 5 * 60 * 1000; // 5 minutes in milliseconds
 
+// ---------------------------------------------------
+// FETCH HELPER
+// ---------------------------------------------------
 async function fetchJSON(url) {
     const r = await fetch(url, { headers: { "X-Requested-With": "XMLHttpRequest" } });
     if (!r.ok) throw new Error("HTTP " + r.status);
     return r.json();
 }
 
+// ---------------------------------------------------
+// NORMALIZE STATUS
+// ---------------------------------------------------
 function normalizeStatus(device) {
     let raw = device.display_status || device.status || "";
     raw = raw.toString().trim().toUpperCase();
-
     if (raw === "ACTIVE") raw = "ON";
     if (raw === "INACTIVE") raw = "OFF";
-
     return raw;
 }
 
+// ---------------------------------------------------
+// BADGE RENDERING
+// ---------------------------------------------------
 function getStatusBadge(device) {
     const status = normalizeStatus(device);
     const isOnline = status === "ON";
@@ -1077,14 +1086,14 @@ function getStatusBadge(device) {
 }
 
 // ---------------------------------------------------
-// SWEETALERT – BEAUTIFIED OFFLINE ALERT
+// SWEETALERT: DEVICE OFFLINE (AFTER 5 MINUTES)
 // ---------------------------------------------------
 function showOfflineAlert(device) {
     Swal.fire({
         title: '<span style="font-weight:800; font-size:28px; color:#ffb366;">Device Offline</span>',
         html: `
             <div style="font-size:16px; color:#e2e8f0;"> 
-                <strong>${device.household_name}</strong> just went offline.
+                <strong>${device.household_name}</strong> has been offline for over 5 minutes.
             </div>
             <div style="margin-top:12px; font-size:14px; color:#94a3b8;">
                 Last seen: ${device.last_seen_human}
@@ -1094,7 +1103,7 @@ function showOfflineAlert(device) {
         iconColor: '#f97316',
         background: 'rgba(15,23,42,0.85)',
         color: '#fff',
-        confirmButtonText: 'Got it',
+        confirmButtonText: 'OK',
         confirmButtonColor: '#6366f1',
 
         showClass: {
@@ -1110,22 +1119,19 @@ function showOfflineAlert(device) {
                 animate__fadeOutUp
                 animate__faster
             `
-        },
-
-        timer: 6000,
-        timerProgressBar: true
+        }
     });
 }
 
 // ---------------------------------------------------
-// SWEETALERT – BEAUTIFIED ONLINE ALERT
+// SWEETALERT: DEVICE ONLINE
 // ---------------------------------------------------
 function showOnlineAlert(device) {
     Swal.fire({
         title: '<span style="font-weight:800; font-size:28px; color:#4ade80;">Device Online</span>',
         html: `
             <div style="font-size:16px; color:#e2e8f0;">
-                <strong>${device.household_name}</strong> is now back online.
+                <strong>${device.household_name}</strong> is back online.
             </div>
             <div style="margin-top:12px; font-size:14px; color:#94a3b8;">
                 Updated: ${device.last_seen_human}
@@ -1151,15 +1157,12 @@ function showOnlineAlert(device) {
                 animate__zoomOut
                 animate__faster
             `
-        },
-
-        timer: 5000,
-        timerProgressBar: true
+        }
     });
 }
 
 // ---------------------------------------------------
-// MAIN LOAD FUNCTION WITH NEW SWEETALERT SYSTEM
+// MAIN LOAD FUNCTION
 // ---------------------------------------------------
 async function loadDevices() {
     const loadingState   = document.getElementById('deviceLoadingState');
@@ -1181,26 +1184,55 @@ async function loadDevices() {
         const devices = data.devices || [];
         deviceCount.textContent = `${devices.length} device${devices.length !== 1 ? "s" : ""}`;
 
-        // Detect transitions (ON->OFF or OFF->ON)
+        // ----------------------------------------------
+        // DEVICE STATUS CHECKING + 5-MINUTE DELAY LOGIC
+        // ----------------------------------------------
         devices.forEach(device => {
             const id = device.device_id;
             const newStatus = normalizeStatus(device);
 
-            if (lastDeviceStates[id]) {
-                const oldStatus = lastDeviceStates[id];
+            // FIRST TIME SEEN
+            if (!lastDeviceStates[id]) {
+                lastDeviceStates[id] = newStatus;
 
-                if (oldStatus === "ON" && newStatus === "OFF") {
-                    showOfflineAlert(device);
+                if (newStatus === "OFF") {
+                    offlineTimestamp[id] = Date.now();
                 }
 
-                if (oldStatus === "OFF" && newStatus === "ON") {
-                    showOnlineAlert(device);
+                return;
+            }
+
+            const oldStatus = lastDeviceStates[id];
+
+            // ONLINE → OFFLINE (start 5-min timer)
+            if (oldStatus === "ON" && newStatus === "OFF") {
+                offlineTimestamp[id] = Date.now();
+            }
+
+            // CHECK IF DEVICE HAS BEEN OFF FOR 5 MINUTES
+            if (newStatus === "OFF") {
+                const offlineTime = offlineTimestamp[id] || Date.now();
+                const elapsed = Date.now() - offlineTime;
+
+                if (elapsed >= OFFLINE_DELAY && oldStatus !== "5MIN_ALERTED") {
+                    showOfflineAlert(device);
+                    lastDeviceStates[id] = "5MIN_ALERTED"; // prevent spam
                 }
             }
 
+            // OFFLINE → ONLINE
+            if (oldStatus !== "ON" && newStatus === "ON") {
+                showOnlineAlert(device);
+                offlineTimestamp[id] = null;
+            }
+
+            // Update last state
             lastDeviceStates[id] = newStatus;
         });
 
+        // ---------------------------------------------------
+        // RENDER DEVICE CARDS
+        // ---------------------------------------------------
         if (devices.length === 0) {
             loadingState.style.display = "none";
             emptyState.style.display   = "block";
@@ -1239,6 +1271,9 @@ async function loadDevices() {
     }
 }
 
+// ---------------------------------------------------
+// AUTO-REFRESH EVERY 60 SECONDS
+// ---------------------------------------------------
 document.addEventListener('DOMContentLoaded', () => {
     loadDevices();
     setInterval(loadDevices, 60000);
