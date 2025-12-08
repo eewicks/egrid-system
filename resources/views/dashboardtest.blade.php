@@ -1067,16 +1067,20 @@ function alertOnline(device) {
 }
 
 async function loadDevices() {
-
-    // IMPORTANT: Use Laravel full absolute URL
-    const data = await fetchJSON("{{ url('/admin/api/devices') }}");
+    const data = await fetchJSON("{{ route('api.devices') }}");
 
     if (!data.success) {
-        console.warn("Device API failed.");
+        document.getElementById("deviceLoadingState").style.display = "none";
+        document.getElementById("deviceErrorState").style.display = "block";
         return;
     }
 
     const devices = data.devices;
+
+    document.getElementById("deviceLoadingState").style.display = "none";
+    document.getElementById("deviceErrorState").style.display = "none";
+    document.getElementById("deviceEmptyState").style.display = devices.length === 0 ? "block" : "none";
+    document.getElementById("deviceCardsContainer").style.display = devices.length > 0 ? "grid" : "none";
 
     document.getElementById("deviceCardsContainer").innerHTML = devices.map(device => `
         <div class="device-card compact">
@@ -1089,48 +1093,17 @@ async function loadDevices() {
                     <span class="device-last-seen"><i class="fas fa-clock"></i> ${device.last_seen_human}</span>
                 </span>
             </div>
-            <div class="device-field status">${getBadge(device)}</div>
+            <div class="device-field status">
+                <span class="status-indicator ${device.status === 'ON' ? 'online' : 'offline'}"></span>
+                <span>${device.status}</span>
+            </div>
         </div>
     `).join("");
 
-    // Update header values
     document.getElementById("deviceCount").textContent = `${devices.length} devices`;
     document.getElementById("lastUpdate").textContent = new Date().toLocaleTimeString();
-
-    // Status change detection logic
-    devices.forEach(device => {
-        const id = device.device_id;
-        const newStatus = getStatus(device);
-
-        // First time seeing device
-        if (!lastState[id]) {
-            lastState[id] = newStatus;
-            if (newStatus === "OFF") offlineStart[id] = Date.now();
-            return;
-        }
-
-        const old = lastState[id];
-
-        // Transition: ON → OFF
-        if (old === "ON" && newStatus === "OFF") {
-            offlineStart[id] = Date.now();
-        }
-
-        // Offline 5 minutes → alert
-        if (newStatus === "OFF" && Date.now() - offlineStart[id] >= DELAY && old !== "ALERTED") {
-            alertOffline(device);
-            lastState[id] = "ALERTED";
-            return;
-        }
-
-        // Transition: OFF → ON
-        if (old !== "ON" && newStatus === "ON") {
-            alertOnline(device);
-        }
-
-        lastState[id] = newStatus;
-    });
 }
+
 
 // Start auto-refresh
 document.addEventListener("DOMContentLoaded", () => {
