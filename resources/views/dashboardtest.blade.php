@@ -1009,12 +1009,17 @@
 
     
 
-
 <script>
+/* -----------------------------------------------------------
+   GLOBAL STATE
+----------------------------------------------------------- */
 let lastState = {};      
 let offlineStart = {};
 const DELAY = 5 * 60 * 1000; // 5 minutes
 
+/* -----------------------------------------------------------
+   FETCH HELPER
+----------------------------------------------------------- */
 async function fetchJSON(url) {
     try {
         const r = await fetch(url, {
@@ -1027,6 +1032,9 @@ async function fetchJSON(url) {
     }
 }
 
+/* -----------------------------------------------------------
+   STATUS FORMATTERS
+----------------------------------------------------------- */
 function getStatus(device) {
     let s = (device.status || "").toUpperCase();
     if (s === "ACTIVE") return "ON";
@@ -1034,16 +1042,9 @@ function getStatus(device) {
     return s;
 }
 
-function getBadge(device) {
-    const s = getStatus(device);
-    return `
-        <div class="status-badge ${s === 'ON' ? 'online' : 'offline'}">
-            <span class="status-indicator ${s === 'ON' ? 'online' : 'offline'}"></span>
-            ${s}
-        </div>
-    `;
-}
-
+/* -----------------------------------------------------------
+   ALERTS
+----------------------------------------------------------- */
 function alertOffline(device) {
     Swal.fire({
         title: "Device Offline",
@@ -1066,6 +1067,9 @@ function alertOnline(device) {
     });
 }
 
+/* -----------------------------------------------------------
+   LOAD DEVICE CARDS
+----------------------------------------------------------- */
 async function loadDevices() {
     const data = await fetchJSON("{{ route('api.devices') }}");
 
@@ -1082,33 +1086,91 @@ async function loadDevices() {
     document.getElementById("deviceEmptyState").style.display = devices.length === 0 ? "block" : "none";
     document.getElementById("deviceCardsContainer").style.display = devices.length > 0 ? "grid" : "none";
 
+    // Render device cards
     document.getElementById("deviceCardsContainer").innerHTML = devices.map(device => `
         <div class="device-card compact">
             <div class="device-field device-name">${device.household_name}</div>
             <div class="device-field device-id">ID: ${device.device_id}</div>
+
             <div class="device-field device-location">
                 <i class="fas fa-map-marker-alt"></i>
                 <span>${device.barangay}</span>
                 <span class="device-meta-inline">
-                    <span class="device-last-seen"><i class="fas fa-clock"></i> ${device.last_seen_human}</span>
+                    <span class="device-last-seen">
+                        <i class="fas fa-clock"></i> ${device.last_seen_human}
+                    </span>
                 </span>
             </div>
+
             <div class="device-field status">
-                <span class="status-indicator ${device.status === 'ON' ? 'online' : 'offline'}"></span>
-                <span>${device.status}</span>
+                <span class="status-indicator ${getStatus(device) === 'ON' ? 'online' : 'offline'}"></span>
+                <span>${getStatus(device)}</span>
             </div>
         </div>
     `).join("");
 
     document.getElementById("deviceCount").textContent = `${devices.length} devices`;
     document.getElementById("lastUpdate").textContent = new Date().toLocaleTimeString();
+
+    /* --------------------------------------------
+        STATUS CHANGE ALERTS
+    -------------------------------------------- */
+    devices.forEach(device => {
+        const id = device.device_id;
+        const newStatus = getStatus(device);
+
+        if (!lastState[id]) {
+            lastState[id] = newStatus;
+            if (newStatus === "OFF") offlineStart[id] = Date.now();
+            return;
+        }
+
+        const old = lastState[id];
+
+        // Went OFFLINE
+        if (old === "ON" && newStatus === "OFF") {
+            offlineStart[id] = Date.now();
+        }
+
+        // Stayed OFFLINE for 5 min
+        if (newStatus === "OFF" && Date.now() - offlineStart[id] >= DELAY && old !== "ALERTED") {
+            alertOffline(device);
+            lastState[id] = "ALERTED";
+            return;
+        }
+
+        // BACK ONLINE
+        if (old !== "ON" && newStatus === "ON") {
+            alertOnline(device);
+        }
+
+        lastState[id] = newStatus;
+    });
 }
 
+/* -----------------------------------------------------------
+   LOAD SUMMARY CARDS (4 METRICS)
+----------------------------------------------------------- */
+async function loadDashboardStats() {
+    const stats = await fetchJSON("{{ url('/admin/api/dashboard-stats') }}");
 
-// Start auto-refresh
+    if (!stats.success) return;
+
+    document.querySelector("#monthlyOutages .count-value").textContent = stats.monthly;
+    document.querySelector("#onlineDevices .count-value").textContent  = stats.online;
+    document.querySelector("#offlineDevices .count-value").textContent = stats.offline;
+    document.querySelector("#todayOutages .count-value").textContent   = stats.today;
+}
+
+/* -----------------------------------------------------------
+   AUTO-INITIALIZE
+----------------------------------------------------------- */
 document.addEventListener("DOMContentLoaded", () => {
     loadDevices();
-    setInterval(loadDevices, 60000); // refresh every 1 min
+    loadDashboardStats();
+
+    setInterval(loadDevices, 60000);
+    setInterval(loadDashboardStats, 60000);
 });
 </script>
 
