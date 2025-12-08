@@ -1069,23 +1069,28 @@ async function checkOutageTable() {
         if (lastOutageId === res.outage_id) return;
         lastOutageId = res.outage_id;
 
-        if (res.status === "active") {
-            Swal.fire({
-                title: `<span style="color:#ef4444;font-size:22px;font-weight:700;">Device Offline</span>`,
-                html: `
-                    <div style="color:#e5e7eb;font-size:15px;">
-                        <b>${res.household}</b> (${res.barangay})<br>
-                        Device ID: <b>${res.device_id}</b><br><br>
-                        <b>Outage Started:</b> ${res.started_at}
-                    </div>
-                `,
-                icon: "warning",
-                iconColor: "#ef4444",
-                background: "rgba(15,23,42,0.95)",
-                color: "#fff",
-                confirmButtonColor: "#ef4444"
-            });
-        }
+        iif (res.status === "active") {
+    Swal.fire({
+        title: `
+            <span style="color:#ef4444; font-size:22px; font-weight:700;">
+                Device Offline
+            </span>
+        `,
+        html: `
+            <div style="color:#e5e7eb; font-size:15px; line-height:1.4;">
+                <span style="color:#fbbf24; font-weight:600;">⚠️ Outage Detected</span><br>
+                Household <b>${res.household}</b> (${res.barangay})<br>
+                Device ID: <b>${res.device_id}</b><br>
+                Outage Started: <b>${res.started_at}</b>
+            </div>
+        `,
+        icon: "warning",
+        iconColor: "#f87171",
+        background: "rgba(15,23,42,0.95)",
+        color: "#fff",
+        confirmButtonColor: "#ef4444"
+    });
+}
 
         if (res.status === "closed") {
             Swal.fire({
