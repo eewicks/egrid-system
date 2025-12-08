@@ -1189,12 +1189,36 @@ function getStatusBadge(device) {
     `;
 }
 
-async function loadDevices() {
+asasync function loadDevices() {
+    const loading = document.getElementById("deviceLoadingState");
+    const container = document.getElementById("deviceCardsContainer");
+    const empty = document.getElementById("deviceEmptyState");
+    const error = document.getElementById("deviceErrorState");
+    const count = document.getElementById("deviceCount");
+    const lastUpdate = document.getElementById("lastUpdate");
+
     try {
-        const data = await fetch("/admin/api/devices").then(r => r.json());
+        // Show loading
+        loading.style.display = "block";
+        container.style.display = "none";
+        empty.style.display = "none";
+        error.style.display = "none";
+
+        const res = await fetch("/admin/api/devices");
+        const data = await res.json();
+
         const devices = data.devices || [];
 
-        const container = document.getElementById("deviceCardsContainer");
+        // Update device count
+        count.textContent = `${devices.length} devices`;
+
+        if (devices.length === 0) {
+            loading.style.display = "none";
+            empty.style.display = "block";
+            return;
+        }
+
+        // Render device cards
         container.innerHTML = devices.map(device => `
             <div class="device-card compact">
                 <div class="device-field device-name">${device.household_name}</div>
@@ -1203,6 +1227,7 @@ async function loadDevices() {
                 <div class="device-field device-location">
                     <i class="fas fa-map-marker-alt"></i>
                     <span>${device.barangay}</span>
+
                     <span class="device-meta-inline">
                         <span class="meta-divider">•</span>
                         <span class="device-last-seen">
@@ -1217,8 +1242,18 @@ async function loadDevices() {
             </div>
         `).join("");
 
+        // Hide loader, show cards
+        loading.style.display = "none";
+        container.style.display = "grid";
+
+        // Update timestamp
+        lastUpdate.textContent = new Date().toLocaleTimeString();
+
     } catch (err) {
         console.error("DEVICE LOAD ERROR:", err);
+
+        loading.style.display = "none";
+        error.style.display = "block";
     }
 }
 
