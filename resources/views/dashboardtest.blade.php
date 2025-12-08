@@ -816,79 +816,108 @@
                     
 
                     <!-- Modern Stats Grid -->
-               <div class="row mb-3">
+                    <div class="row mb-3">
+                        <!-- Monthly Outages Card -->
+                        <div class="col-xl-3 col-lg-3 col-md-6 mb-3">
+                            <div class="card h-100" style="background: linear-gradient(135deg, #1e293b 0%, #334155 100%); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 14px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1); transition: all 0.3s ease; position: relative; overflow: hidden; backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); min-height: 96px;">
+                                <div style="position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, #3b82f6, #1d4ed8);"></div>
+                                <div class="card-body p-2">
+                                    <div class="d-flex align-items-center justify-content-between mb-1">
+                                        <div style="width: 32px; height: 32px; background: linear-gradient(135deg, #3b82f6, #1d4ed8); border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+                                            <i class="fas fa-chart-line" style="color: white; font-size: 13px;"></i>
+                                        </div>
+                                        <div class="text-right">
+                                            <div style="font-size: 1.15rem; font-weight: 700; color: white; line-height: 1; text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);" id="monthlyOutages">
+                                                <i class="fas fa-spinner fa-spin" style="display: none;"></i>
+                                                <span class="count-value">--</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <h6 style="color: rgba(255, 255, 255, 0.9); font-weight: 600; font-size: 0.875rem; margin-bottom: 8px; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);">Monthly Outages</h6>
+                                    <p style="color: rgba(255, 255, 255, 0.7); font-size: 0.75rem; margin: 0; display: flex; align-items: center;">
+                                        <i class="fas fa-chart-line me-2"></i>
+                                        Monthly outage statistics
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
 
-    <!-- Monthly Outages -->
-    <div class="col-xl-3 col-lg-3 col-md-6 mb-3">
-        <div class="card h-100 gradient-card">
-            <div class="card-topline blue"></div>
-            <div class="card-body p-2">
-                <div class="d-flex align-items-center justify-content-between mb-1">
-                    <div class="icon-box blue"><i class="fas fa-chart-line"></i></div>
-                    <div id="monthlyOutages" class="stat-number">
-                        <span class="count-value">--</span>
+                        <!-- Online Devices Card -->
+                        <div class="col-xl-3 col-lg-3 col-md-6 mb-3">
+                            <div class="card h-100" style="background: linear-gradient(135deg, #1e293b 0%, #334155 100%); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 14px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1); transition: all 0.3s ease; position: relative; overflow: hidden; backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); min-height: 96px;">
+                                <div style="position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, #10b981, #059669);"></div>
+                                <div class="card-body p-2">
+                                    <div class="d-flex align-items-center justify-content-between mb-1">
+                                        <div style="width: 32px; height: 32px; background: linear-gradient(135deg, #10b981, #059669); border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+                                            <i class="fas fa-wifi" style="color: white; font-size: 13px;"></i>
+                                        </div>
+                                        <div class="text-right">
+                                            <div style="font-size: 1.15rem; font-weight: 700; color: white; line-height: 1; text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);" id="onlineDevices">
+                                                <i class="fas fa-spinner fa-spin" style="display: none;"></i>
+                                                <span class="count-value">--</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <h6 style="color: #64748b; font-weight: 600; font-size: 0.875rem; margin-bottom: 8px;">Online Devices</h6>
+                                    <p style="color: rgba(255, 255, 255, 0.7); font-size: 0.75rem; margin: 0; display: flex; align-items: center;">
+                                        <div style="width: 8px; height: 8px; background: #10b981; border-radius: 50%; margin-right: 8px; animation: pulse 2s infinite;"></div>
+                                        Currently reporting
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Offline Devices Card -->
+                        <div class="col-xl-3 col-lg-3 col-md-6 mb-3">
+                            <div class="card h-100" style="background: linear-gradient(135deg, #1e293b 0%, #334155 100%); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 14px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1); transition: all 0.3s ease; position: relative; overflow: hidden; backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); min-height: 96px;">
+                                <div style="position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, #ef4444, #dc2626);"></div>
+                                <div class="card-body p-2">
+                                    <div class="d-flex align-items-center justify-content-between mb-1">
+                                        <div style="width: 32px; height: 32px; background: linear-gradient(135deg, #ef4444, #dc2626); border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+                                            <i class="fas fa-exclamation-triangle" style="color: white; font-size: 13px;"></i>
+                                        </div>
+                                        <div class="text-right">
+                                            <div style="font-size: 1.15rem; font-weight: 700; color: white; line-height: 1; text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);" id="offlineDevices">
+                                                <i class="fas fa-spinner fa-spin" style="display: none;"></i>
+                                                <span class="count-value">--</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <h6 style="color: #64748b; font-weight: 600; font-size: 0.875rem; margin-bottom: 8px;">Offline Devices</h6>
+                                    <p style="color: rgba(255, 255, 255, 0.7); font-size: 0.75rem; margin: 0; display: flex; align-items: center;">
+                                        <div style="width: 8px; height: 8px; background: #ef4444; border-radius: 50%; margin-right: 8px; animation: pulse 2s infinite;"></div>
+                                        Needs attention
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Today's Outages Card -->
+                        <div class="col-xl-3 col-lg-3 col-md-6 mb-3">
+                            <div class="card h-100" style="background: linear-gradient(135deg, #1e293b 0%, #334155 100%); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 14px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1); transition: all 0.3s ease; position: relative; overflow: hidden; backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); min-height: 96px;">
+                                <div style="position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, #f59e0b, #d97706);"></div>
+                                <div class="card-body p-2">
+                                    <div class="d-flex align-items-center justify-content-between mb-1">
+                                        <div style="width: 32px; height: 32px; background: linear-gradient(135deg, #f59e0b, #d97706); border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+                                            <i class="fas fa-clock" style="color: white; font-size: 13px;"></i>
+                                        </div>
+                                        <div class="text-right">
+                                            <div style="font-size: 1.15rem; font-weight: 700; color: white; line-height: 1; text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);" id="todayOutages">
+                                                <i class="fas fa-spinner fa-spin" style="display: none;"></i>
+                                                <span class="count-value">--</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <h6 style="color: #64748b; font-weight: 600; font-size: 0.875rem; margin-bottom: 8px;">Today's Outages</h6>
+                                    <p style="color: rgba(255, 255, 255, 0.7); font-size: 0.75rem; margin: 0; display: flex; align-items: center;">
+                                        <i class="fas fa-clock me-2"></i>
+                                        Off events (24h)
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                </div>
-                <h6 class="stat-title">Monthly Outages</h6>
-                <p class="stat-desc"><i class="fas fa-chart-line me-2"></i>Monthly outage statistics</p>
-            </div>
-        </div>
-    </div>
 
-    <!-- Online Devices -->
-    <div class="col-xl-3 col-lg-3 col-md-6 mb-3">
-        <div class="card h-100 gradient-card">
-            <div class="card-topline green"></div>
-            <div class="card-body p-2">
-                <div class="d-flex align-items-center justify-content-between mb-1">
-                    <div class="icon-box green"><i class="fas fa-wifi"></i></div>
-                    <div id="onlineDevices" class="stat-number">
-                        <span class="count-value">--</span>
-                    </div>
-                </div>
-                <h6 class="stat-title">Online Devices</h6>
-                <p class="stat-desc">
-                    <div class="dot green"></div>Currently reporting
-                </p>
-            </div>
-        </div>
-    </div>
-
-    <!-- Offline Devices -->
-    <div class="col-xl-3 col-lg-3 col-md-6 mb-3">
-        <div class="card h-100 gradient-card">
-            <div class="card-topline red"></div>
-            <div class="card-body p-2">
-                <div class="d-flex align-items-center justify-content-between mb-1">
-                    <div class="icon-box red"><i class="fas fa-exclamation-triangle"></i></div>
-                    <div id="offlineDevices" class="stat-number">
-                        <span class="count-value">--</span>
-                    </div>
-                </div>
-                <h6 class="stat-title">Offline Devices</h6>
-                <p class="stat-desc"><div class="dot red"></div>Needs attention</p>
-            </div>
-        </div>
-    </div>
-
-    <!-- Today's Outages -->
-    <div class="col-xl-3 col-lg-3 col-md-6 mb-3">
-        <div class="card h-100 gradient-card">
-            <div class="card-topline orange"></div>
-            <div class="card-body p-2">
-                <div class="d-flex align-items-center justify-content-between mb-1">
-                    <div class="icon-box orange"><i class="fas fa-clock"></i></div>
-                    <div id="todayOutages" class="stat-number">
-                        <span class="count-value">--</span>
-                    </div>
-                </div>
-                <h6 class="stat-title">Today's Outages</h6>
-                <p class="stat-desc"><i class="fas fa-clock me-2"></i>Off events (24h)</p>
-            </div>
-        </div>
-    </div>
-
-</div>
                     <!-- Device Status - Full Width -->
                     <div class="row mb-4">
                         <!-- Device Status Cards -->
@@ -1007,111 +1036,275 @@
 
     <!-- Page level plugins removed: Chart.js not used on this page -->
 
-    
-
-
+    <script>
+        // Removed System Status and Recent Events auto-refresh scripts
+    </script>
 <script>
-let lastState = {};      
-let offlineStart = {};
-const DELAY = 5 * 60 * 1000; // 5 minutes
+// ---------------------------
+// GLOBAL JSON FETCH HELPER
+// ---------------------------
+// ---------------------------------------------------
+// GLOBAL STATE
+// ---------------------------------------------------
+let lastDeviceStates = {};       // { device_id: "ON" / "OFF" / "5MIN_ALERTED" }
+let offlineTimestamp = {};       // { device_id: timestamp when device went offline }
+const OFFLINE_DELAY = 5 * 60 * 1000; // 5 minutes in milliseconds
 
+// ---------------------------------------------------
+// FETCH HELPER
+// ---------------------------------------------------
 async function fetchJSON(url) {
-    try {
-        const r = await fetch(url, {
-            headers: { "X-Requested-With": "XMLHttpRequest" }
-        });
-        return r.json();
-    } catch (e) {
-        console.error("Fetch failed:", e);
-        return { success: false };
-    }
+    const r = await fetch(url, { headers: { "X-Requested-With": "XMLHttpRequest" } });
+    if (!r.ok) throw new Error("HTTP " + r.status);
+    return r.json();
 }
 
-function getStatus(device) {
-    let s = (device.status || "").toUpperCase();
-    if (s === "ACTIVE") return "ON";
-    if (s === "INACTIVE") return "OFF";
-    return s;
+// ---------------------------------------------------
+// NORMALIZE STATUS
+// ---------------------------------------------------
+function normalizeStatus(device) {
+    let raw = device.display_status || device.status || "";
+    raw = raw.toString().trim().toUpperCase();
+    if (raw === "ACTIVE") raw = "ON";
+    if (raw === "INACTIVE") raw = "OFF";
+    return raw;
 }
 
-function getBadge(device) {
-    const s = getStatus(device);
+// ---------------------------------------------------
+// BADGE RENDERING
+// ---------------------------------------------------
+function getStatusBadge(device) {
+    const status = normalizeStatus(device);
+    const isOnline = status === "ON";
+
     return `
-        <div class="status-badge ${s === 'ON' ? 'online' : 'offline'}">
-            <span class="status-indicator ${s === 'ON' ? 'online' : 'offline'}"></span>
-            ${s}
+        <div class="status-badge ${isOnline ? "online" : "offline"}">
+            <span class="status-indicator ${isOnline ? "online" : "offline"}"></span>
+            ${isOnline ? "ONLINE" : "OFFLINE"}
         </div>
     `;
 }
 
-function alertOffline(device) {
+// ---------------------------------------------------
+// SWEETALERT: DEVICE OFFLINE (AFTER 5 MINUTES)
+// ---------------------------------------------------
+function showOfflineAlert(device) {
     Swal.fire({
-        title: "Device Offline",
-        html: `<strong>${device.household_name}</strong> has been offline for 5 minutes.`,
-        icon: "warning",
-        background: "#111827",
-        color: "#fff",
-        confirmButtonColor: "#f87171"
+        title: '<span style="font-weight:800; font-size:28px; color:#ffb366;">Device Offline</span>',
+        html: `
+            <div style="font-size:16px; color:#e2e8f0;"> 
+                <strong>${device.household_name}</strong> has been offline for over 5 minutes.
+            </div>
+            <div style="margin-top:12px; font-size:14px; color:#94a3b8;">
+                Last seen: ${device.last_seen_human}
+            </div>
+        `,
+        icon: 'warning',
+        iconColor: '#f97316',
+        background: 'rgba(15,23,42,0.85)',
+        color: '#fff',
+        confirmButtonText: 'OK',
+        confirmButtonColor: '#6366f1',
+
+        showClass: {
+            popup: `
+                animate__animated
+                animate__fadeInDown
+                animate__faster
+            `
+        },
+        hideClass: {
+            popup: `
+                animate__animated
+                animate__fadeOutUp
+                animate__faster
+            `
+        }
     });
 }
 
-function alertOnline(device) {
+// ---------------------------------------------------
+// SWEETALERT: DEVICE ONLINE
+// ---------------------------------------------------
+function showOnlineAlert(device) {
     Swal.fire({
-        title: "Device Online",
-        html: `<strong>${device.household_name}</strong> is back online.`,
-        icon: "success",
-        background: "#111827",
-        color: "#fff",
-        confirmButtonColor: "#4ade80"
+        title: '<span style="font-weight:800; font-size:28px; color:#4ade80;">Device Online</span>',
+        html: `
+            <div style="font-size:16px; color:#e2e8f0;">
+                <strong>${device.household_name}</strong> is back online.
+            </div>
+            <div style="margin-top:12px; font-size:14px; color:#94a3b8;">
+                Updated: ${device.last_seen_human}
+            </div>
+        `,
+        icon: 'success',
+        iconColor: '#4ade80',
+        background: 'rgba(15,23,42,0.85)',
+        color: '#fff',
+        confirmButtonText: 'Nice!',
+        confirmButtonColor: '#22c55e',
+
+        showClass: {
+            popup: `
+                animate__animated
+                animate__zoomIn
+                animate__faster
+            `
+        },
+        hideClass: {
+            popup: `
+                animate__animated
+                animate__zoomOut
+                animate__faster
+            `
+        }
     });
 }
 
-async function loadDevices() {
-    const data = await fetchJSON("{{ route('api.devices') }}");
+async function loadDashboardStats() {
+    try {
+        const response = await fetch("/admin/api/dashboard-stats");
+        const data = await response.json();
 
-    if (!data.success) {
-        document.getElementById("deviceLoadingState").style.display = "none";
-        document.getElementById("deviceErrorState").style.display = "block";
-        return;
+        if (!data.success) return;
+
+        // Update card numbers
+        document.querySelector("#onlineDevices .count-value").textContent = data.online;
+        document.querySelector("#offlineDevices .count-value").textContent = data.offline;
+        document.querySelector("#monthlyOutages .count-value").textContent = data.monthly;
+        document.querySelector("#todayOutages .count-value").textContent = data.today;
+
+    } catch (e) {
+        console.error("Failed to load dashboard stats", e);
     }
-
-    const devices = data.devices;
-
-    document.getElementById("deviceLoadingState").style.display = "none";
-    document.getElementById("deviceErrorState").style.display = "none";
-    document.getElementById("deviceEmptyState").style.display = devices.length === 0 ? "block" : "none";
-    document.getElementById("deviceCardsContainer").style.display = devices.length > 0 ? "grid" : "none";
-
-    document.getElementById("deviceCardsContainer").innerHTML = devices.map(device => `
-        <div class="device-card compact">
-            <div class="device-field device-name">${device.household_name}</div>
-            <div class="device-field device-id">ID: ${device.device_id}</div>
-            <div class="device-field device-location">
-                <i class="fas fa-map-marker-alt"></i>
-                <span>${device.barangay}</span>
-                <span class="device-meta-inline">
-                    <span class="device-last-seen"><i class="fas fa-clock"></i> ${device.last_seen_human}</span>
-                </span>
-            </div>
-            <div class="device-field status">
-                <span class="status-indicator ${device.status === 'ON' ? 'online' : 'offline'}"></span>
-                <span>${device.status}</span>
-            </div>
-        </div>
-    `).join("");
-
-    document.getElementById("deviceCount").textContent = `${devices.length} devices`;
-    document.getElementById("lastUpdate").textContent = new Date().toLocaleTimeString();
 }
 
-
-// Start auto-refresh
+// Auto-load stats
 document.addEventListener("DOMContentLoaded", () => {
-    loadDevices();
-    setInterval(loadDevices, 60000); // refresh every 1 min
+    loadDashboardStats();
+    setInterval(loadDashboardStats, 60000); // refresh every 60s
 });
-</script>
 
+
+// ---------------------------------------------------
+// MAIN LOAD FUNCTION
+// ---------------------------------------------------
+async function loadDevices() {
+    const loadingState   = document.getElementById('deviceLoadingState');
+    const errorState     = document.getElementById('deviceErrorState');
+    const cardsContainer = document.getElementById('deviceCardsContainer');
+    const emptyState     = document.getElementById('deviceEmptyState');
+    const deviceCount    = document.getElementById('deviceCount');
+    const lastUpdate     = document.getElementById('lastUpdate');
+
+    loadingState.style.display = "block";
+    errorState.style.display   = "none";
+    cardsContainer.style.display = "none";
+    emptyState.style.display     = "none";
+
+    try {
+        const data = await fetchJSON("/admin/api/devices");
+        if (!data.success) throw new Error("API missing success:true");
+
+        const devices = data.devices || [];
+        deviceCount.textContent = `${devices.length} device${devices.length !== 1 ? "s" : ""}`;
+
+        // ----------------------------------------------
+        // DEVICE STATUS CHECKING + 5-MINUTE DELAY LOGIC
+        // ----------------------------------------------
+        devices.forEach(device => {
+            const id = device.device_id;
+            const newStatus = normalizeStatus(device);
+
+            // FIRST TIME SEEN
+            if (!lastDeviceStates[id]) {
+                lastDeviceStates[id] = newStatus;
+
+                if (newStatus === "OFF") {
+                    offlineTimestamp[id] = Date.now();
+                }
+
+                return;
+            }
+
+            const oldStatus = lastDeviceStates[id];
+
+            // ONLINE → OFFLINE (start 5-min timer)
+            if (oldStatus === "ON" && newStatus === "OFF") {
+                offlineTimestamp[id] = Date.now();
+            }
+
+            // CHECK IF DEVICE HAS BEEN OFF FOR 5 MINUTES
+            if (newStatus === "OFF") {
+                const offlineTime = offlineTimestamp[id] || Date.now();
+                const elapsed = Date.now() - offlineTime;
+
+                if (elapsed >= OFFLINE_DELAY && oldStatus !== "5MIN_ALERTED") {
+                    showOfflineAlert(device);
+                    lastDeviceStates[id] = "5MIN_ALERTED"; // prevent spam
+                }
+            }
+
+            // OFFLINE → ONLINE
+            if (oldStatus !== "ON" && newStatus === "ON") {
+                showOnlineAlert(device);
+                offlineTimestamp[id] = null;
+            }
+
+            // Update last state
+            lastDeviceStates[id] = newStatus;
+        });
+
+        // ---------------------------------------------------
+        // RENDER DEVICE CARDS
+        // ---------------------------------------------------
+        if (devices.length === 0) {
+            loadingState.style.display = "none";
+            emptyState.style.display   = "block";
+            return;
+        }
+
+        cardsContainer.innerHTML = devices.map(device => `
+            <div class="device-card compact">
+                <div class="device-field device-name">${device.household_name}</div>
+                <div class="device-field device-id">ID: ${device.device_id}</div>
+                <div class="device-field device-location">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <span>${device.barangay}</span>
+                    <span class="device-meta-inline">
+                        <span class="meta-divider">•</span>
+                        <span class="device-last-seen">
+                            <i class="fas fa-clock"></i>
+                            ${device.last_seen_human}
+                        </span>
+                    </span>
+                </div>
+                <div class="device-field status">
+                    ${getStatusBadge(device)}
+                </div>
+            </div>
+        `).join("");
+
+        loadingState.style.display = "none";
+        cardsContainer.style.display = "block";
+        lastUpdate.textContent = new Date().toLocaleTimeString();
+
+    } catch (err) {
+        console.error("Device load error:", err);
+        loadingState.style.display = "none";
+        errorState.style.display   = "block";
+    }
+}
+
+// ---------------------------------------------------
+// AUTO-REFRESH EVERY 60 SECONDS
+// ---------------------------------------------------
+document.addEventListener('DOMContentLoaded', () => {
+    loadDevices();
+    setInterval(loadDevices, 60000);
+});
+
+</script>
 </body>
 
 </html>
