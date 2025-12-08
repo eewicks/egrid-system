@@ -59,19 +59,15 @@ Route::middleware('web')->group(function () {
  * DASHBOARD API (CORRECT)
  */
 
-Route::middleware('web')->group(function () {
+Route::middleware('web')->get('/admin/outage/latest', [OutageController::class, 'latest']);
 
-    // Outage detection used by dashboard popup
-    Route::get('/admin/outage/latest', [OutageController::class, 'latest']);
+Route::middleware('web')->prefix('admin/api')->group(function () {
 
-    // Dashboard API routes
-    Route::prefix('admin/api')->group(function () {
-        Route::get('/stats', [AdminDashboardController::class, 'stats']);
-        Route::get('/logs', [AdminDashboardController::class, 'logs']);
-        Route::get('/device-status', [AdminDashboardController::class, 'deviceStatus']);
-        Route::get('/dashboard-stats', [AdminDashboardController::class, 'dashboardStats']);
-        Route::get('/devices', [AdminDashboardController::class, 'getDevices']);
-    });
+    Route::get('/stats', [AdminDashboardController::class, 'stats'])->name('api.stats');
+    Route::get('/logs', [AdminDashboardController::class, 'logs'])->name('api.logs');
+    Route::get('/device-status', [AdminDashboardController::class, 'deviceStatus'])->name('api.device-status');
+    Route::get('/dashboard-stats', [AdminDashboardController::class, 'dashboardStats']);
+    Route::get('/devices', [AdminDashboardController::class, 'getDevices'])->name('api.devices');
 
 });
 
