@@ -20,272 +20,167 @@
 
     <!-- SB Admin CSS -->
    <link rel="stylesheet" href="{{ asset('assets/admin/css/sb-admin-2.min.css') }}">
-
 <style>
 
-/* =============================
-   FIXED SIDEBAR LAYOUT
-============================= */
+/* ======================================
+   GLOBAL LAYOUT / SIDEBAR FIXES
+====================================== */
 #accordionSidebar.sidebar {
     position: fixed !important;
     top: 0 !important;
     left: 0 !important;
     height: 100vh !important;
-    max-height: 100vh !important;
     overflow-y: auto !important;
-    overflow-x: hidden !important;
-    z-index: 1000 !important;
 }
-
-#wrapper {
-    display: flex !important;
-}
-
 #content-wrapper {
     margin-left: 224px !important;
     width: calc(100% - 224px) !important;
-    min-height: 100vh;
-    overflow-x: hidden;
 }
 
-body, html {
-    overflow-x: hidden;
-}
-
-/* Sidebar Scrollbar */
-#accordionSidebar::-webkit-scrollbar {
-    width: 6px;
-}
-#accordionSidebar::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.05);
-}
-#accordionSidebar::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.2);
-    border-radius: 3px;
-}
-#accordionSidebar::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.3);
-}
-
-/* Mobile Sidebar */
-@media (max-width: 768px) {
-    #accordionSidebar.sidebar {
-        position: fixed !important;
-        transform: translateX(-100%);
-    }
-    #accordionSidebar.sidebar.mobile-open {
-        transform: translateX(0) !important;
-    }
-    #content-wrapper {
-        margin-left: 0 !important;
-        width: 100% !important;
-    }
-}
-
-/* Collapsed Sidebar */
-#accordionSidebar.collapsed ~ #content-wrapper {
-    margin-left: 64px !important;
-    width: calc(100% - 64px) !important;
-}
-
-/* Branding */
-.navbar-logo {
-    width: 45px;
-    height: 45px;
-    object-fit: contain;
-}
-
-/* =============================
-   STATUS BADGES + PILLS
-============================= */
-.status-pill {
-    display: inline-block;
-    padding: 4px 10px;
-    font-size: 0.8rem;
-    font-weight: 600;
-    border-radius: 20px;
-    color: #fff;
-}
-.pill-on { background-color: #28a745; }
-.pill-off { background-color: #dc3545; }
-
-.badge-success {
-    background-color: #28a745;
-    color: white;
-    padding: 0.375rem 0.75rem;
-    border-radius: 0.375rem;
-}
-.badge-danger {
-    background-color: #dc3545;
-    color: white;
-    padding: 0.375rem 0.75rem;
-    border-radius: 0.375rem;
-}
-
-/* =============================
-   ANIMATIONS
-============================= */
-.fa-spinner { animation: spin 1s linear infinite; }
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
-@keyframes fadeInUp {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-/* =============================
-   METRIC CARDS (TOP 4 CARDS)
-============================= */
+/* ======================================
+   TOP METRIC CARDS (MATCH YOUR DESIGN)
+====================================== */
 .metric-card {
-    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-    border: none;
+    background: rgba(255,255,255,0.04);
     border-radius: 16px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-    padding: 18px 20px;
-    transition: 0.3s ease;
-    position: relative;
-    overflow: hidden;
+    padding: 22px 26px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+    transition: 0.25s ease;
+    border: 1px solid rgba(255,255,255,0.07);
 }
 .metric-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+    transform: translateY(-3px);
+    background: rgba(255,255,255,0.06);
 }
-
-.metric-card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0;
-    width: 4px; height: 100%;
+.metric-title {
+    font-size: 0.9rem;
+    color: #cbd5e1;
+    font-weight: 600;
 }
-.metric-card.primary::before { background: #3B82F6; }
-.metric-card.success::before { background: #10B981; }
-.metric-card.danger::before { background: #EF4444; }
-.metric-card.warning::before { background: #F59E0B; }
-
 .metric-value {
-    font-size: 2.5rem;
+    font-size: 2rem;
     font-weight: 800;
-    color: #1F2937;
+    color: #fff;
 }
 
-/* =============================
-   DEVICE LIST SECTION
-============================= */
-
-/* FIXED — stacked like your perfect design */
+/* ======================================
+   DEVICE STATUS — CONTAINER
+   (VERTICAL STACK, CLEAN, EVEN)
+====================================== */
 .device-cards-container {
     display: flex !important;
     flex-direction: column !important;
-    gap: 14px !important;
-    width: 100% !important;
-    max-width: 100% !important;
+    gap: 18px !important;
+    width: 100%;
+    padding: 6px 0;
 }
 
+/* ======================================
+   DEVICE CARD (THE IMPORTANT PART)
+   EXACT MATCH TO YOUR SCREENSHOT
+====================================== */
 .device-card {
-    background: rgba(31, 35, 44, 0.7);
-    border: 1px solid rgba(100, 116, 139, 0.35);
-    border-radius: 14px;
-    padding: 14px 20px;
+    background: rgba(255,255,255,0.03);     /* dark glass background */
+    border-radius: 18px;                    /* smooth curves */
+    padding: 22px 28px;                     /* thick padding */
+    min-height: 90px;
+    
     display: flex;
     align-items: center;
-    gap: 14px;
-    width: 100% !important;
-    transition: 0.3s ease;
-}
+    justify-content: space-between;
 
+    border: 1px solid rgba(255,255,255,0.06);
+    box-shadow: 0 8px 26px rgba(0,0,0,0.35);
+
+    transition: 0.25s ease;
+    width: 100%;
+}
 .device-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 10px 24px rgba(2, 6, 23, 0.45);
+    transform: translateY(-3px);
+    background: rgba(255,255,255,0.06);
 }
 
+/* ======================================
+   DEVICE CARD CONTENT ALIGNMENT
+====================================== */
 .device-field {
-    flex: 1 1 auto;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #e2e8f0;
+    font-size: 0.95rem;
+}
+.device-name {
+    font-size: 1.1rem !important;
+    font-weight: 700 !important;
+    min-width: 180px;
+}
+.device-id {
+    color: #94a3b8;
+    min-width: 130px;
+}
+.device-location {
+    flex: 1;
+    color: #cbd5e1;
+}
+.device-last-seen {
+    font-size: 0.85rem;
+    color: #94a3b8;
+    display: flex;
+    gap: 4px;
+}
+
+/* ======================================
+   STATUS: ONLINE / OFFLINE BADGES
+====================================== */
+.status {
+    min-width: 120px;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.status-badge {
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 0.83rem;
+    font-weight: 700;
     display: flex;
     align-items: center;
     gap: 6px;
-    font-size: 0.85rem;
-    color: #e5e7eb;
-}
-
-.device-field.device-name {
-    font-size: 1rem;
-    font-weight: 600;
-}
-
-.device-field.status {
-    margin-left: auto !important;
-    justify-content: flex-end !important;
-}
-
-/* Status badge */
-.status-badge {
-    padding: 3px 10px;
-    border-radius: 14px;
-    font-size: 0.7rem;
     text-transform: uppercase;
-    font-weight: 700;
-}
-.status-badge.online {
-    background: #d4edda;
-    color: #155724;
-}
-.status-badge.offline {
-    background: #f8d7da;
-    color: #721c24;
 }
 
-/* Status Dot */
+/* OFFLINE */
+.status-badge.offline {
+    background: #fee2e2;
+    color: #b91c1c;
+}
+/* ONLINE */
+.status-badge.online {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+/* Status dot */
 .status-indicator {
     width: 10px;
     height: 10px;
     border-radius: 50%;
-    animation: pulse 2s infinite;
 }
-.status-indicator.online { background: #10B981; }
-.status-indicator.offline { background: #EF4444; }
+.status-indicator.online { background: #10b981; }
+.status-indicator.offline { background: #ef4444; }
 
-@keyframes pulse {
-    0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
-    70% { box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
-    100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
-}
-
-/* =============================
-   SIDEBAR HOVER EFFECTS
-============================= */
-.sidebar .nav-link:hover {
-    background: rgba(251, 146, 60, 0.1) !important;
-    transform: translateX(3px);
-}
-.sidebar .nav-link:hover i,
-.sidebar .nav-link:hover span {
-    color: #f97316 !important;
-}
-
-/* Active menu state */
-.sidebar .nav-item.active .nav-link {
-    background: rgba(251, 146, 60, 0.08) !important;
-}
-.sidebar .nav-item.active .nav-link i {
-    color: #f97316 !important;
-}
-
-/* Sidebar aesthetic */
-.sidebar {
-    backdrop-filter: blur(20px);
-    box-shadow: 0 8px 32px rgba(0,0,0,0.3);
-}
-
-/* Center copyright */
-.copyright {
-    text-align: center !important;
-    width: 100% !important;
+/* ======================================
+   SMALL UI TOUCHES
+====================================== */
+.section-title {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #fff;
 }
 
 </style>
+
 
 </head>
 
