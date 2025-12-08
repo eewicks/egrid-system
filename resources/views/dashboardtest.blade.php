@@ -1043,31 +1043,27 @@
 // ---------------------------
 // GLOBAL JSON FETCH HELPER
 // ---------------------------
+// ---------------------------
+// GLOBAL JSON FETCH HELPER
+// ---------------------------
 let lastDeviceStates = {};  // { device_id: "ON" / "OFF" }
 
-// Helper to fetch JSON
 async function fetchJSON(url) {
-    const r = await fetch(url, {
-        headers: { "X-Requested-With": "XMLHttpRequest" }
-    });
+    const r = await fetch(url, { headers: { "X-Requested-With": "XMLHttpRequest" } });
     if (!r.ok) throw new Error("HTTP " + r.status);
     return r.json();
 }
 
-// Convert display_status → ON/OFF
 function normalizeStatus(device) {
     let raw = device.display_status || device.status || "";
-
     raw = raw.toString().trim().toUpperCase();
 
-    // Convert Active/Inactive → ON/OFF
     if (raw === "ACTIVE") raw = "ON";
     if (raw === "INACTIVE") raw = "OFF";
 
-    return raw; // Should now ALWAYS be "ON" or "OFF"
+    return raw;
 }
 
-// Build Online/Offline UI badge
 function getStatusBadge(device) {
     const status = normalizeStatus(device);
     const isOnline = status === "ON";
@@ -1081,7 +1077,89 @@ function getStatusBadge(device) {
 }
 
 // ---------------------------------------------------
-// MAIN LOAD FUNCTION (Triggers notifications)
+// SWEETALERT – BEAUTIFIED OFFLINE ALERT
+// ---------------------------------------------------
+function showOfflineAlert(device) {
+    Swal.fire({
+        title: '<span style="font-weight:800; font-size:28px; color:#ffb366;">Device Offline</span>',
+        html: `
+            <div style="font-size:16px; color:#e2e8f0;"> 
+                <strong>${device.household_name}</strong> just went offline.
+            </div>
+            <div style="margin-top:12px; font-size:14px; color:#94a3b8;">
+                Last seen: ${device.last_seen_human}
+            </div>
+        `,
+        icon: 'warning',
+        iconColor: '#f97316',
+        background: 'rgba(15,23,42,0.85)',
+        color: '#fff',
+        confirmButtonText: 'Got it',
+        confirmButtonColor: '#6366f1',
+
+        showClass: {
+            popup: `
+                animate__animated
+                animate__fadeInDown
+                animate__faster
+            `
+        },
+        hideClass: {
+            popup: `
+                animate__animated
+                animate__fadeOutUp
+                animate__faster
+            `
+        },
+
+        timer: 6000,
+        timerProgressBar: true
+    });
+}
+
+// ---------------------------------------------------
+// SWEETALERT – BEAUTIFIED ONLINE ALERT
+// ---------------------------------------------------
+function showOnlineAlert(device) {
+    Swal.fire({
+        title: '<span style="font-weight:800; font-size:28px; color:#4ade80;">Device Online</span>',
+        html: `
+            <div style="font-size:16px; color:#e2e8f0;">
+                <strong>${device.household_name}</strong> is now back online.
+            </div>
+            <div style="margin-top:12px; font-size:14px; color:#94a3b8;">
+                Updated: ${device.last_seen_human}
+            </div>
+        `,
+        icon: 'success',
+        iconColor: '#4ade80',
+        background: 'rgba(15,23,42,0.85)',
+        color: '#fff',
+        confirmButtonText: 'Nice!',
+        confirmButtonColor: '#22c55e',
+
+        showClass: {
+            popup: `
+                animate__animated
+                animate__zoomIn
+                animate__faster
+            `
+        },
+        hideClass: {
+            popup: `
+                animate__animated
+                animate__zoomOut
+                animate__faster
+            `
+        },
+
+        timer: 5000,
+        timerProgressBar: true
+    });
+}
+
+// ---------------------------------------------------
+// MAIN LOAD FUNCTION WITH NEW SWEETALERT SYSTEM
 // ---------------------------------------------------
 async function loadDevices() {
     const loadingState   = document.getElementById('deviceLoadingState');
@@ -1098,54 +1176,31 @@ async function loadDevices() {
 
     try {
         const data = await fetchJSON("/admin/api/devices");
-
         if (!data.success) throw new Error("API missing success:true");
 
         const devices = data.devices || [];
         deviceCount.textContent = `${devices.length} device${devices.length !== 1 ? "s" : ""}`;
 
-        // ---------------------------------------------------
-        // DETECT transitions AND show popups
-        // ---------------------------------------------------
+        // Detect transitions (ON->OFF or OFF->ON)
         devices.forEach(device => {
             const id = device.device_id;
-            const newStatus = normalizeStatus(device); // ON or OFF
+            const newStatus = normalizeStatus(device);
 
             if (lastDeviceStates[id]) {
                 const oldStatus = lastDeviceStates[id];
 
-                // ONLINE → OFFLINE
                 if (oldStatus === "ON" && newStatus === "OFF") {
-                    Swal.fire({
-                        icon: 'warning',
-                        title: 'Device Offline',
-                        text: `${device.household_name} just went offline.`,
-                        footer: `Last seen: ${device.last_seen_human}`,
-                        timer: 5000,
-                        timerProgressBar: true
-                    });
+                    showOfflineAlert(device);
                 }
 
-                // OFFLINE → ONLINE
                 if (oldStatus === "OFF" && newStatus === "ON") {
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Device Online',
-                        text: `${device.household_name} is now back online.`,
-                        footer: `Updated: ${device.last_seen_human}`,
-                        timer: 3500,
-                        timerProgressBar: true
-                    });
+                    showOnlineAlert(device);
                 }
             }
 
-            // Save status to memory
             lastDeviceStates[id] = newStatus;
         });
 
-        // ---------------------------------------------------
-        // BUILD DEVICE CARDS
-        // ---------------------------------------------------
         if (devices.length === 0) {
             loadingState.style.display = "none";
             emptyState.style.display   = "block";
@@ -1155,11 +1210,7 @@ async function loadDevices() {
         cardsContainer.innerHTML = devices.map(device => `
             <div class="device-card compact">
                 <div class="device-field device-name">${device.household_name}</div>
-
-                <div class="device-field device-id">
-                    ID: ${device.device_id}
-                </div>
-
+                <div class="device-field device-id">ID: ${device.device_id}</div>
                 <div class="device-field device-location">
                     <i class="fas fa-map-marker-alt"></i>
                     <span>${device.barangay}</span>
@@ -1171,7 +1222,6 @@ async function loadDevices() {
                         </span>
                     </span>
                 </div>
-
                 <div class="device-field status">
                     ${getStatusBadge(device)}
                 </div>
@@ -1189,11 +1239,11 @@ async function loadDevices() {
     }
 }
 
-// Auto-refresh every 60 seconds
 document.addEventListener('DOMContentLoaded', () => {
     loadDevices();
     setInterval(loadDevices, 60000);
 });
+
 </script>
 </body>
 
