@@ -1007,24 +1007,31 @@
 
     <!-- Page level plugins removed: Chart.js not used on this page -->
 
-    <script>
-        // Removed System Status and Recent Events auto-refresh scripts
-    </script>
+    
 
 
 <script>
 let lastState = {};      
 let offlineStart = {};
-const DELAY = 5 * 60 * 1000;
+const DELAY = 5 * 60 * 1000; // 5 minutes
 
 async function fetchJSON(url) {
-    const r = await fetch(url);
-    return r.json();
+    try {
+        const r = await fetch(url, {
+            headers: { "X-Requested-With": "XMLHttpRequest" }
+        });
+        return r.json();
+    } catch (e) {
+        console.error("Fetch failed:", e);
+        return { success: false };
+    }
 }
 
 function getStatus(device) {
     let s = (device.status || "").toUpperCase();
-    return s === "ACTIVE" ? "ON" : s === "INACTIVE" ? "OFF" : s;
+    if (s === "ACTIVE") return "ON";
+    if (s === "INACTIVE") return "OFF";
+    return s;
 }
 
 function getBadge(device) {
@@ -1043,7 +1050,8 @@ function alertOffline(device) {
         html: `<strong>${device.household_name}</strong> has been offline for 5 minutes.`,
         icon: "warning",
         background: "#111827",
-        color: "#fff"
+        color: "#fff",
+        confirmButtonColor: "#f87171"
     });
 }
 
@@ -1053,15 +1061,23 @@ function alertOnline(device) {
         html: `<strong>${device.household_name}</strong> is back online.`,
         icon: "success",
         background: "#111827",
-        color: "#fff"
+        color: "#fff",
+        confirmButtonColor: "#4ade80"
     });
 }
 
 async function loadDevices() {
-    const data = await fetchJSON("/admin/api/devices");
-    if (!data.success) return;
+
+    // IMPORTANT: Use Laravel full absolute URL
+    const data = await fetchJSON("{{ url('/admin/api/devices') }}");
+
+    if (!data.success) {
+        console.warn("Device API failed.");
+        return;
+    }
 
     const devices = data.devices;
+
     document.getElementById("deviceCardsContainer").innerHTML = devices.map(device => `
         <div class="device-card compact">
             <div class="device-field device-name">${device.household_name}</div>
@@ -1077,14 +1093,16 @@ async function loadDevices() {
         </div>
     `).join("");
 
+    // Update header values
     document.getElementById("deviceCount").textContent = `${devices.length} devices`;
     document.getElementById("lastUpdate").textContent = new Date().toLocaleTimeString();
 
+    // Status change detection logic
     devices.forEach(device => {
         const id = device.device_id;
         const newStatus = getStatus(device);
 
-        // first time
+        // First time seeing device
         if (!lastState[id]) {
             lastState[id] = newStatus;
             if (newStatus === "OFF") offlineStart[id] = Date.now();
@@ -1093,19 +1111,19 @@ async function loadDevices() {
 
         const old = lastState[id];
 
-        // going offline
+        // Transition: ON → OFF
         if (old === "ON" && newStatus === "OFF") {
             offlineStart[id] = Date.now();
         }
 
-        // OFF for 5 mins
+        // Offline 5 minutes → alert
         if (newStatus === "OFF" && Date.now() - offlineStart[id] >= DELAY && old !== "ALERTED") {
             alertOffline(device);
             lastState[id] = "ALERTED";
             return;
         }
 
-        // coming back online
+        // Transition: OFF → ON
         if (old !== "ON" && newStatus === "ON") {
             alertOnline(device);
         }
@@ -1114,13 +1132,13 @@ async function loadDevices() {
     });
 }
 
+// Start auto-refresh
 document.addEventListener("DOMContentLoaded", () => {
     loadDevices();
-    setInterval(loadDevices, 60000);
+    setInterval(loadDevices, 60000); // refresh every 1 min
 });
 </script>
 
-</script>
 </body>
 
 </html>
