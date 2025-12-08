@@ -1037,45 +1037,113 @@
     <!-- Page level plugins removed: Chart.js not used on this page -->
 
     <script>
-        // Removed System Status and Recent Events auto-refresh scripts
-    </script>
-<script>
-// ---------------------------
-// GLOBAL JSON FETCH HELPER
-// ---------------------------
-// ---------------------------------------------------
-// GLOBAL STATE
-// ---------------------------------------------------
-let lastDeviceStates = {};       // { device_id: "ON" / "OFF" / "5MIN_ALERTED" }
-let offlineTimestamp = {};       // { device_id: timestamp when device went offline }
-const OFFLINE_DELAY = 5 * 60 * 1000; // 5 minutes in milliseconds
+// =============================================================
+//  GLOBALS
+// =============================================================
+let lastOutageId = null;
 
-// ---------------------------------------------------
-// FETCH HELPER
-// ---------------------------------------------------
+// =============================================================
+//  OUTAGE POPUP ENGINE (THE ONLY ALERT SYSTEM YOU NEED)
+// =============================================================
+async function checkOutageTable() {
+    try {
+        let res = await fetch("/admin/outage/latest");
+        let data = await res.json();
+
+        if (!data.success) return;
+
+        // Prevent alert spam
+        if (lastOutageId === data.outage_id) return;
+        lastOutageId = data.outage_id;
+
+        // -----------------------------
+        // DEVICE WENT OFFLINE
+        // -----------------------------
+        if (data.status === "active") {
+            Swal.fire({
+                title: `<span style="font-size:24px; font-weight:700; color:#ef4444;">Device Offline</span>`,
+                html: `
+                    <div style="font-size:16px; color:#e5e7eb;">
+                        <strong>${data.household}</strong> (${data.barangay})<br>
+                        Device ID: <b>${data.device_id}</b><br><br>
+                        <b>Outage started:</b> ${data.started_at}
+                    </div>
+                `,
+                icon: "warning",
+                iconColor: "#ef4444",
+                background: "rgba(15, 23, 42, 0.95)",
+                color: "#fff",
+                confirmButtonColor: "#ef4444"
+            });
+        }
+
+        // -----------------------------
+        // DEVICE CAME BACK ONLINE
+        // -----------------------------
+        if (data.status === "closed") {
+            Swal.fire({
+                title: `<span style="font-size:24px; font-weight:700; color:#22c55e;">Device Online</span>`,
+                html: `
+                    <div style="font-size:16px; color:#e5e7eb;">
+                        <strong>${data.household}</strong> (${data.barangay})<br>
+                        Device ID: <b>${data.device_id}</b><br><br>
+                        <b>Restored:</b> ${data.ended_at}<br>
+                        <b>Duration:</b> ${data.duration} seconds
+                    </div>
+                `,
+                icon: "success",
+                iconColor: "#22c55e",
+                background: "rgba(15, 23, 42, 0.95)",
+                color: "#fff",
+                confirmButtonColor: "#22c55e"
+            });
+        }
+
+    } catch (err) {
+        console.error("Error fetching outage updates:", err);
+    }
+}
+
+// Repeat check every 8 seconds
+setInterval(checkOutageTable, 8000);
+
+
+
+// =============================================================
+//  DASHBOARD STATS CARDS (ONLINE, OFFLINE, MONTHLY, TODAY)
+// =============================================================
+async function loadDashboardStats() {
+    try {
+        let res = await fetch("/admin/api/dashboard-stats");
+        let data = await res.json();
+
+        if (!data.success) return;
+
+        document.querySelector("#onlineDevices .count-value").textContent = data.online;
+        document.querySelector("#offlineDevices .count-value").textContent = data.offline;
+        document.querySelector("#monthlyOutages .count-value").textContent = data.monthly;
+        document.querySelector("#todayOutages .count-value").textContent = data.today;
+
+    } catch (err) {
+        console.error("Stats load error:", err);
+    }
+}
+
+setInterval(loadDashboardStats, 60000);
+
+
+
+// =============================================================
+//  HELPER
+// =============================================================
 async function fetchJSON(url) {
     const r = await fetch(url, { headers: { "X-Requested-With": "XMLHttpRequest" } });
     if (!r.ok) throw new Error("HTTP " + r.status);
     return r.json();
 }
 
-// ---------------------------------------------------
-// NORMALIZE STATUS
-// ---------------------------------------------------
-function normalizeStatus(device) {
-    let raw = device.display_status || device.status || "";
-    raw = raw.toString().trim().toUpperCase();
-    if (raw === "ACTIVE") raw = "ON";
-    if (raw === "INACTIVE") raw = "OFF";
-    return raw;
-}
-
-// ---------------------------------------------------
-// BADGE RENDERING
-// ---------------------------------------------------
 function getStatusBadge(device) {
-    const status = normalizeStatus(device);
-    const isOnline = status === "ON";
+    const isOnline = device.status === "ON";
 
     return `
         <div class="status-badge ${isOnline ? "online" : "offline"}">
@@ -1085,110 +1153,11 @@ function getStatusBadge(device) {
     `;
 }
 
-// ---------------------------------------------------
-// SWEETALERT: DEVICE OFFLINE (AFTER 5 MINUTES)
-// ---------------------------------------------------
-function showOfflineAlert(device) {
-    Swal.fire({
-        title: '<span style="font-weight:800; font-size:28px; color:#ffb366;">Device Offline</span>',
-        html: `
-            <div style="font-size:16px; color:#e2e8f0;"> 
-                <strong>${device.household_name}</strong> has been offline for over 5 minutes.
-            </div>
-            <div style="margin-top:12px; font-size:14px; color:#94a3b8;">
-                Last seen: ${device.last_seen_human}
-            </div>
-        `,
-        icon: 'warning',
-        iconColor: '#f97316',
-        background: 'rgba(15,23,42,0.85)',
-        color: '#fff',
-        confirmButtonText: 'OK',
-        confirmButtonColor: '#6366f1',
-
-        showClass: {
-            popup: `
-                animate__animated
-                animate__fadeInDown
-                animate__faster
-            `
-        },
-        hideClass: {
-            popup: `
-                animate__animated
-                animate__fadeOutUp
-                animate__faster
-            `
-        }
-    });
-}
-
-// ---------------------------------------------------
-// SWEETALERT: DEVICE ONLINE
-// ---------------------------------------------------
-function showOnlineAlert(device) {
-    Swal.fire({
-        title: '<span style="font-weight:800; font-size:28px; color:#4ade80;">Device Online</span>',
-        html: `
-            <div style="font-size:16px; color:#e2e8f0;">
-                <strong>${device.household_name}</strong> is back online.
-            </div>
-            <div style="margin-top:12px; font-size:14px; color:#94a3b8;">
-                Updated: ${device.last_seen_human}
-            </div>
-        `,
-        icon: 'success',
-        iconColor: '#4ade80',
-        background: 'rgba(15,23,42,0.85)',
-        color: '#fff',
-        confirmButtonText: 'Nice!',
-        confirmButtonColor: '#22c55e',
-
-        showClass: {
-            popup: `
-                animate__animated
-                animate__zoomIn
-                animate__faster
-            `
-        },
-        hideClass: {
-            popup: `
-                animate__animated
-                animate__zoomOut
-                animate__faster
-            `
-        }
-    });
-}
-
-async function loadDashboardStats() {
-    try {
-        const response = await fetch("/admin/api/dashboard-stats");
-        const data = await response.json();
-
-        if (!data.success) return;
-
-        // Update card numbers
-        document.querySelector("#onlineDevices .count-value").textContent = data.online;
-        document.querySelector("#offlineDevices .count-value").textContent = data.offline;
-        document.querySelector("#monthlyOutages .count-value").textContent = data.monthly;
-        document.querySelector("#todayOutages .count-value").textContent = data.today;
-
-    } catch (e) {
-        console.error("Failed to load dashboard stats", e);
-    }
-}
-
-// Auto-load stats
-document.addEventListener("DOMContentLoaded", () => {
-    loadDashboardStats();
-    setInterval(loadDashboardStats, 60000); // refresh every 60s
-});
 
 
-// ---------------------------------------------------
-// MAIN LOAD FUNCTION
-// ---------------------------------------------------
+// =============================================================
+//  DEVICE LIST LOADER (NO ALERT LOGIC HERE!!!)
+// =============================================================
 async function loadDevices() {
     const loadingState   = document.getElementById('deviceLoadingState');
     const errorState     = document.getElementById('deviceErrorState');
@@ -1204,81 +1173,34 @@ async function loadDevices() {
 
     try {
         const data = await fetchJSON("/admin/api/devices");
-        if (!data.success) throw new Error("API missing success:true");
+        if (!data.success) throw new Error("Invalid API response");
 
         const devices = data.devices || [];
         deviceCount.textContent = `${devices.length} device${devices.length !== 1 ? "s" : ""}`;
 
-        // ----------------------------------------------
-        // DEVICE STATUS CHECKING + 5-MINUTE DELAY LOGIC
-        // ----------------------------------------------
-        devices.forEach(device => {
-            const id = device.device_id;
-            const newStatus = normalizeStatus(device);
-
-            // FIRST TIME SEEN
-            if (!lastDeviceStates[id]) {
-                lastDeviceStates[id] = newStatus;
-
-                if (newStatus === "OFF") {
-                    offlineTimestamp[id] = Date.now();
-                }
-
-                return;
-            }
-
-            const oldStatus = lastDeviceStates[id];
-
-            // ONLINE → OFFLINE (start 5-min timer)
-            if (oldStatus === "ON" && newStatus === "OFF") {
-                offlineTimestamp[id] = Date.now();
-            }
-
-            // CHECK IF DEVICE HAS BEEN OFF FOR 5 MINUTES
-            if (newStatus === "OFF") {
-                const offlineTime = offlineTimestamp[id] || Date.now();
-                const elapsed = Date.now() - offlineTime;
-
-                if (elapsed >= OFFLINE_DELAY && oldStatus !== "5MIN_ALERTED") {
-                    showOfflineAlert(device);
-                    lastDeviceStates[id] = "5MIN_ALERTED"; // prevent spam
-                }
-            }
-
-            // OFFLINE → ONLINE
-            if (oldStatus !== "ON" && newStatus === "ON") {
-                showOnlineAlert(device);
-                offlineTimestamp[id] = null;
-            }
-
-            // Update last state
-            lastDeviceStates[id] = newStatus;
-        });
-
-        // ---------------------------------------------------
-        // RENDER DEVICE CARDS
-        // ---------------------------------------------------
         if (devices.length === 0) {
             loadingState.style.display = "none";
-            emptyState.style.display   = "block";
+            emptyState.style.display = "block";
             return;
         }
 
+        // Render cards
         cardsContainer.innerHTML = devices.map(device => `
             <div class="device-card compact">
                 <div class="device-field device-name">${device.household_name}</div>
                 <div class="device-field device-id">ID: ${device.device_id}</div>
+
                 <div class="device-field device-location">
                     <i class="fas fa-map-marker-alt"></i>
                     <span>${device.barangay}</span>
                     <span class="device-meta-inline">
                         <span class="meta-divider">•</span>
                         <span class="device-last-seen">
-                            <i class="fas fa-clock"></i>
-                            ${device.last_seen_human}
+                            <i class="fas fa-clock"></i> ${device.last_seen_human}
                         </span>
                     </span>
                 </div>
+
                 <div class="device-field status">
                     ${getStatusBadge(device)}
                 </div>
@@ -1292,17 +1214,19 @@ async function loadDevices() {
     } catch (err) {
         console.error("Device load error:", err);
         loadingState.style.display = "none";
-        errorState.style.display   = "block";
+        errorState.style.display = "block";
     }
 }
 
-// ---------------------------------------------------
-// AUTO-REFRESH EVERY 60 SECONDS
-// ---------------------------------------------------
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener("DOMContentLoaded", () => {
     loadDevices();
+    loadDashboardStats();
+
+    // auto-refresh device list every 60s
     setInterval(loadDevices, 60000);
 });
+</script>
+
 
 </script>
 </body>

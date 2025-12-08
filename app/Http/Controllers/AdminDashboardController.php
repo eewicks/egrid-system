@@ -230,6 +230,29 @@ class AdminDashboardController extends Controller
         }
     }
 
+    public function latestOutageEvent()
+{
+    $latest = Outage::orderBy('id', 'desc')->first();
+
+    if (!$latest) {
+        return response()->json(['success' => false]);
+    }
+
+    $device = Device::find($latest->device_id);
+
+    return response()->json([
+        'success' => true,
+        'outage_id' => $latest->id,
+        'status' => $latest->status,  // active or closed
+        'device_id' => $device->device_id ?? null,
+        'household' => $device->household_name ?? 'Unknown',
+        'barangay' => $device->barangay ?? 'Unknown',
+        'started_at' => $latest->started_at?->toDateTimeString(),
+        'ended_at' => $latest->ended_at?->toDateTimeString(),
+        'duration' => $latest->duration_seconds,
+    ]);
+}
+
     /**
      * -------------------------------------------------------------------------
      * STATS (counts ON/OFF)
