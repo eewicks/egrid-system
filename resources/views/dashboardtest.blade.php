@@ -1036,200 +1036,128 @@
 
     <!-- Page level plugins removed: Chart.js not used on this page -->
 
-    <script>
+   <script>
 // =============================================================
-//  GLOBALS
+//  GLOBAL STATE TRACKERS
 // =============================================================
-let lastOutageId = null;
+let previousStatus = {};
+const OFFLINE_TIMEOUT_MINUTES = 3;   // offline after no heartbeat for 3 mins
+
 
 // =============================================================
-//  OUTAGE POPUP ENGINE (THE ONLY ALERT SYSTEM YOU NEED)
+//  FETCH DEVICE STATUS FROM API
 // =============================================================
-
-async function checkDeviceStatus() {
+async function fetchDevices() {
     try {
-        const response = await fetch("/admin/api/device-status");
-        const data = await response.json();
-
-        if (!data.devices) return;
-
-        data.devices.forEach(device => {
-            let id = device.device_id;
-            let currentStatus = device.status; // ON or OFF
-
-            // First time seeing this device → store only
-            if (!(id in previousStatus)) {
-                previousStatus[id] = currentStatus;
-                return;
-            }
-
-            // Device was OFF before, but now Arduino reports ON → Show popup
-            if (previousStatus[id] === "OFF" && currentStatus === "ON") {
-                Swal.fire({
-                    title: `<span style="font-size:22px; font-weight:700; color:#22c55e;">DEVICE ONLINE</span>`,
-                    html: `
-                        <div style="font-size:15px; color:#e5e7eb;">
-                            Device ID: <b>${id}</b><br>
-                            Status: <b>Arduino Heartbeat Detected</b><br>
-                            Last Seen: <b>${device.last_seen}</b>
-                        </div>
-                    `,
-                    icon: "success",
-                    background: "rgba(15, 23, 42, 0.95)",
-                    color: "#fff",
-                    confirmButtonColor: "#22c55e"
-                });
-            }
-
-            // Update tracker
-            previousStatus[id] = currentStatus;
-        });
-
-    } catch (error) {
-        console.error("Error checking device status:", error);
+        const res = await fetch("/admin/api/devices");
+        return await res.json();
+    } catch (err) {
+        console.error("DEVICE FETCH ERROR:", err);
+        return null;
     }
 }
-async function checkOutageTable() {
-    try {
-        let res = await fetch("/admin/outage/latest");
-        let data = await res.json();
 
-        if (!data.success) return;
 
-        // Prevent alert spam
-        if (lastOutageId === data.outage_id) return;
-        lastOutageId = data.outage_id;
+// =============================================================
+//  REAL-TIME NOTIFICATIONS
+// =============================================================
+async function checkRealtimeStatus() {
+    const data = await fetchDevices();
+    if (!data || !data.devices) return;
 
-        // -----------------------------
-        // DEVICE WENT OFFLINE
-        // -----------------------------
-        if (data.status === "active") {
-            Swal.fire({
-                title: `<span style="font-size:24px; font-weight:700; color:#ef4444;">Device Offline</span>`,
-                html: `
-                    <div style="font-size:16px; color:#e5e7eb;">
-                        <strong>${data.household}</strong> (${data.barangay})<br>
-                        Device ID: <b>${data.device_id}</b><br><br>
-                        <b>Outage started:</b> ${data.started_at}
-                    </div>
-                `,
-                icon: "warning",
-                iconColor: "#ef4444",
-                background: "rgba(15, 23, 42, 0.95)",
-                color: "#fff",
-                confirmButtonColor: "#ef4444"
-            });
+    let now = new Date();
+
+    data.devices.forEach(device => {
+        const id = device.device_id;
+        const status = device.status;  
+        const lastSeen = device.last_seen ? new Date(device.last_seen) : null;
+
+        // First load → store current status, do nothing
+        if (!(id in previousStatus)) {
+            previousStatus[id] = status;
+            return;
         }
 
-        // -----------------------------
-        // DEVICE CAME BACK ONLINE
-        // -----------------------------
-        if (data.status === "closed") {
+        // ---------------------------------------------
+        // 🔴 OFFLINE DETECTION (no heartbeat > X minutes)
+        // ---------------------------------------------
+        if (lastSeen) {
+            const diffMinutes = (now - lastSeen) / 60000;
+
+            if (diffMinutes >= OFFLINE_TIMEOUT_MINUTES && previousStatus[id] !== "OFF") {
+                previousStatus[id] = "OFF";
+
+                Swal.fire({
+                    title: `<span style="color:#ef4444;font-size:24px;font-weight:700;">Device Offline</span>`,
+                    html: `
+                        <div style="font-size:15px;color:#e5e7eb;">
+                            Household: <b>${device.household_name}</b> (${device.barangay})<br>
+                            Device ID: <b>${id}</b><br><br>
+                            <b>Last heartbeat:</b> ${device.last_seen_human}
+                        </div>
+                    `,
+                    icon: "warning",
+                    iconColor: "#ef4444",
+                    background: "rgba(15,23,42,0.95)",
+                    color: "#fff",
+                    confirmButtonColor: "#ef4444"
+                });
+            }
+        }
+
+        // ---------------------------------------------
+        // 🟢 ONLINE DETECTION (was OFF → now ON)
+        // ---------------------------------------------
+        if (previousStatus[id] === "OFF" && status === "ON") {
+            previousStatus[id] = "ON";
+
             Swal.fire({
-                title: `<span style="font-size:24px; font-weight:700; color:#22c55e;">Device Online</span>`,
+                title: `<span style="color:#22c55e;font-size:24px;font-weight:700;">Device Online</span>`,
                 html: `
-                    <div style="font-size:16px; color:#e5e7eb;">
-                        <strong>${data.household}</strong> (${data.barangay})<br>
-                        Device ID: <b>${data.device_id}</b><br><br>
-                        <b>Restored:</b> ${data.ended_at}<br>
-                        <b>Duration:</b> ${data.duration} seconds
+                    <div style="font-size:15px;color:#e5e7eb;">
+                        Household: <b>${device.household_name}</b> (${device.barangay})<br>
+                        Device ID: <b>${id}</b><br><br>
+                        <b>Last heartbeat:</b> ${device.last_seen_human}
                     </div>
                 `,
                 icon: "success",
                 iconColor: "#22c55e",
-                background: "rgba(15, 23, 42, 0.95)",
+                background: "rgba(15,23,42,0.95)",
                 color: "#fff",
                 confirmButtonColor: "#22c55e"
             });
         }
-
-    } catch (err) {
-        console.error("Error fetching outage updates:", err);
-    }
-}
-
-// Repeat check every 8 seconds
-setInterval(checkOutageTable, 8000);
-
-
-
-// =============================================================
-//  DASHBOARD STATS CARDS (ONLINE, OFFLINE, MONTHLY, TODAY)
-// =============================================================
-async function loadDashboardStats() {
-    try {
-        let res = await fetch("/admin/api/dashboard-stats");
-        let data = await res.json();
-
-        if (!data.success) return;
-
-        document.querySelector("#onlineDevices .count-value").textContent = data.online;
-        document.querySelector("#offlineDevices .count-value").textContent = data.offline;
-        document.querySelector("#monthlyOutages .count-value").textContent = data.monthly;
-        document.querySelector("#todayOutages .count-value").textContent = data.today;
-
-    } catch (err) {
-        console.error("Stats load error:", err);
-    }
-}
-
-setInterval(loadDashboardStats, 60000);
-
-
-
-// =============================================================
-//  HELPER
-// =============================================================
-async function fetchJSON(url) {
-    const r = await fetch(url, { headers: { "X-Requested-With": "XMLHttpRequest" } });
-    if (!r.ok) throw new Error("HTTP " + r.status);
-    return r.json();
-}
-
-function getStatusBadge(device) {
-    const isOnline = device.status === "ON";
-
-    return `
-        <div class="status-badge ${isOnline ? "online" : "offline"}">
-            <span class="status-indicator ${isOnline ? "online" : "offline"}"></span>
-            ${isOnline ? "ONLINE" : "OFFLINE"}
-        </div>
-    `;
+    });
 }
 
 
-
 // =============================================================
-//  DEVICE LIST LOADER (NO ALERT LOGIC HERE!!!)
+//  LOAD DEVICE CARDS
 // =============================================================
 async function loadDevices() {
-    const loadingState   = document.getElementById('deviceLoadingState');
-    const errorState     = document.getElementById('deviceErrorState');
-    const cardsContainer = document.getElementById('deviceCardsContainer');
-    const emptyState     = document.getElementById('deviceEmptyState');
-    const deviceCount    = document.getElementById('deviceCount');
-    const lastUpdate     = document.getElementById('lastUpdate');
-
-    loadingState.style.display = "block";
-    errorState.style.display   = "none";
-    cardsContainer.style.display = "none";
-    emptyState.style.display     = "none";
+    const container = document.getElementById("deviceCardsContainer");
+    const loading = document.getElementById("deviceLoadingState");
+    const emptyState = document.getElementById("deviceEmptyState");
+    const count = document.getElementById("deviceCount");
+    const lastUpdate = document.getElementById("lastUpdate");
 
     try {
-        const data = await fetchJSON("/admin/api/devices");
-        if (!data.success) throw new Error("Invalid API response");
+        loading.style.display = "block";
+        container.style.display = "none";
+        emptyState.style.display = "none";
 
+        const data = await fetchDevices();
         const devices = data.devices || [];
-        deviceCount.textContent = `${devices.length} device${devices.length !== 1 ? "s" : ""}`;
+
+        count.textContent = `${devices.length} devices`;
 
         if (devices.length === 0) {
-            loadingState.style.display = "none";
+            loading.style.display = "none";
             emptyState.style.display = "block";
             return;
         }
 
-        // Render cards
-        cardsContainer.innerHTML = devices.map(device => `
+        container.innerHTML = devices.map(device => `
             <div class="device-card compact">
                 <div class="device-field device-name">${device.household_name}</div>
                 <div class="device-field device-id">ID: ${device.device_id}</div>
@@ -1246,44 +1174,59 @@ async function loadDevices() {
                 </div>
 
                 <div class="device-field status">
-                    ${getStatusBadge(device)}
+                    ${device.status === "ON" ? 
+                        `<div class="status-badge online">ONLINE</div>` :
+                        `<div class="status-badge offline">OFFLINE</div>`
+                    }
                 </div>
             </div>
         `).join("");
 
-        loadingState.style.display = "none";
-        cardsContainer.style.display = "block";
+        loading.style.display = "none";
+        container.style.display = "grid";
         lastUpdate.textContent = new Date().toLocaleTimeString();
 
     } catch (err) {
-        console.error("Device load error:", err);
-        loadingState.style.display = "none";
-        errorState.style.display = "block";
+        console.error("DEVICE LOAD ERROR:", err);
+        loading.innerHTML = `<p style='color:red;'>Failed to load devices.</p>`;
     }
 }
 
+
+// =============================================================
+//  DASHBOARD STATS LOAD
+// =============================================================
+async function loadDashboardStats() {
+    try {
+        let res = await fetch("/admin/api/dashboard-stats");
+        let data = await res.json();
+
+        document.querySelector("#onlineDevices .count-value").textContent = data.online;
+        document.querySelector("#offlineDevices .count-value").textContent = data.offline;
+        document.querySelector("#monthlyOutages .count-value").textContent = data.monthly;
+        document.querySelector("#todayOutages .count-value").textContent = data.today;
+
+    } catch (err) {
+        console.error("Stats error:", err);
+    }
+}
+
+
+// =============================================================
+//  INITIALIZE EVERYTHING
+// =============================================================
 document.addEventListener("DOMContentLoaded", () => {
     loadDevices();
     loadDashboardStats();
+    checkRealtimeStatus();
 
-    // auto-refresh device list every 60s
+    // Auto-refresh
     setInterval(loadDevices, 60000);
-});
-
-setInterval(checkOutageTable, 6000);
-
-// Check real-time Arduino ON reports
-setInterval(checkDeviceStatus, 5000);
-
-// Run immediately at page load
-document.addEventListener("DOMContentLoaded", () => {
-    checkOutageTable();
-    checkDeviceStatus();
+    setInterval(loadDashboardStats, 60000);
+    setInterval(checkRealtimeStatus, 5000);
 });
 </script>
 
-
-</script>
 </body>
 
 </html>
