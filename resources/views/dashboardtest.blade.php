@@ -1010,17 +1010,12 @@
     <script>
         // Removed System Status and Recent Events auto-refresh scripts
     </script>
+
+
 <script>
-// ---------------------------
-// GLOBAL JSON FETCH HELPER
-// ---------------------------
-// ---------------------------------------------------
-// GLOBAL STATE
-// ---------------------------------------------------
-<script>
-let lastState = {};       // ON / OFF / ALERTED
-let offlineStart = {};    // timestamps
-const DELAY = 5 * 60 * 1000; // 5 minutes
+let lastState = {};      
+let offlineStart = {};
+const DELAY = 5 * 60 * 1000;
 
 async function fetchJSON(url) {
     const r = await fetch(url);
