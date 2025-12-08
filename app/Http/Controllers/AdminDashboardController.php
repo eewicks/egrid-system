@@ -16,6 +16,78 @@ class AdminDashboardController extends Controller
         return view('dashboardtest');
     }
 
+    public function dashboardStats()
+{
+    // online/offline counts
+    $devices = Device::all();
+    $onCount = 0;
+    $offCount = 0;
+
+    foreach ($devices as $d) {
+        $onCount += $d->derived_status === 'ON' ? 1 : 0;
+        $offCount += $d->derived_status === 'OFF' ? 1 : 0;
+    }
+
+    // monthly outages
+    $monthlyOutages = Outage::whereMonth('started_at', now()->month)->count();
+
+    // outages in last 24 hours
+    $todayOutages = Outage::where('started_at', '>=', now()->subDay())->count();
+
+    return response()->json([
+        'success' => true,
+        'online' => $onCount,
+        'offline' => $offCount,
+        'monthly' => $monthlyOutages,
+        'today' => $todayOutages,
+    ]);
+}
+
+ private function handleOutage(Device $device)
+    {
+        $status = $device->derived_status;
+
+        $open = Outage::where("device_id", $device->id)
+            ->where("status", "active")
+            ->whereNull("ended_at")
+            ->first();
+
+        // GOING OFFLINE — create outage
+        if ($status === "OFF" && !$open) {
+            Outage::create([
+                'device_id'    => $device->id,
+                'household_id' => $device->household_id,
+                'started_at'   => now(),
+                'week_number'  => now()->isoWeek(),
+                'iso_year'     => now()->isoWeekYear(),
+                'status'       => "active"
+            ]);
+
+            StatusLog::create([
+                'device_id' => $device->device_id,
+                'status'    => "OFF"
+            ]);
+        }
+
+        // COMING ONLINE — close outage
+        if ($status === "ON" && $open) {
+            $open->update([
+                'ended_at'         => $device->last_seen ?? now(),
+                'duration_seconds' => $device->last_seen
+                    ? $device->last_seen->diffInSeconds($open->started_at)
+                    : 0,
+                'status'           => "closed"
+            ]);
+
+            StatusLog::create([
+                'device_id' => $device->device_id,
+                'status'    => "ON"
+            ]);
+        }
+    }
+
+
+
     /**
      * -------------------------------------------------------------------------
      * OUTAGE ENGINE

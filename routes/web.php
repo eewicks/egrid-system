@@ -94,6 +94,8 @@ Route::middleware('web')->prefix('admin/api')->group(function () {
     Route::get('/device-status', [AdminDashboardController::class, 'deviceStatus'])
         ->name('api.device-status');
 
+    Route::get('/dashboard-stats', [AdminDashboardController::class, 'dashboardStats']);
+
     Route::get('/devices', [AdminDashboardController::class, 'getDevices'])
         ->name('api.devices');
 });
@@ -118,6 +120,10 @@ Route::post('/heartbeat', function (Request $request) {
 
     return response()->json(['success' => true]);
 });
+
+
+
+
 
 /*
 |--------------------------------------------------------------------------
